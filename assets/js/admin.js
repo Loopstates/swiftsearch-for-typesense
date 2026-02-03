@@ -6,7 +6,6 @@
             this.cacheDOM();
             this.bindEvents();
             this.checkStatus();
-            this.checkStatus();
             this.checkPlan();
             this.restoreState();
         },
@@ -50,7 +49,6 @@
             this.$ssMobileBtn = $('#ss-mobile-btn');
 
             // Relevance
-            this.$relevanceRange = $('#ss-relevance-range');
             this.$relevanceRange = $('#ss-relevance-range');
             this.$synonymsInput = $('#ss-synonyms-list');
 
@@ -128,7 +126,9 @@
             if (swiftSearchConfig.relevance) {
                 // Post Title Weight
                 if (swiftSearchConfig.relevance.weights && swiftSearchConfig.relevance.weights.post_title) {
-                    this.$relevanceRange.val(swiftSearchConfig.relevance.weights.post_title * 10); // Scale 1-10 to 1-100 UI
+                    const val = swiftSearchConfig.relevance.weights.post_title * 10;
+                    this.$relevanceRange.val(val); // Scale 1-10 to 1-100 UI
+                    $('#ss-relevance-val').text(val);
                 }
 
                 // Synonyms

@@ -198,8 +198,13 @@
                     <div class="ss-card-body">
                         <div class="ss-pro-gate" data-feature="relevance">
                             <div class="ss-form-group">
-                                <label>Global Relevance Score</label>
-                                <input type="range" id="ss-relevance-range" min="1" max="100" value="50">
+                                <label>Global Relevance Score: <span id="ss-relevance-val"
+                                        style="font-weight:700;">50</span></label>
+                                <input type="range" id="ss-relevance-range" min="1" max="100" value="50"
+                                    oninput="document.getElementById('ss-relevance-val').innerText = this.value">
+                                <p class="description">
+                                    <?php esc_html_e('Adjust the base ranking weight for searches. Higher values favor exact matches.', 'swift-search-typesense'); ?>
+                                </p>
                             </div>
                             <div class="ss-form-group">
                                 <label>Synonyms</label>
@@ -378,9 +383,17 @@
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-pro-gate" data-feature="pinning">
-                            <div class="ss-empty-state">
-                                <h3>Results Pinning</h3>
-                                <p>Drag and drop products to pin them for specific queries.</p>
+                            <div class="ss-pinning-ui">
+                                <div class="ss-form-group">
+                                    <label><?php esc_html_e('Search for Product', 'swift-search-typesense'); ?></label>
+                                    <input type="text" class="ss-input" placeholder="Type a product name...">
+                                </div>
+                                <div class="ss-empty-state"
+                                    style="border: 2px dashed #e5e7eb; padding: 40px; text-align: center; border-radius: 8px; color: #6b7280;">
+                                    <h3><?php esc_html_e('No pinned items', 'swift-search-typesense'); ?></h3>
+                                    <p><?php esc_html_e('Search above to pin products to the top of results.', 'swift-search-typesense'); ?>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -397,16 +410,30 @@
                     <div class="ss-card-header">
                         <h2><?php esc_html_e('Index Management', 'swift-search-typesense'); ?></h2>
                     </div>
-                    <div class="ss-card-body center-align">
-                        <div class="ss-sync-status">
-                            <div class="progress-circle" data-percent="0">0%</div>
-                            <p>Ready to index.</p>
-                        </div>
-                        <div class="ss-actions-row">
-                            <button type="button" id="ss-sync-btn"
-                                class="ss-btn ss-btn-primary"><?php esc_html_e('Index All Content', 'swift-search-typesense'); ?></button>
-                            <button type="button" id="ss-reset-btn"
-                                class="ss-btn ss-btn-danger"><?php esc_html_e('Delete Index & Reset', 'swift-search-typesense'); ?></button>
+                    <div class="ss-card-body">
+                        <div class="ss-sync-card-container" style="display: flex; gap: 30px; align-items: center;">
+                            <div class="ss-sync-visual" style="flex: 0 0 150px; text-align: center;">
+                                <div class="progress-circle" data-percent="0" style="margin: 0 auto 15px;">
+                                    <span style="font-size: 24px;">0%</span>
+                                </div>
+                                <span class="ss-status-badge"
+                                    style="background: #e5e7eb; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; color: #4b5563;">Idle</span>
+                            </div>
+                            <div class="ss-sync-details" style="flex: 1;">
+                                <h3 style="margin: 0 0 10px 0; font-size: 16px;">Index Synchronization</h3>
+                                <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280; line-height: 1.5;">
+                                    <?php esc_html_e('Synchronize your WordPress content with Typesense. This process sends all selected posts, pages, and products to your Typesense server. Run this initial sync or after bulk edits.', 'swift-search-typesense'); ?>
+                                </p>
+                                <div class="ss-actions-row" style="display: flex; gap: 15px;">
+                                    <button type="button" id="ss-sync-btn"
+                                        class="ss-btn ss-btn-primary"><?php esc_html_e('Index All Content', 'swift-search-typesense'); ?></button>
+                                    <button type="button" id="ss-reset-btn" class="ss-btn ss-btn-danger ss-btn-outline"
+                                        style="background: transparent; border: 1px solid #ef4444; color: #ef4444;"><?php esc_html_e('Delete Index', 'swift-search-typesense'); ?></button>
+                                </div>
+                                <p id="ss-sync-msg"
+                                    style="margin-top: 15px; font-size: 13px; font-weight: 500; min-height: 20px;">
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
