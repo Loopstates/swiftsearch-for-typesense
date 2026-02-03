@@ -105,7 +105,10 @@ class AdminController
                 'search_key' => isset($settings['search_key']) ? $settings['search_key'] : '',
             ),
             'indexed_post_types' => isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : array('post', 'page', 'product'),
+            'indexed_taxonomies' => isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array('category', 'post_tag', 'product_cat'),
+            'indexed_users' => isset($settings['indexed_users']) ? (bool) $settings['indexed_users'] : false,
             'available_post_types' => $this->get_public_post_types(),
+            'available_taxonomies' => $this->get_public_taxonomies(),
             'texts' => array(
                 'connecting' => __('Connecting to Typesense...', 'swift-search-typesense'),
                 'success' => __('Connected Successfully!', 'swift-search-typesense'),
@@ -143,6 +146,36 @@ class AdminController
                 'name' => (string) $pt->name,
                 'label' => (string) $pt->label,
                 'description' => empty($pt->description) ? '' : substr(strip_tags((string) $pt->description), 0, 100),
+            );
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get list of public taxonomies.
+     *
+     * @return array List of taxonomies.
+     */
+    private function get_public_taxonomies()
+    {
+        $args = array(
+            'public' => true,
+        );
+        $output = 'objects';
+        $taxonomies = get_taxonomies($args, $output);
+
+        $data = array();
+        $exclude = array('nav_menu', 'link_category', 'post_format', 'wp_theme_styles');
+
+        foreach ($taxonomies as $tax) {
+            if (in_array($tax->name, $exclude)) {
+                continue;
+            }
+            $data[] = array(
+                'name' => (string) $tax->name,
+                'label' => (string) $tax->label,
+                'description' => empty($tax->description) ? '' : substr(strip_tags((string) $tax->description), 0, 100),
             );
         }
 

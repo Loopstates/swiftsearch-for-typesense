@@ -192,28 +192,67 @@
             const container = $('#ss-content-settings-container');
             if (!container.length) return;
 
-            const available = swiftSearchConfig.available_post_types || [];
-            const saved = swiftSearchConfig.indexed_post_types || [];
+            const postTypes = swiftSearchConfig.available_post_types || [];
+            const savedPostTypes = swiftSearchConfig.indexed_post_types || [];
 
-            console.log('Rendering Content Settings. Available:', available);
+            const taxonomies = swiftSearchConfig.available_taxonomies || [];
+            const savedTaxonomies = swiftSearchConfig.indexed_taxonomies || [];
+
+            const savedUsers = swiftSearchConfig.indexed_users || false;
+
+            console.log('Rendering Content Settings.', { postTypes, taxonomies });
             let html = '';
 
-            available.forEach(type => {
-                if (!type || !type.name) return;
-
-                const isChecked = saved.includes(type.name) ? 'checked' : '';
-                html += `<label class="ss-checkbox-card">
-                    <input type="checkbox" name="post_types[]" value="${type.name}" ${isChecked}>
-                    <div class="info">
-                        <span class="title">${type.label || type.name}</span>
-                        <span class="meta">${type.description || type.name}</span>
-                    </div>
-                </label>`;
-            });
-
-            if (html === '') {
-                html = '<p>No public post types found.</p>';
+            // Section: Post Types
+            html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Post Types</h4>';
+            html += '<div class="ss-grid-2" style="margin-bottom: 20px;">';
+            if (postTypes.length > 0) {
+                postTypes.forEach(type => {
+                    const isChecked = savedPostTypes.includes(type.name) ? 'checked' : '';
+                    html += `<label class="ss-checkbox-card">
+                        <input type="checkbox" name="post_types[]" value="${type.name}" ${isChecked}>
+                        <div class="info">
+                            <span class="title">${type.label || type.name}</span>
+                            <span class="meta">${type.description || type.name}</span>
+                        </div>
+                    </label>`;
+                });
+            } else {
+                html += '<p>No public post types found.</p>';
             }
+            html += '</div>';
+
+            // Section: Taxonomies
+            html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Taxonomies</h4>';
+            html += '<div class="ss-grid-2" style="margin-bottom: 20px;">';
+            if (taxonomies.length > 0) {
+                taxonomies.forEach(tax => {
+                    const isChecked = savedTaxonomies.includes(tax.name) ? 'checked' : '';
+                    html += `<label class="ss-checkbox-card">
+                        <input type="checkbox" name="taxonomies[]" value="${tax.name}" ${isChecked}>
+                        <div class="info">
+                            <span class="title">${tax.label || tax.name}</span>
+                            <span class="meta">${tax.description || tax.name}</span>
+                        </div>
+                    </label>`;
+                });
+            } else {
+                html += '<p>No public taxonomies found.</p>';
+            }
+            html += '</div>';
+
+            // Section: Users
+            html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Users</h4>';
+            html += '<div class="ss-grid-2" style="margin-bottom: 20px;">';
+            const userChecked = savedUsers ? 'checked' : '';
+            html += `<label class="ss-checkbox-card">
+                <input type="checkbox" id="ss-index-users" name="index_users" ${userChecked}>
+                <div class="info">
+                    <span class="title">Authors & Users</span>
+                    <span class="meta">Index public authors for "By Author" searches.</span>
+                </div>
+            </label>`;
+            html += '</div>';
 
             container.html(html);
         },
@@ -241,8 +280,17 @@
                 postTypes.push($(this).val());
             });
 
+            const taxonomies = [];
+            $('input[name="taxonomies[]"]:checked').each(function () {
+                taxonomies.push($(this).val());
+            });
+
+            const indexUsers = $('#ss-index-users').is(':checked');
+
             const payload = {
-                post_types: postTypes
+                post_types: postTypes,
+                taxonomies: taxonomies,
+                index_users: indexUsers
             };
 
             this.request('POST', '/settings', payload).done(function (response) {
@@ -694,31 +742,43 @@
             this.$syncStatusText.text('Initializing...');
             this.updateProgress(0);
 
-            this.processBatch(1);
+            this.syncQueue = ['posts', 'terms', 'users'];
+            this.processNextInQueue();
         },
 
-        processBatch: function (page) {
+        processNextInQueue: function () {
+            if (this.syncQueue.length === 0) {
+                this.finishSync();
+                return;
+            }
+
+            const type = this.syncQueue.shift();
+            let label = 'Content';
+            if (type === 'posts') label = 'Posts';
+            else if (type === 'terms') label = 'Taxonomies';
+            else if (type === 'users') label = 'Authors';
+
+            this.$syncStatusText.text(`Indexing ${label}...`);
+            this.processBatch(1, type);
+        },
+
+        processBatch: function (page, type) {
             const self = this;
 
-            this.request('POST', '/sync/batch', { page: page }).done(function (response) {
+            this.request('POST', '/sync/batch', { page: page, type: type }).done(function (response) {
                 if (response.success) {
                     const data = response.data;
-                    const percent = Math.round((data.page / data.total_pages) * 100);
 
-                    self.updateProgress(percent);
+                    // Progress Calculation is tricky with multiple queues.
+                    // Simplified: Just show percentage of current phase
+                    const percent = data.total_pages > 0 ? Math.round((data.page / data.total_pages) * 100) : 100;
+                    self.updateProgress(percent, type);
 
                     if (!data.complete) {
-                        self.processBatch(data.page + 1);
+                        self.processBatch(data.page + 1, type);
                     } else {
-                        self.$syncStatusText.text('Indexing Complete!');
-                        self.$syncBtn.prop('disabled', false);
-                        self.$resetBtn.prop('disabled', false);
-                        self.checkStatus();
-
-                        // Small delay to let UI render text before alert blocks thread
-                        setTimeout(function () {
-                            alert('Success: All selected content has been indexed.');
-                        }, 100);
+                        // Phase Complete
+                        self.processNextInQueue();
                     }
                 } else {
                     self.syncError(response.data.message || 'Error processing batch.');
@@ -729,25 +789,34 @@
             });
         },
 
+        finishSync: function () {
+            this.$syncStatusText.text('Indexing Complete!');
+            this.$syncBtn.prop('disabled', false);
+            this.$resetBtn.prop('disabled', false);
+            this.checkStatus();
+
+            setTimeout(function () {
+                alert('Success: All selected content has been indexed.');
+            }, 100);
+        },
+
+        updateProgress: function (percent, type) {
+            let label = 'Indexing...';
+            if (type === 'posts') label = 'Indexing Posts...';
+            else if (type === 'terms') label = 'Indexing Taxonomies...';
+            else if (type === 'users') label = 'Indexing Authors...';
+
+            this.$progressCircle.text(percent + '%');
+            this.$syncStatusText.text(`${label} ${percent}%`);
+        },
+
         syncError: function (msg) {
             this.$syncStatusText.html('<span style="color: #ef4444;">Error: ' + msg + '</span>');
             this.$syncBtn.prop('disabled', false);
             this.$resetBtn.prop('disabled', false);
         },
 
-        updateProgress: function (percent) {
-            // Update CSS variable for circle progress if using SVG or similar, 
-            // but for now text is fine as per current dom
-            this.$progressCircle.text(percent + '%');
 
-            // Visual circle check
-            const $circle = $('.progress-circle');
-            if ($circle.length) {
-                // Assuming simple CSS conic gradient or similar could be added later
-            }
-
-            this.$syncStatusText.text('Indexing... ' + percent + '%');
-        },
 
         resetIndex: function () {
             if (!confirm(swiftSearchConfig.texts.confirmReset || 'Are you sure you want to delete the entire index? This cannot be undone.')) return;

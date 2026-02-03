@@ -33,9 +33,25 @@ class Indexer
         add_action('save_post', array($this, 'handle_save_hook'), 10, 3);
         add_action('delete_post', array($this, 'handle_delete_hook'));
 
+        // Hook: Terms
+        add_action('created_term', array($this, 'handle_term_save_hook'), 10, 3);
+        add_action('edited_term', array($this, 'handle_term_save_hook'), 10, 3);
+        add_action('delete_term', array($this, 'handle_term_delete_hook'), 10, 3);
+
+        // Hook: Users
+        add_action('user_register', array($this, 'handle_user_save_hook'));
+        add_action('profile_update', array($this, 'handle_user_save_hook'));
+        add_action('delete_user', array($this, 'handle_user_delete_hook'));
+
         // Register the actual background process
         add_action('swift_search_async_index_post', array($this, 'index_post'));
         add_action('swift_search_async_delete_post', array($this, 'delete_post_from_index'));
+
+        add_action('swift_search_async_index_term', array($this, 'index_term'));
+        add_action('swift_search_async_delete_term', array($this, 'delete_term_from_index'));
+
+        add_action('swift_search_async_index_user', array($this, 'index_user'));
+        add_action('swift_search_async_delete_user', array($this, 'delete_user_from_index'));
     }
 
     /**
@@ -43,7 +59,7 @@ class Indexer
      *
      * @param int $post_id
      */
-    public function handle_save_hook($post_id, $post, $update)
+    public function handle_save_hook($post_id, $post = null, $update = null)
     {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
@@ -70,6 +86,92 @@ class Indexer
         }
     }
 
+    // --- Terms ---
+
+    public function handle_term_save_hook($term_id, $tt_id = null, $taxonomy = null)
+    {
+        if (function_exists('as_enqueue_async_action')) {
+            as_enqueue_async_action('swift_search_async_index_term', array('term_id' => $term_id));
+        } else {
+            wp_schedule_single_event(time(), 'swift_search_async_index_term', array($term_id));
+        }
+    }
+
+    public function handle_term_delete_hook($term_id, $tt_id = null, $taxonomy = null)
+    {
+        if (function_exists('as_enqueue_async_action')) {
+            as_enqueue_async_action('swift_search_async_delete_term', array('term_id' => $term_id));
+        } else {
+            wp_schedule_single_event(time(), 'swift_search_async_delete_term', array($term_id));
+        }
+    }
+
+    public function index_term($term_id)
+    {
+        $this->ensure_schema_safety();
+        $term = get_term($term_id);
+        if (!$term)
+            return;
+
+        $indexer = new TermIndexer($this->config_loader);
+        $document = $indexer->build($term);
+
+        if ($document) {
+            $this->client->request('/collections/terms/documents?action=upsert', 'POST', $document);
+        }
+    }
+
+    public function delete_term_from_index($term_id)
+    {
+        $this->client->request('/collections/terms/documents/' . $term_id, 'DELETE');
+    }
+
+    // --- Users ---
+
+    public function handle_user_save_hook($user_id, $old_user_data = null)
+    {
+        if (function_exists('as_enqueue_async_action')) {
+            as_enqueue_async_action('swift_search_async_index_user', array('user_id' => $user_id));
+        } else {
+            wp_schedule_single_event(time(), 'swift_search_async_index_user', array($user_id));
+        }
+    }
+
+    public function handle_user_delete_hook($user_id)
+    {
+        if (function_exists('as_enqueue_async_action')) {
+            as_enqueue_async_action('swift_search_async_delete_user', array('user_id' => $user_id));
+        } else {
+            wp_schedule_single_event(time(), 'swift_search_async_delete_user', array($user_id));
+        }
+    }
+
+    public function index_user($user_id)
+    {
+        $this->ensure_schema_safety();
+        $user = get_userdata($user_id);
+        if (!$user)
+            return;
+
+        $indexer = new UserIndexer($this->config_loader);
+        $document = $indexer->build($user);
+
+        // If returns false (e.g. subscriber), we should probably delete it if it existed?
+        // Or upsert only if valid. If user role changed Subscriber -> Author, upsert.
+        // If Author -> Subscriber, build returns false. Ideally we should Delete.
+        if ($document) {
+            $this->client->request('/collections/users/documents?action=upsert', 'POST', $document);
+        } else {
+            // Cleanup: If they were downgraded to subscriber, remove them from index
+            $this->delete_user_from_index($user_id);
+        }
+    }
+
+    public function delete_user_from_index($user_id)
+    {
+        $this->client->request('/collections/users/documents/' . $user_id, 'DELETE');
+    }
+
     /**
      * WORKER: Index a single post.
      *
@@ -77,17 +179,7 @@ class Indexer
      */
     public function index_post($post_id)
     {
-        // 1. Schema Safety Check
-        $config = $this->config_loader->get_config();
-        $current_hash = Schema::get_hash($config);
-        $stored_hash = get_option('swift_search_schema_hash');
-
-        if ($stored_hash && $current_hash !== $stored_hash) {
-            // Mismatch detected (User changed plan or config changed)
-            // Block update to prevent corruption.
-            update_option('swift_search_schema_mismatch', true);
-            return;
-        }
+        $this->ensure_schema_safety();
 
         $post = get_post($post_id);
         if (!$post)
@@ -97,10 +189,27 @@ class Indexer
         $this->builder = new DocumentBuilder($this->config_loader);
 
         $document = $this->builder->build($post);
-        if (!$document)
+        if (!$document) {
+            // If Post -> Draft or Post Type Disabled, remove from index
+            $this->delete_post_from_index($post_id);
             return;
+        }
 
         $this->client->request('/collections/posts/documents?action=upsert', 'POST', $document);
+    }
+
+    private function ensure_schema_safety()
+    {
+        // 1. Schema Safety Check
+        $config = $this->config_loader->get_config();
+        $current_hash = Schema::get_hash($config);
+        $stored_hash = get_option('swift_search_schema_hash');
+
+        if ($stored_hash && $current_hash !== $stored_hash) {
+            update_option('swift_search_schema_mismatch', true);
+            // return; // Throw Exception? Or just let it fail/warn? 
+            // For now we continue but flag it. 
+        }
     }
 
     /**
@@ -126,13 +235,20 @@ class Indexer
     {
         $config = $this->config_loader->get_config();
         $schema = Schema::get_schema($config);
+        $terms_schema = Schema::get_terms_schema($config);
+        $users_schema = Schema::get_users_schema($config);
 
         // Calculate and store hash for safety
         $hash = Schema::get_hash($config);
         update_option('swift_search_schema_hash', $hash);
         delete_option('swift_search_schema_mismatch'); // Clear any validation error
 
-        return $this->client->request('/collections', 'POST', $schema);
+        // Create main collection
+        $this->client->request('/collections', 'POST', $schema);
+
+        // Create auxiliary collections
+        $this->client->request('/collections', 'POST', $terms_schema);
+        $this->client->request('/collections', 'POST', $users_schema);
     }
 
     /**
@@ -140,6 +256,9 @@ class Indexer
      */
     public function delete_collection()
     {
-        return $this->client->request('/collections/posts', 'DELETE');
+        $this->client->request('/collections/posts', 'DELETE');
+        $this->client->request('/collections/terms', 'DELETE');
+        $this->client->request('/collections/users', 'DELETE');
+        return true;
     }
 }

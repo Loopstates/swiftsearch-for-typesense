@@ -54,6 +54,43 @@ class Schema
     }
 
     /**
+     * Get the schema definition for the terms collection.
+     */
+    public static function get_terms_schema($config = array())
+    {
+        return array(
+            'name' => 'terms',
+            'fields' => array(
+                array('name' => 'term_id', 'type' => 'int64'),
+                array('name' => 'name', 'type' => 'string'), // Facet? Maybe not needed for name
+                array('name' => 'slug', 'type' => 'string'),
+                array('name' => 'taxonomy', 'type' => 'string', 'facet' => true),
+                array('name' => 'url', 'type' => 'string'),
+                array('name' => 'count', 'type' => 'int32'),
+            ),
+            'default_sorting_field' => 'count', // Relevance? Browsing usually by popular
+        );
+    }
+
+    /**
+     * Get the schema definition for the users collection.
+     */
+    public static function get_users_schema($config = array())
+    {
+        return array(
+            'name' => 'users',
+            'fields' => array(
+                array('name' => 'user_id', 'type' => 'int64'),
+                array('name' => 'display_name', 'type' => 'string'),
+                array('name' => 'user_login', 'type' => 'string'),
+                array('name' => 'avatar_url', 'type' => 'string', 'optional' => true),
+                array('name' => 'url', 'type' => 'string'),
+            ),
+            // No default sort, relevance is key
+        );
+    }
+
+    /**
      * Generate a deterministic hash of the current schema definition.
      * Used to detect if the remote/local settings have changed requiring reindex.
      *
@@ -62,8 +99,13 @@ class Schema
      */
     public static function get_hash($config)
     {
-        $schema = self::get_schema($config);
+        $posts = self::get_schema($config);
+        $terms = self::get_terms_schema($config);
+        $users = self::get_users_schema($config);
+
+        $composite = array('posts' => $posts, 'terms' => $terms, 'users' => $users);
+
         // Serialize and hash to get unique fingerprint
-        return md5(serialize($schema));
+        return md5(serialize($composite));
     }
 }

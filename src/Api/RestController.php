@@ -221,33 +221,110 @@ class RestController extends WP_REST_Controller
     {
         $page = (int) $request->get_param('page');
         $page = $page > 0 ? $page : 1;
+        $type = $request->get_param('type') ? sanitize_text_field($request->get_param('type')) : 'posts';
         $per_page = 20;
+        $offset = ($page - 1) * $per_page;
 
         $config = get_option('swift_search_settings', array());
-        $post_types = isset($config['indexed_post_types']) ? $config['indexed_post_types'] : array('post', 'page', 'product');
-
-        $args = array(
-            'post_type' => $post_types,
-            'post_status' => 'publish',
-            'posts_per_page' => $per_page,
-            'paged' => $page,
-            'fields' => 'ids',
-            'orderby' => 'ID',
-            'order' => 'ASC',
-        );
-
-        $query = new \WP_Query($args);
-        $ids = $query->posts;
-
         $indexer = new \SwiftSearch\Engine\Indexer();
         $processed = 0;
+        $total_pages = 0;
+        $complete = false;
 
-        foreach ($ids as $id) {
-            $indexer->index_post($id);
-            $processed++;
+        if ($type === 'terms') {
+            // Sync Terms
+            $taxonomies = isset($config['indexed_taxonomies']) ? $config['indexed_taxonomies'] : array();
+
+            if (empty($taxonomies)) {
+                return new \WP_REST_Response(array('success' => true, 'data' => array('processed' => 0, 'page' => 1, 'total_pages' => 0, 'complete' => true)), 200);
+            }
+
+            $args = array(
+                'taxonomy' => $taxonomies,
+                'hide_empty' => false,
+                'number' => $per_page,
+                'offset' => $offset,
+                'fields' => 'ids',
+            );
+
+            $terms = get_terms($args);
+            $count = wp_count_terms($taxonomies, array('hide_empty' => false)); // Approximation
+
+            if (!is_wp_error($terms)) {
+                foreach ($terms as $term_id) {
+                    $indexer->index_term($term_id);
+                    $processed++;
+                }
+            }
+
+            // Calculate Pages
+            // wp_count_terms might return string or int, and it counts individual terms, so sum needs care involved or just rely on result count
+            // Actually get_terms with offset doesn't return max_num_pages easily. 
+            // Simple logic: if count(terms) < per_page, we are done.
+            $complete = count($terms) < $per_page;
+            // Fake total pages for progress bar if possible, else just keep going
+            $total_pages = ceil((int) $count / $per_page);
+
+        } elseif ($type === 'users') {
+            // Sync Users
+            $index_users = isset($config['indexed_users']) ? (bool) $config['indexed_users'] : false;
+
+            if (!$index_users) {
+                return new \WP_REST_Response(array('success' => true, 'data' => array('processed' => 0, 'page' => 1, 'total_pages' => 0, 'complete' => true)), 200);
+            }
+
+            // Only Authors/Editors +
+            $args = array(
+                'number' => $per_page,
+                'offset' => $offset,
+                'fields' => 'ID',
+                'who' => 'authors', // This gets authors and admins usually? Deprecated in WP 5.9 but still works.
+                // Better: capability check or role__in
+            );
+
+            // Fallback for modern WP: use capability if 'who' feels risky, but 'who' => 'authors' is standard short-hand.
+            // Actually, 'who' => 'authors' only gets levels > 0. 
+            // Let's rely on UserIndexer strict check, but fetch wide here? 
+            // Efficient: 'role__in' => ['administrator', 'editor', 'author', 'contributor']? 
+            // Let's use 'who' => 'authors' for simplicity.
+
+            $query = new \WP_User_Query($args);
+            $ids = $query->get_results();
+            $total_users = $query->get_total();
+
+            foreach ($ids as $user_id) {
+                $indexer->index_user($user_id);
+                $processed++;
+            }
+
+            $total_pages = ceil($total_users / $per_page);
+            $complete = $page >= $total_pages;
+
+        } else {
+            // Sync Posts (Default)
+            $post_types = isset($config['indexed_post_types']) ? $config['indexed_post_types'] : array('post', 'page', 'product');
+
+            $args = array(
+                'post_type' => $post_types,
+                'post_status' => 'publish',
+                'posts_per_page' => $per_page,
+                'paged' => $page,
+                'fields' => 'ids',
+                'orderby' => 'ID',
+                'order' => 'ASC',
+            );
+
+            $query = new \WP_Query($args);
+            $ids = $query->posts;
+
+            foreach ($ids as $id) {
+                $indexer->index_post($id);
+                $processed++;
+            }
+
+            $total_pages = $query->max_num_pages;
+            $complete = $page >= $total_pages;
         }
-
-        $total_pages = $query->max_num_pages;
 
         return new \WP_REST_Response(array(
             'success' => true,
@@ -255,7 +332,8 @@ class RestController extends WP_REST_Controller
                 'processed' => $processed,
                 'page' => $page,
                 'total_pages' => $total_pages,
-                'complete' => $page >= $total_pages,
+                'complete' => $complete,
+                'type' => $type
             ),
         ), 200);
     }
@@ -281,6 +359,22 @@ class RestController extends WP_REST_Controller
             $current_settings = get_option('swift_search_settings', array());
             $types = is_array($params['post_types']) ? array_map('sanitize_text_field', $params['post_types']) : array();
             $current_settings['indexed_post_types'] = $types;
+            update_option('swift_search_settings', $current_settings);
+        }
+
+        // Handle Taxonomies
+        if (isset($params['taxonomies'])) {
+            $current_settings = get_option('swift_search_settings', array());
+            $taxes = is_array($params['taxonomies']) ? array_map('sanitize_text_field', $params['taxonomies']) : array();
+            $current_settings['indexed_taxonomies'] = $taxes;
+            update_option('swift_search_settings', $current_settings);
+        }
+
+        // Handle Users
+        if (isset($params['index_users'])) {
+            $current_settings = get_option('swift_search_settings', array());
+            $val = filter_var($params['index_users'], FILTER_VALIDATE_BOOLEAN);
+            $current_settings['indexed_users'] = $val;
             update_option('swift_search_settings', $current_settings);
         }
 
