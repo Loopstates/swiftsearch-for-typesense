@@ -114,6 +114,29 @@
             <section class="ss-step-view" id="view-content" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
+                        <h2><?php esc_html_e('Search Behavior', 'swift-search-typesense'); ?></h2>
+                        <p><?php esc_html_e('Configure how SwiftSearch integrates with your theme.', 'swift-search-typesense'); ?>
+                        </p>
+                    </div>
+                    <div class="ss-card-body">
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card" style="width: 100%;">
+                                    <input type="checkbox" id="ss-override-default">
+                                    <div class="info">
+                                        <span
+                                            class="title"><?php esc_html_e('Override Default Search', 'swift-search-typesense'); ?></span>
+                                        <span
+                                            class="meta"><?php esc_html_e('Automatically replace the native WordPress search form with SwiftSearch.', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ss-card">
+                    <div class="ss-card-header">
                         <h2><?php esc_html_e('Searchable Content', 'swift-search-typesense'); ?></h2>
                         <p><?php esc_html_e('Select which post types to index.', 'swift-search-typesense'); ?></p>
                     </div>
@@ -162,18 +185,23 @@
                         <div class="ss-pro-gate" data-feature="relevance">
                             <div class="ss-form-group">
                                 <label>Global Relevance Score</label>
-                                <input type="range" min="1" max="100" value="50">
+                                <input type="range" id="ss-relevance-range" min="1" max="100" value="50">
                             </div>
                             <div class="ss-form-group">
                                 <label>Synonyms</label>
-                                <textarea rows="4" class="ss-input" placeholder="jacket, coat, blazer"></textarea>
+                                <textarea id="ss-synonyms-list" rows="4" class="ss-input"
+                                    placeholder="jacket, coat, blazer"></textarea>
                             </div>
                         </div>
+                    </div>
+                    <div class="ss-form-actions">
+                        <button type="button" class="ss-btn ss-btn-primary next-step"
+                            data-target="sync"><?php esc_html_e('Next: Sync & Usage', 'swift-search-typesense'); ?></button>
                     </div>
                 </div>
             </section>
 
-            <!-- Step 4: Sync -->
+            <!-- Step 4: Sync & Usage -->
             <section class="ss-step-view" id="view-sync" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
@@ -189,6 +217,28 @@
                                 class="ss-btn ss-btn-primary"><?php esc_html_e('Index All Content', 'swift-search-typesense'); ?></button>
                             <button type="button" id="ss-reset-btn"
                                 class="ss-btn ss-btn-danger"><?php esc_html_e('Delete Index & Reset', 'swift-search-typesense'); ?></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shortcode Builder -->
+                <div class="ss-card">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Shortcode Builder', 'swift-search-typesense'); ?></h2>
+                        <p><?php esc_html_e('Generate a custom shortcode for your pages.', 'swift-search-typesense'); ?>
+                        </p>
+                    </div>
+                    <div class="ss-card-body">
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label>Placeholder Text</label>
+                                <input type="text" id="sc-placeholder" class="ss-input" value="Search...">
+                            </div>
+                        </div>
+                        <div class="ss-code-preview">
+                            <code id="sc-preview">[swift_search placeholder="Search..."]</code>
+                            <button type="button" class="ss-btn ss-btn-sm ss-btn-secondary"
+                                id="ss-copy-sc">Copy</button>
                         </div>
                     </div>
                 </div>

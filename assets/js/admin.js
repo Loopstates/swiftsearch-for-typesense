@@ -24,6 +24,20 @@
 
             // Pro Gates
             this.$proGates = $('.ss-pro-gate');
+
+            // Override
+            this.$overrideToggle = $('#ss-override-default');
+
+            // Shortcode Builder
+            this.$scPlaceholder = $('#sc-placeholder');
+            this.$scPreview = $('#sc-preview');
+            this.$scCopyBtn = $('#ss-copy-sc');
+
+            this.$scCopyBtn = $('#ss-copy-sc');
+
+            // Relevance
+            this.$relevanceRange = $('#ss-relevance-range');
+            this.$synonymsInput = $('#ss-synonyms-list');
         },
 
         bindEvents: function () {
@@ -39,6 +53,127 @@
             // Sync Actions
             this.$syncBtn.on('click', this.startSync.bind(this));
             this.$resetBtn.on('click', this.resetIndex.bind(this));
+
+            // Override Toggle
+            this.$overrideToggle.on('change', this.handleOverrideChange.bind(this));
+
+            // Shortcode Actions
+            this.$scPlaceholder.on('input', this.updateShortcodePreview.bind(this));
+            this.$scCopyBtn.on('click', this.copyShortcode.bind(this));
+
+            // Relevance
+            this.$relevanceRange.on('change', this.handleRelevanceChange.bind(this));
+            this.$synonymsInput.on('change', this.handleRelevanceChange.bind(this));
+        },
+
+        init: function () {
+            this.cacheDOM();
+            this.bindEvents();
+            this.checkStatus();
+            this.checkPlan();
+
+            // Set Initial State
+            if (swiftSearchConfig.status.overrideDefault) {
+                this.$overrideToggle.prop('checked', true);
+            }
+
+            // Set Relevance State
+            if (swiftSearchConfig.relevance) {
+                // Post Title Weight
+                if (swiftSearchConfig.relevance.weights && swiftSearchConfig.relevance.weights.post_title) {
+                    this.$relevanceRange.val(swiftSearchConfig.relevance.weights.post_title * 10); // Scale 1-10 to 1-100 UI
+                }
+
+                // Synonyms
+                if (swiftSearchConfig.relevance.synonyms) {
+                    // Convert array to CSV string for display
+                    // Format: [{root: 'foo', synonyms: ['bar', 'baz']}] -> "foo, bar, baz\n"
+                    let text = '';
+                    swiftSearchConfig.relevance.synonyms.forEach(group => {
+                        text += group.root + ', ' + group.synonyms.join(', ') + '\n';
+                    });
+                    this.$synonymsInput.val(text.trim());
+                }
+            }
+        },
+
+        handleRelevanceChange: function () {
+            // Debounce or save immediately? Change event is good for now.
+
+            // Transform UI to Data
+            const weightVal = this.$relevanceRange.val();
+            const weight = Math.max(1, Math.round(weightVal / 10)); // Scale 100 -> 10
+
+            // Synonyms Parsing: "foo, bar, baz \n a, b" -> structured array
+            const lines = this.$synonymsInput.val().split('\n');
+            const synonyms = [];
+
+            lines.forEach(line => {
+                const parts = line.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                if (parts.length > 1) {
+                    const root = parts[0];
+                    const others = parts.slice(1);
+                    synonyms.push({
+                        root: root,
+                        synonyms: others
+                    });
+                }
+            });
+
+            // Prepare Payload
+            const payload = {
+                relevance_settings: {
+                    weights: {
+                        post_title: weight,
+                        // Default others
+                        post_content: 2,
+                        sku: 4,
+                        category: 2,
+                        tag: 2
+                    },
+                    synonyms: synonyms
+                }
+            };
+
+            // Save
+            $.post(swiftSearchConfig.apiUrl + '/settings', payload, function (response) {
+                // SIlent saving or toast
+            });
+        },
+
+        handleOverrideChange: function (e) {
+            const isChecked = $(e.currentTarget).is(':checked');
+
+            // We need a settings endpoint. Re-using /connect for simplicity or assume /settings exists?
+            // Let's assume we need to add /settings to RestController. For now, we use a custom action on connect or just separate post.
+            // Actually, best to add a specific endpoint. 
+            // Since we are iterating, let's POST to /settings endpoint which we will create next.
+
+            $.post(swiftSearchConfig.apiUrl + '/settings', {
+                override_default: isChecked
+            }, function (response) {
+                if (response.success) {
+                    // Saved
+                } else {
+                    alert('Failed to save setting.');
+                }
+            });
+        },
+
+        updateShortcodePreview: function () {
+            const placeholder = this.$scPlaceholder.val() || 'Search...';
+            this.$scPreview.text(`[swift_search placeholder="${placeholder}"]`);
+        },
+
+        copyShortcode: function () {
+            const code = this.$scPreview.text();
+            const $btn = this.$scCopyBtn;
+
+            navigator.clipboard.writeText(code).then(function () {
+                const originalText = $btn.text();
+                $btn.text('Copied!');
+                setTimeout(() => $btn.text(originalText), 2000);
+            });
         },
 
         handleNavClick: function (e) {

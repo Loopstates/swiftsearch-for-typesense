@@ -77,6 +77,9 @@ class AdminController
         $index_status = get_option('swift_search_index_status', array());
 
         // Localize Script for JS Data
+        // Localize Script for JS Data
+        $settings = get_option('swift_search_settings', array());
+
         wp_localize_script('swift-search-admin', 'swiftSearchConfig', array(
             'apiUrl' => rest_url('swift-search/v1'),
             'nonce' => wp_create_nonce('wp_rest'),
@@ -87,6 +90,11 @@ class AdminController
             'status' => array(
                 'schemaMismatch' => (bool) $schema_mismatch,
                 'backgroundIndex' => $index_status,
+                'overrideDefault' => (bool) get_option('swift_search_override_default', false),
+            ),
+            'relevance' => array(
+                'weights' => isset($settings['weights']) ? $settings['weights'] : array(),
+                'synonyms' => isset($settings['synonyms']) ? $settings['synonyms'] : array(),
             ),
             'texts' => array(
                 'connecting' => __('Connecting to Typesense...', 'swift-search-typesense'),

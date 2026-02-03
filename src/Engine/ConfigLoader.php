@@ -34,30 +34,37 @@ class ConfigLoader
      */
     private function get_pro_config()
     {
-        return array(
-            'ranking_rules' => array(
-                'words',
-                'typo',
-                'proximity',
-                'attribute',
-                'exactness',
-                'promoted_products(stock_status: asc)' // Pro feature: Stock boosting
-            ),
+        $saved = get_option('swift_search_settings', array());
+
+        // Defaults
+        $defaults = array(
+            'ranking_rules' => array('words', 'typo', 'proximity', 'attribute', 'exactness', 'promoted_products(stock_status: asc)'),
             'synonyms' => array(
-                // Example of Pro-exclusive built-in value
-                array('root' => 'laptop', 'synonyms' => array('notebook', 'macbook')),
-                array('root' => 'shirt', 'synonyms' => array('t-shirt', 'tee', 'top'))
+                array('root' => 'laptop', 'synonyms' => array('notebook', 'macbook'))
             ),
             'weights' => array(
-                'post_title' => 8,       // Boosted title for Pro
+                'post_title' => 8,
                 'post_content' => 2,
-                'sku' => 4,              // SKU support
+                'sku' => 4,
                 'category' => 2,
                 'tag' => 2
             ),
             'default_sorting_field' => 'published_at',
-            'enable_facets' => true // Enable faceted navigation
+            'enable_facets' => true
         );
+
+        // Merge User Settings
+        if (!empty($saved['weights'])) {
+            $defaults['weights'] = $saved['weights'];
+        }
+
+        if (isset($saved['synonyms']) && is_array($saved['synonyms'])) {
+            $defaults['synonyms'] = $saved['synonyms'];
+        }
+
+        // Future: Ranking Rules could also be merged here
+
+        return $defaults;
     }
 
     /**

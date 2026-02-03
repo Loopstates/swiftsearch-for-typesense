@@ -56,6 +56,12 @@ class RestController extends WP_REST_Controller
             'callback' => array($this, 'handle_reset'),
             'permission_callback' => array($this, 'check_permission'),
         ));
+
+        register_rest_route($this->namespace, '/settings', array(
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => array($this, 'handle_settings'),
+            'permission_callback' => array($this, 'check_permission'),
+        ));
     }
 
     /**
@@ -201,7 +207,59 @@ class RestController extends WP_REST_Controller
     }
 
     /**
+     * Handle Settings Update.
+     * 
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response
+     */
+    public function handle_settings($request)
+    {
+        $params = $request->get_params();
+
+        // Handle Override Toggle
+        if (isset($params['override_default'])) {
+            $val = filter_var($params['override_default'], FILTER_VALIDATE_BOOLEAN);
+            update_option('swift_search_override_default', $val);
+        }
+
+        // Handle Relevance Settings (Pro)
+        if (isset($params['relevance_settings'])) {
+            // Retrieve current settings to merge
+            $current_settings = get_option('swift_search_settings', array());
+
+            $new_relevance = $params['relevance_settings'];
+
+            // 1. Update Weights
+            if (isset($new_relevance['weights'])) {
+                foreach ($new_relevance['weights'] as $key => $weight) {
+                    $current_settings['weights'][sanitize_key($key)] = absint($weight);
+                }
+            }
+
+            // 2. Update Synonyms
+            if (isset($new_relevance['synonyms']) && is_array($new_relevance['synonyms'])) {
+                $clean_synonyms = array();
+                foreach ($new_relevance['synonyms'] as $group) {
+                    if (!empty($group['root']) && !empty($group['synonyms']) && is_array($group['synonyms'])) {
+                        $clean_synonyms[] = array(
+                            'root' => sanitize_text_field($group['root']),
+                            'synonyms' => array_map('sanitize_text_field', $group['synonyms'])
+                        );
+                    }
+                }
+                $current_settings['synonyms'] = $clean_synonyms;
+            }
+
+            update_option('swift_search_settings', $current_settings);
+        }
+
+        return new \WP_REST_Response(array('success' => true), 200);
+    }
+
+    /**
      * Handle Index Reset.
+     *
+     * @return \WP_REST_Response
      */
     public function handle_reset()
     {
