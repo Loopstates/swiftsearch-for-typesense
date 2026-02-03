@@ -33,6 +33,8 @@ class DocumentBuilder
         $allowed_types = isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : array('post', 'page', 'product');
 
         if (!in_array($post->post_type, $allowed_types)) {
+            // Debugging Sync: Log why it skipped
+            error_log("SwiftSearch Debug: Skipped Post {$post_id} (Type: {$post->post_type}). Allowed: " . json_encode($allowed_types));
             return false;
         }
 

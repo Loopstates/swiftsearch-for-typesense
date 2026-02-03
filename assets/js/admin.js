@@ -687,12 +687,12 @@
         },
 
         startSync: function () {
-            if (!confirm('This will index all posts/products. Continue?')) return;
+            if (!confirm(swiftSearchConfig.texts.confirmSync || 'This will index all selected content. Continue?')) return;
 
-            const self = this;
             this.$syncBtn.prop('disabled', true);
             this.$resetBtn.prop('disabled', true);
             this.$syncStatusText.text('Initializing...');
+            this.updateProgress(0);
 
             this.processBatch(1);
         },
@@ -714,29 +714,43 @@
                         self.$syncBtn.prop('disabled', false);
                         self.$resetBtn.prop('disabled', false);
                         self.checkStatus();
-                        alert('Indexing Complete!');
+
+                        // Small delay to let UI render text before alert blocks thread
+                        setTimeout(function () {
+                            alert('Success: All selected content has been indexed.');
+                        }, 100);
                     }
                 } else {
-                    self.syncError('Error processing batch.');
+                    self.syncError(response.data.message || 'Error processing batch.');
                 }
-            }).fail(function () {
-                self.syncError('Network Error.');
+            }).fail(function (xhr) {
+                const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Network Error';
+                self.syncError(msg);
             });
         },
 
         syncError: function (msg) {
-            this.$syncStatusText.text('Error: ' + msg);
+            this.$syncStatusText.html('<span style="color: #ef4444;">Error: ' + msg + '</span>');
             this.$syncBtn.prop('disabled', false);
             this.$resetBtn.prop('disabled', false);
         },
 
         updateProgress: function (percent) {
+            // Update CSS variable for circle progress if using SVG or similar, 
+            // but for now text is fine as per current dom
             this.$progressCircle.text(percent + '%');
+
+            // Visual circle check
+            const $circle = $('.progress-circle');
+            if ($circle.length) {
+                // Assuming simple CSS conic gradient or similar could be added later
+            }
+
             this.$syncStatusText.text('Indexing... ' + percent + '%');
         },
 
         resetIndex: function () {
-            if (!confirm('Are you sure you want to delete the entire index? This cannot be undone.')) return;
+            if (!confirm(swiftSearchConfig.texts.confirmReset || 'Are you sure you want to delete the entire index? This cannot be undone.')) return;
 
             const self = this;
             this.$resetBtn.prop('disabled', true);
@@ -747,9 +761,8 @@
                 self.$syncStatusText.text('Index Cleared.');
                 self.updateProgress(0);
                 self.checkStatus();
-                alert('Index has been reset.');
             }).fail(function () {
-                alert('Error resetting index.');
+                self.$syncStatusText.text('Error resetting index.');
                 self.$resetBtn.prop('disabled', false);
             });
         }

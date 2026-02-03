@@ -150,7 +150,8 @@
                 <div class="ss-card">
                     <div class="ss-card-header">
                         <h2><?php esc_html_e('Searchable Content', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Select which post types to index.', 'swift-search-typesense'); ?></p>
+                        <p><?php esc_html_e('Configure which content types (Posts, Pages, Products, Custom Types) should be indexed.', 'swift-search-typesense'); ?>
+                        </p>
                     </div>
                     <div class="ss-card-body">
                         <!-- Content Checkboxes will be rendered here -->
@@ -410,7 +411,7 @@
                             <div class="ss-sync-details" style="flex: 1;">
                                 <h3 style="margin: 0 0 10px 0; font-size: 16px;">Index Synchronization</h3>
                                 <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280; line-height: 1.5;">
-                                    <?php esc_html_e('Synchronize your WordPress content with Typesense. This process sends all selected posts, pages, and products to your Typesense server. Run this initial sync or after bulk edits.', 'swift-search-typesense'); ?>
+                                    <?php esc_html_e('Synchronize your WordPress content with Typesense. This process sends all selected content types to your Typesense server. Run this initial sync or after bulk edits.', 'swift-search-typesense'); ?>
                                 </p>
                                 <div class="ss-actions-row" style="display: flex; gap: 15px;">
                                     <button type="button" id="ss-sync-btn"

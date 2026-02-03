@@ -123,6 +123,7 @@ class AdminController
      */
     private function get_public_post_types()
     {
+        // Reverted to Public Only as per user request
         $args = array(
             'public' => true,
         );
