@@ -164,7 +164,18 @@ class RestController extends WP_REST_Controller
                 )
             ), 200);
         } else {
-            return new \WP_REST_Response(array('success' => false, 'message' => 'Could not connect to Typesense server. Check your credentials.'), 400);
+            $error = $client->get_last_error();
+            $msg = 'Connection failed. Please check your credentials.';
+            if (!empty($error)) {
+                $msg .= ' Details: ' . $error;
+            }
+
+            return new \WP_REST_Response(array(
+                'success' => false,
+                'data' => array(
+                    'message' => $msg
+                )
+            ), 200);
         }
     }
 

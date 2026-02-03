@@ -3,6 +3,13 @@
 
     const SwiftSearchAdmin = {
         init: function () {
+            // Setup Ajax Nonce
+            $.ajaxSetup({
+                headers: {
+                    'X-WP-Nonce': swiftSearchConfig.nonce
+                }
+            });
+
             this.cacheDOM();
             this.bindEvents();
             this.checkStatus();
@@ -123,6 +130,15 @@
             this.checkPlan();
 
             // Set Initial State
+            // Populate Credentials
+            if (swiftSearchConfig.credentials) {
+                if (swiftSearchConfig.credentials.host) $('#ts-host').val(swiftSearchConfig.credentials.host);
+                if (swiftSearchConfig.credentials.port) $('#ts-port').val(swiftSearchConfig.credentials.port);
+                if (swiftSearchConfig.credentials.protocol) $('#ts-protocol').val(swiftSearchConfig.credentials.protocol);
+                if (swiftSearchConfig.credentials.api_key) $('#ts-api-key').val(swiftSearchConfig.credentials.api_key);
+                if (swiftSearchConfig.credentials.search_key) $('#ts-search-key').val(swiftSearchConfig.credentials.search_key);
+            }
+
             // Indexed Post Types
             if (swiftSearchConfig.indexed_post_types && Array.isArray(swiftSearchConfig.indexed_post_types)) {
                 this.$postTypeInputs.prop('checked', false); // Default unchecked
@@ -172,6 +188,18 @@
             // Already handled in init, but kept for structure if needed
         },
 
+        // Helper for Authenticated Requests
+        request: function (method, endpoint, data = {}) {
+            return $.ajax({
+                url: swiftSearchConfig.apiUrl + endpoint,
+                method: method,
+                data: data,
+                headers: {
+                    'X-WP-Nonce': swiftSearchConfig.nonce
+                }
+            });
+        },
+
         saveContentSettings: function (e) {
             e.preventDefault();
             const $btn = this.$saveContentBtn;
@@ -183,14 +211,11 @@
                 postTypes.push($(this).val());
             });
 
-            // We need a way to pass post_types settings. 
-            // Currently RestController only accepts them in /settings.
-
             const payload = {
                 post_types: postTypes
             };
 
-            $.post(swiftSearchConfig.apiUrl + '/settings', payload, function (response) {
+            this.request('POST', '/settings', payload).done(function (response) {
                 if (response.success) {
                     alert('Settings Saved!');
                 } else {
@@ -202,13 +227,9 @@
         },
 
         handleRelevanceChange: function () {
-            // Debounce or save immediately? Change event is good for now.
-
-            // Transform UI to Data
             const weightVal = this.$relevanceRange.val();
             const weight = Math.max(1, Math.round(weightVal / 10)); // Scale 100 -> 10
 
-            // Synonyms Parsing: "foo, bar, baz \n a, b" -> structured array
             const lines = this.$synonymsInput.val().split('\n');
             const synonyms = [];
 
@@ -224,12 +245,10 @@
                 }
             });
 
-            // Prepare Payload
             const payload = {
                 relevance_settings: {
                     weights: {
                         post_title: weight,
-                        // Default others
                         post_content: 2,
                         sku: 4,
                         category: 2,
@@ -239,26 +258,16 @@
                 }
             };
 
-            // Save
-            $.post(swiftSearchConfig.apiUrl + '/settings', payload, function (response) {
-                // SIlent saving or toast
-            });
+            this.request('POST', '/settings', payload);
         },
 
         handleOverrideChange: function (e) {
             const isChecked = $(e.currentTarget).is(':checked');
 
-            // We need a settings endpoint. Re-using /connect for simplicity or assume /settings exists?
-            // Let's assume we need to add /settings to RestController. For now, we use a custom action on connect or just separate post.
-            // Actually, best to add a specific endpoint. 
-            // Since we are iterating, let's POST to /settings endpoint which we will create next.
-
-            $.post(swiftSearchConfig.apiUrl + '/settings', {
+            this.request('POST', '/settings', {
                 override_default: isChecked
-            }, function (response) {
-                if (response.success) {
-                    // Saved
-                } else {
+            }).done(function (response) {
+                if (!response.success) {
                     alert('Failed to save setting.');
                 }
             });
@@ -273,13 +282,14 @@
                 }
             };
 
-            $.post(swiftSearchConfig.apiUrl + '/settings', payload, function (response) {
+            this.request('POST', '/settings', payload).done(function (response) {
                 if (!response.success) {
                     alert('Failed to save settings.');
                 }
             });
         },
 
+        // ... Shortcode functions omitted (unchanged) ...
         updateShortcodePreview: function () {
             const placeholder = this.$scPlaceholder.val() || 'Search...';
             const limit = this.$scLimit.val() || 10;
@@ -289,10 +299,9 @@
 
             let shortcode = `[swift_search placeholder="${placeholder}" limit="${limit}"`;
 
-            // Only add defaults if they differ? No, be explicit for clarity.
             if (thumb === 'false') shortcode += ` show_thumbnail="false"`;
             if (price === 'false') shortcode += ` show_price="false"`;
-            if (excerpt === 'true') shortcode += ` show_excerpt="true"`; // Default is likely hidden/false
+            if (excerpt === 'true') shortcode += ` show_excerpt="true"`;
 
             shortcode += `]`;
 
@@ -309,11 +318,11 @@
                 setTimeout(() => $btn.text(originalText), 2000);
             });
         },
+        // ... (End Shortcode) ...
 
         handleNavClick: function (e) {
             const $item = $(e.currentTarget);
             const step = $item.data('step');
-
             this.switchView(step);
         },
 
@@ -325,11 +334,9 @@
         },
 
         switchView: function (stepName) {
-            // Update Nav
             this.$navItems.removeClass('active');
             this.$navItems.filter('[data-step="' + stepName + '"]').addClass('active');
 
-            // Update View
             this.$views.hide();
             $('#view-' + stepName).fadeIn(200);
 
@@ -341,20 +348,17 @@
         },
 
         loadAnalytics: function () {
-            const self = this;
             const $topParams = $('#ss-analytics-top tbody');
             const $zeroParams = $('#ss-analytics-zero tbody');
 
-            // Set Loading
             $topParams.html('<tr><td colspan="3">Loading...</td></tr>');
             $zeroParams.html('<tr><td colspan="2">Loading...</td></tr>');
 
-            $.get(swiftSearchConfig.apiUrl + '/analytics', function (response) {
+            this.request('GET', '/analytics').done(function (response) {
                 if (response.success) {
                     const top = response.data.top_queries;
                     const zero = response.data.no_results;
 
-                    // Render Top
                     if (top.length > 0) {
                         let html = '';
                         top.forEach(row => {
@@ -369,7 +373,6 @@
                         $topParams.html('<tr><td colspan="3">No data yet.</td></tr>');
                     }
 
-                    // Render Zero
                     if (zero.length > 0) {
                         let html = '';
                         zero.forEach(row => {
@@ -386,11 +389,9 @@
             });
         },
 
-        // --- Pinning Logic ---
-
         loadPinnedItems: function () {
             const self = this;
-            $.get(swiftSearchConfig.apiUrl + '/pinning/items', function (response) {
+            this.request('GET', '/pinning/items').done(function (response) {
                 if (response.success) {
                     self.pinnedItems = response.data || [];
                     self.renderPinnedList();
@@ -410,7 +411,7 @@
             }
 
             this.searchTimeout = setTimeout(function () {
-                $.post(swiftSearchConfig.apiUrl + '/pinning/search', { term: term }, function (response) {
+                self.request('POST', '/pinning/search', { term: term }).done(function (response) {
                     if (response.success) {
                         self.renderPinningResults(response.data);
                     }
@@ -443,7 +444,6 @@
                 type: $el.data('type')
             };
 
-            // Avoid duplicates
             if (this.pinnedItems.find(i => i.id == item.id)) {
                 this.$pinningSearch.val('');
                 this.$pinningResults.hide();
@@ -489,42 +489,75 @@
 
         savePinnedItems: function () {
             const payload = { items: this.pinnedItems };
-            // Optional: Show saving state?
-            $.post(swiftSearchConfig.apiUrl + '/pinning/items', payload, function (response) {
-                // SIlent save
-            });
+            this.request('POST', '/pinning/items', payload);
         },
 
         handleConnect: function (e) {
             e.preventDefault();
+
             const formData = this.$connectForm.serialize();
             const self = this;
             const $btn = this.$connectForm.find('button[type="submit"]');
             const oldText = $btn.text();
 
+            this.clearConnectionError();
             $btn.prop('disabled', true).text(swiftSearchConfig.texts.connecting);
 
-            $.post(swiftSearchConfig.apiUrl + '/connect', formData, function (response) {
+            // Manual Ajax for Connect to handle Fail cleanly with Nonce
+            $.ajax({
+                url: swiftSearchConfig.apiUrl + '/connect',
+                method: 'POST',
+                data: formData,
+                headers: { 'X-WP-Nonce': swiftSearchConfig.nonce }
+            }).done(function (response) {
                 if (response.success) {
                     alert(swiftSearchConfig.texts.success);
                     self.updateStatus(true, response.data.doc_count);
-                    // Auto advance to next step after success?
-                    // self.switchView( 'content' ); 
                 } else {
-                    alert(response.data && response.data.message ? response.data.message : swiftSearchConfig.texts.error);
+                    console.warn('SwiftSearch: Connect Success=False', response);
+                    const msg = response.data && response.data.message ? response.data.message : swiftSearchConfig.texts.error;
+                    self.showConnectionError(msg);
                     self.updateStatus(false);
                 }
-            }).fail(function () {
-                alert(swiftSearchConfig.texts.error);
+            }).fail(function (xhr, status, error) {
+                console.error('SwiftSearch: Connect Failed', { status: xhr.status, response: xhr.responseJSON });
+
+                let msg = swiftSearchConfig.texts.error;
+                const res = xhr.responseJSON;
+
+                if (res && res.message) {
+                    msg = res.message;
+                } else if (res && res.data && res.data.message) {
+                    msg = res.data.message;
+                }
+
+                self.showConnectionError(msg + ' (HTTP ' + xhr.status + ')');
                 self.updateStatus(false);
             }).always(function () {
                 $btn.prop('disabled', false).text(oldText);
             });
         },
 
+        showConnectionError: function (msg) {
+            let $err = $('#ss-connection-error');
+            if (!$err.length) {
+                $err = $('<div id="ss-connection-error" class="notice notice-error inline" style="margin: 10px 0 0 0;"><p></p></div>');
+                this.$connectForm.find('.submit-wrapper, button[type="submit"]').last().after($err);
+                if (!$('#ss-connection-error').length) {
+                    this.$connectForm.append($err);
+                }
+            }
+            $err.find('p').text(msg);
+            $err.show();
+        },
+
+        clearConnectionError: function () {
+            $('#ss-connection-error').hide();
+        },
+
         checkStatus: function () {
             const self = this;
-            $.get(swiftSearchConfig.apiUrl + '/status', function (response) {
+            this.request('GET', '/status').done(function (response) {
                 if (response.success) {
                     self.updateStatus(response.data.connected, response.data.doc_count);
                 }
@@ -533,23 +566,18 @@
 
         checkPlan: function () {
             if (swiftSearchConfig.plan && swiftSearchConfig.plan.isPaying) {
-                return; // Plan is pro, do nothing
+                return;
             }
 
-            // Lock features
             this.$proGates.each(function () {
                 const $el = $(this);
                 $el.addClass('ss-feature-disabled');
-
-                // Append Overlay
                 const url = swiftSearchConfig.plan.upgradeUrl || '#';
                 $el.append(`
 					<div class="ss-feature-lock-overlay">
 						<a href="${url}" target="_blank" class="ss-lock-btn">Upgrade to PRO</a>
 					</div>
 				`);
-
-                // Disable inputs inside
                 $el.find('input, select, textarea').prop('disabled', true);
             });
         },
@@ -566,8 +594,6 @@
             }
         },
 
-        // --- Batch Sync Logic ---
-
         startSync: function () {
             if (!confirm('This will index all posts/products. Continue?')) return;
 
@@ -582,7 +608,7 @@
         processBatch: function (page) {
             const self = this;
 
-            $.post(swiftSearchConfig.apiUrl + '/sync/batch', { page: page }, function (response) {
+            this.request('POST', '/sync/batch', { page: page }).done(function (response) {
                 if (response.success) {
                     const data = response.data;
                     const percent = Math.round((data.page / data.total_pages) * 100);
@@ -595,7 +621,7 @@
                         self.$syncStatusText.text('Indexing Complete!');
                         self.$syncBtn.prop('disabled', false);
                         self.$resetBtn.prop('disabled', false);
-                        self.checkStatus(); // Refresh doc count
+                        self.checkStatus();
                         alert('Indexing Complete!');
                     }
                 } else {
@@ -624,7 +650,7 @@
             this.$resetBtn.prop('disabled', true);
             this.$syncStatusText.text('Resetting...');
 
-            $.post(swiftSearchConfig.apiUrl + '/reset', {}, function (response) {
+            this.request('POST', '/reset', {}).done(function (response) {
                 self.$resetBtn.prop('disabled', false);
                 self.$syncStatusText.text('Index Cleared.');
                 self.updateProgress(0);

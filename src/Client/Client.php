@@ -20,6 +20,7 @@ class Client
     protected $protocol;
     protected $api_key;
     protected $search_key;
+    protected $last_error = '';
 
     /**
      * Constructor.
@@ -50,6 +51,16 @@ class Client
     }
 
     /**
+     * Get Last Error.
+     * 
+     * @return string
+     */
+    public function get_last_error()
+    {
+        return $this->last_error;
+    }
+
+    /**
      * Make a request to Typesense.
      *
      * @param string $endpoint Endpoint path.
@@ -59,6 +70,7 @@ class Client
      */
     public function request($endpoint, $method = 'GET', $body = array())
     {
+        $this->last_error = ''; // Reset error
         $url = $this->get_base_url() . $endpoint;
 
         $args = array(
@@ -77,13 +89,20 @@ class Client
         $response = wp_remote_request($url, $args);
 
         if (is_wp_error($response)) {
-            // Log error
-            error_log('SwiftSearch Typesense Error: ' . $response->get_error_message());
+            $this->last_error = $response->get_error_message();
+            error_log('SwiftSearch Typesense Error: ' . $this->last_error);
             return false;
         }
 
         $code = wp_remote_retrieve_response_code($response);
         if ($code < 200 || $code >= 300) {
+            $body = wp_remote_retrieve_body($response);
+            $msg = "HTTP $code";
+            $json = json_decode($body, true);
+            if ($json && isset($json['message'])) {
+                $msg .= ': ' . $json['message'];
+            }
+            $this->last_error = $msg;
             return false;
         }
 
@@ -99,7 +118,17 @@ class Client
     {
         // Health check endpoint
         $health = $this->request('/health', 'GET');
-        return ($health && isset($health['ok']) && $health['ok']);
+
+        if ($health === false) {
+            return false;
+        }
+
+        if (isset($health['ok']) && $health['ok']) {
+            return true;
+        }
+
+        $this->last_error = 'Health check failed. Response: ' . json_encode($health);
+        return false;
     }
 
     /**

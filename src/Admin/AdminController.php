@@ -97,6 +97,13 @@ class AdminController
                 'synonyms' => isset($settings['synonyms']) ? $settings['synonyms'] : array(),
             ),
             'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
+            'credentials' => array(
+                'host' => isset($settings['host']) ? $settings['host'] : '',
+                'port' => isset($settings['port']) ? $settings['port'] : '443',
+                'protocol' => isset($settings['protocol']) ? $settings['protocol'] : 'https',
+                'api_key' => isset($settings['api_key']) ? $settings['api_key'] : '',
+                'search_key' => isset($settings['search_key']) ? $settings['search_key'] : '',
+            ),
             'indexed_post_types' => isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : array('post', 'page', 'product'),
             'texts' => array(
                 'connecting' => __('Connecting to Typesense...', 'swift-search-typesense'),
