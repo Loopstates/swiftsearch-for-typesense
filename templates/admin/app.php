@@ -384,12 +384,19 @@
                     <div class="ss-card-body">
                         <div class="ss-pro-gate" data-feature="pinning">
                             <div class="ss-pinning-ui">
-                                <div class="ss-form-group">
+                                <div class="ss-form-group" style="position:relative;">
                                     <label><?php esc_html_e('Search for Product', 'swift-search-typesense'); ?></label>
-                                    <input type="text" class="ss-input" placeholder="Type a product name...">
+                                    <input type="text" id="ss-pinning-search" class="ss-input"
+                                        placeholder="Type a product name..." autocomplete="off">
+                                    <div id="ss-pinning-results" class="ss-autocomplete-results"></div>
                                 </div>
-                                <div class="ss-empty-state"
-                                    style="border: 2px dashed #e5e7eb; padding: 40px; text-align: center; border-radius: 8px; color: #6b7280;">
+
+                                <div id="ss-pinned-list-container">
+                                    <!-- Populated by JS -->
+                                </div>
+
+                                <div class="ss-empty-state" id="ss-pinning-empty"
+                                    style="border: 2px dashed #e5e7eb; padding: 40px; text-align: center; border-radius: 8px; color: #6b7280; display:none;">
                                     <h3><?php esc_html_e('No pinned items', 'swift-search-typesense'); ?></h3>
                                     <p><?php esc_html_e('Search above to pin products to the top of results.', 'swift-search-typesense'); ?>
                                     </p>

@@ -74,6 +74,28 @@ class RestController extends WP_REST_Controller
             'callback' => array($this, 'get_analytics'),
             'permission_callback' => array($this, 'check_permission'),
         ));
+
+        // Pinning Endpoints
+        register_rest_route($this->namespace, '/pinning/search', array(
+            'methods' => WP_REST_Server::CREATABLE, // POST
+            'callback' => array($this, 'handle_pinning_search'),
+            'permission_callback' => array($this, 'check_permission'),
+        ));
+
+        register_rest_route($this->namespace, '/pinning/items', array(
+            'methods' => array(WP_REST_Server::READABLE, WP_REST_Server::CREATABLE),
+            'callback' => array($this, 'dispatch_pinning_items'), // wrapper to separate GET/POST
+            'permission_callback' => array($this, 'check_permission'),
+        ));
+    }
+
+    public function dispatch_pinning_items($request)
+    {
+        if ($request->get_method() === 'GET') {
+            return $this->get_pinned_items();
+        } else {
+            return $this->handle_pinning_save($request);
+        }
     }
 
     /**
@@ -380,5 +402,99 @@ class RestController extends WP_REST_Controller
                 'no_results' => $no_results
             )
         ), 200);
+    }
+
+    // --- Pinning Features (Pro) ---
+
+    /**
+     * Handle Product Search for Pinning (Autocomplete).
+     * 
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response
+     */
+    public function handle_pinning_search($request)
+    {
+        $term = sanitize_text_field($request->get_param('term'));
+        if (empty($term))
+            return new \WP_REST_Response(array('success' => true, 'data' => array()), 200);
+
+        $args = array(
+            'post_type' => array('product', 'post', 'page'),
+            'post_status' => 'publish',
+            's' => $term,
+            'posts_per_page' => 10,
+        );
+
+        $query = new \WP_Query($args);
+        $results = array();
+
+        foreach ($query->posts as $post) {
+            $results[] = array(
+                'id' => (string) $post->ID,
+                'title' => $post->post_title,
+                'type' => $post->post_type
+            );
+        }
+
+        return new \WP_REST_Response(array('success' => true, 'data' => $results), 200);
+    }
+
+    /**
+     * Handle Saving Pinned Items.
+     * 
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response
+     */
+    public function handle_pinning_save($request)
+    {
+        $items = $request->get_param('items');
+        if (!is_array($items))
+            $items = array();
+
+        // 1. Save to WP
+        update_option('swift_search_pinned_items', $items);
+
+        // 2. Sync to Typesense (Curation Rule)
+        $config = get_option('swift_search_settings', array());
+        if (!empty($config['api_key'])) {
+            $client = new Client($config);
+
+            // Construct Rule: Push these IDs to the top for ALL queries
+            $rule = array(
+                "rule" => array(
+                    "query" => "*" // Apply to all queries
+                ),
+                "includes" => array()
+            );
+
+            foreach ($items as $index => $item) {
+                $rule['includes'][] = array(
+                    "id" => (string) $item['id'],
+                    "position" => $index + 1
+                );
+            }
+
+            // If empty, we might want to delete the rule, but upsert with empty includes is fine (it just does nothing)
+            // Or better, if empty, we send a rule that does nothing? 
+            // Typesense doesn't like empty includes. 
+            if (empty($items)) {
+                $client->request('/collections/posts/overrides/swift_search_global_pins', 'DELETE');
+            } else {
+                $client->upsert_override('swift_search_global_pins', $rule);
+            }
+        }
+
+        return new \WP_REST_Response(array('success' => true), 200);
+    }
+
+    /**
+     * Get Pinned Items.
+     * 
+     * @return \WP_REST_Response
+     */
+    public function get_pinned_items()
+    {
+        $items = get_option('swift_search_pinned_items', array());
+        return new \WP_REST_Response(array('success' => true, 'data' => $items), 200);
     }
 }

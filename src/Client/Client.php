@@ -122,4 +122,16 @@ class Client
 
         return array('num_documents' => $count);
     }
+
+    /**
+     * Upsert an override rule.
+     * 
+     * @param string $id Rule ID.
+     * @param array $rule Rule definition.
+     * @return array|bool
+     */
+    public function upsert_override($id, $rule)
+    {
+        return $this->request('/collections/posts/overrides/' . $id, 'PUT', $rule);
+    }
 }

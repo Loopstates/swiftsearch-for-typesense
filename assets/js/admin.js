@@ -53,7 +53,16 @@
             this.$synonymsInput = $('#ss-synonyms-list');
 
             // Post Types
+            // Post Types
             this.$postTypeInputs = $('input[name="post_types[]"]');
+
+            // Pinning
+            this.$pinningSearch = $('#ss-pinning-search');
+            this.$pinningResults = $('#ss-pinning-results');
+            this.$pinnedListContainer = $('#ss-pinned-list-container');
+            this.$pinningEmpty = $('#ss-pinning-empty');
+            this.pinnedItems = [];
+            this.searchTimeout = null;
         },
 
         bindEvents: function () {
@@ -94,6 +103,17 @@
             this.$saveContentBtn.on('click', this.saveContentSettings.bind(this));
             this.$saveRelevanceBtn.on('click', this.handleRelevanceChange.bind(this));
             this.$saveExperienceBtn.on('click', this.handleExperienceChange.bind(this));
+
+            // Pinning
+            this.$pinningSearch.on('input', this.handlePinningSearch.bind(this));
+            this.$pinningResults.on('click', '.ss-autocomplete-item', this.addPinnedItem.bind(this));
+            this.$pinnedListContainer.on('click', '.remove-pin', this.removePinnedItem.bind(this));
+            // Close autocomplete on click outside
+            $(document).on('click', (e) => {
+                if (!$(e.target).closest('.ss-pinning-ui').length) {
+                    this.$pinningResults.hide();
+                }
+            });
         },
 
         init: function () {
@@ -315,6 +335,8 @@
 
             if (stepName === 'analytics') {
                 this.loadAnalytics();
+            } else if (stepName === 'pinning') {
+                this.loadPinnedItems();
             }
         },
 
@@ -361,6 +383,115 @@
                         $zeroParams.html('<tr><td colspan="2">No zero-result searches.</td></tr>');
                     }
                 }
+            });
+        },
+
+        // --- Pinning Logic ---
+
+        loadPinnedItems: function () {
+            const self = this;
+            $.get(swiftSearchConfig.apiUrl + '/pinning/items', function (response) {
+                if (response.success) {
+                    self.pinnedItems = response.data || [];
+                    self.renderPinnedList();
+                }
+            });
+        },
+
+        handlePinningSearch: function () {
+            const term = this.$pinningSearch.val().trim();
+            const self = this;
+
+            clearTimeout(this.searchTimeout);
+
+            if (term.length < 2) {
+                this.$pinningResults.hide();
+                return;
+            }
+
+            this.searchTimeout = setTimeout(function () {
+                $.post(swiftSearchConfig.apiUrl + '/pinning/search', { term: term }, function (response) {
+                    if (response.success) {
+                        self.renderPinningResults(response.data);
+                    }
+                });
+            }, 300);
+        },
+
+        renderPinningResults: function (results) {
+            if (!results || results.length === 0) {
+                this.$pinningResults.html('<div class="no-results">No products found</div>').show();
+                return;
+            }
+
+            let html = '<ul>';
+            results.forEach(item => {
+                html += `<li class="ss-autocomplete-item" data-id="${item.id}" data-title="${item.title}" data-type="${item.type}">
+                    <span class="title">${item.title}</span>
+                    <span class="type pill">${item.type}</span>
+                </li>`;
+            });
+            html += '</ul>';
+            this.$pinningResults.html(html).show();
+        },
+
+        addPinnedItem: function (e) {
+            const $el = $(e.currentTarget);
+            const item = {
+                id: $el.data('id'),
+                title: $el.data('title'),
+                type: $el.data('type')
+            };
+
+            // Avoid duplicates
+            if (this.pinnedItems.find(i => i.id == item.id)) {
+                this.$pinningSearch.val('');
+                this.$pinningResults.hide();
+                return;
+            }
+
+            this.pinnedItems.push(item);
+            this.savePinnedItems();
+            this.$pinningSearch.val('');
+            this.$pinningResults.hide();
+            this.renderPinnedList();
+        },
+
+        removePinnedItem: function (e) {
+            const id = $(e.currentTarget).data('id');
+            this.pinnedItems = this.pinnedItems.filter(i => i.id != id);
+            this.savePinnedItems();
+            this.renderPinnedList();
+        },
+
+        renderPinnedList: function () {
+            if (this.pinnedItems.length === 0) {
+                this.$pinnedListContainer.hide();
+                this.$pinningEmpty.show();
+                return;
+            }
+
+            this.$pinningEmpty.hide();
+            let html = '<div class="ss-pinned-grid">';
+            this.pinnedItems.forEach((item, index) => {
+                html += `<div class="ss-pinned-card">
+                    <span class="position">#${index + 1}</span>
+                    <div class="details">
+                        <span class="title">${item.title}</span>
+                        <span class="type">${item.type}</span>
+                    </div>
+                    <button type="button" class="remove-pin" data-id="${item.id}">&times;</button>
+                </div>`;
+            });
+            html += '</div>';
+            this.$pinnedListContainer.html(html).show();
+        },
+
+        savePinnedItems: function () {
+            const payload = { items: this.pinnedItems };
+            // Optional: Show saving state?
+            $.post(swiftSearchConfig.apiUrl + '/pinning/items', payload, function (response) {
+                // SIlent save
             });
         },
 
