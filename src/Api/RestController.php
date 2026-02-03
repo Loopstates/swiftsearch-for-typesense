@@ -62,6 +62,18 @@ class RestController extends WP_REST_Controller
             'callback' => array($this, 'handle_settings'),
             'permission_callback' => array($this, 'check_permission'),
         ));
+
+        register_rest_route($this->namespace, '/log', array(
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => array($this, 'handle_log'),
+            'permission_callback' => '__return_true', // Public
+        ));
+
+        register_rest_route($this->namespace, '/analytics', array(
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => array($this, 'get_analytics'),
+            'permission_callback' => array($this, 'check_permission'),
+        ));
     }
 
     /**
@@ -172,8 +184,11 @@ class RestController extends WP_REST_Controller
         $page = $page > 0 ? $page : 1;
         $per_page = 20;
 
+        $config = get_option('swift_search_settings', array());
+        $post_types = isset($config['indexed_post_types']) ? $config['indexed_post_types'] : array('post', 'page', 'product');
+
         $args = array(
-            'post_type' => array('post', 'page', 'product'),
+            'post_type' => $post_types,
             'post_status' => 'publish',
             'posts_per_page' => $per_page,
             'paged' => $page,
@@ -220,6 +235,14 @@ class RestController extends WP_REST_Controller
         if (isset($params['override_default'])) {
             $val = filter_var($params['override_default'], FILTER_VALIDATE_BOOLEAN);
             update_option('swift_search_override_default', $val);
+        }
+
+        // Handle Post Types
+        if (isset($params['post_types'])) {
+            $current_settings = get_option('swift_search_settings', array());
+            $types = is_array($params['post_types']) ? array_map('sanitize_text_field', $params['post_types']) : array();
+            $current_settings['indexed_post_types'] = $types;
+            update_option('swift_search_settings', $current_settings);
         }
 
         // Handle Relevance Settings (Pro)
@@ -287,5 +310,75 @@ class RestController extends WP_REST_Controller
         }
 
         return new \WP_REST_Response(array('success' => true), 200);
+    }
+
+    /**
+     * Handle Search Log.
+     * 
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response
+     */
+    public function handle_log($request)
+    {
+        $params = $request->get_params();
+        $query = sanitize_text_field($params['query'] ?? '');
+        $hits = intval($params['hits'] ?? 0);
+
+        if (empty($query)) {
+            return new \WP_REST_Response(array('success' => false), 400);
+        }
+
+        global $wpdb;
+        $table_name = \SwiftSearch\Core\DB::get_table_name();
+
+        $wpdb->insert(
+            $table_name,
+            array(
+                'query' => $query,
+                'hits' => $hits,
+            ),
+            array('%s', '%d')
+        );
+
+        return new \WP_REST_Response(array('success' => true), 200);
+    }
+
+    /**
+     * Get Analytics Data.
+     * 
+     * @return \WP_REST_Response
+     */
+    public function get_analytics()
+    {
+        global $wpdb;
+        $table_name = \SwiftSearch\Core\DB::get_table_name();
+
+        // Top Searches
+        $top_queries = $wpdb->get_results("
+            SELECT query, COUNT(*) as count, AVG(hits) as avg_hits 
+            FROM $table_name 
+            WHERE hits > 0 
+            GROUP BY query 
+            ORDER BY count DESC 
+            LIMIT 10
+        ");
+
+        // Zero Result Queries
+        $no_results = $wpdb->get_results("
+            SELECT query, COUNT(*) as count 
+            FROM $table_name 
+            WHERE hits = 0 
+            GROUP BY query 
+            ORDER BY count DESC 
+            LIMIT 10
+        ");
+
+        return new \WP_REST_Response(array(
+            'success' => true,
+            'data' => array(
+                'top_queries' => $top_queries,
+                'no_results' => $no_results
+            )
+        ), 200);
     }
 }

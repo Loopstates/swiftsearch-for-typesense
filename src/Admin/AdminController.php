@@ -97,6 +97,7 @@ class AdminController
                 'synonyms' => isset($settings['synonyms']) ? $settings['synonyms'] : array(),
             ),
             'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
+            'indexed_post_types' => isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : array('post', 'page', 'product'),
             'texts' => array(
                 'connecting' => __('Connecting to Typesense...', 'swift-search-typesense'),
                 'success' => __('Connected Successfully!', 'swift-search-typesense'),

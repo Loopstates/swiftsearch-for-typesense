@@ -6,7 +6,9 @@
             this.cacheDOM();
             this.bindEvents();
             this.checkStatus();
+            this.checkStatus();
             this.checkPlan();
+            this.restoreState();
         },
 
         cacheDOM: function () {
@@ -21,6 +23,11 @@
             this.$resetBtn = $('#ss-reset-btn');
             this.$progressCircle = $('.progress-circle');
             this.$syncStatusText = $('.ss-sync-status p');
+
+            // Save Btns
+            this.$saveContentBtn = $('#ss-save-content');
+            this.$saveRelevanceBtn = $('#ss-save-relevance');
+            this.$saveExperienceBtn = $('#ss-save-experience');
 
             // Pro Gates
             this.$proGates = $('.ss-pro-gate');
@@ -44,7 +51,11 @@
 
             // Relevance
             this.$relevanceRange = $('#ss-relevance-range');
+            this.$relevanceRange = $('#ss-relevance-range');
             this.$synonymsInput = $('#ss-synonyms-list');
+
+            // Post Types
+            this.$postTypeInputs = $('input[name="post_types[]"]');
         },
 
         bindEvents: function () {
@@ -80,6 +91,11 @@
             // Relevance
             this.$relevanceRange.on('change', this.handleRelevanceChange.bind(this));
             this.$synonymsInput.on('change', this.handleRelevanceChange.bind(this));
+
+            // Save Actions
+            this.$saveContentBtn.on('click', this.saveContentSettings.bind(this));
+            this.$saveRelevanceBtn.on('click', this.handleRelevanceChange.bind(this));
+            this.$saveExperienceBtn.on('click', this.handleExperienceChange.bind(this));
         },
 
         init: function () {
@@ -89,6 +105,14 @@
             this.checkPlan();
 
             // Set Initial State
+            // Indexed Post Types
+            if (swiftSearchConfig.indexed_post_types && Array.isArray(swiftSearchConfig.indexed_post_types)) {
+                this.$postTypeInputs.prop('checked', false); // Default unchecked
+                swiftSearchConfig.indexed_post_types.forEach(type => {
+                    $(`input[name="post_types[]"][value="${type}"]`).prop('checked', true);
+                });
+            }
+
             if (swiftSearchConfig.status.overrideDefault) {
                 this.$overrideToggle.prop('checked', true);
             }
@@ -120,7 +144,41 @@
             }
 
             // Trigger initial shortcode preview
+            // Trigger initial shortcode preview
             this.updateShortcodePreview();
+        },
+
+        restoreState: function () {
+            // Already handled in init, but kept for structure if needed
+        },
+
+        saveContentSettings: function (e) {
+            e.preventDefault();
+            const $btn = this.$saveContentBtn;
+            const originalText = $btn.text();
+            $btn.prop('disabled', true).text('Saving...');
+
+            const postTypes = [];
+            $('input[name="post_types[]"]:checked').each(function () {
+                postTypes.push($(this).val());
+            });
+
+            // We need a way to pass post_types settings. 
+            // Currently RestController only accepts them in /settings.
+
+            const payload = {
+                post_types: postTypes
+            };
+
+            $.post(swiftSearchConfig.apiUrl + '/settings', payload, function (response) {
+                if (response.success) {
+                    alert('Settings Saved!');
+                } else {
+                    alert('Failed to save settings.');
+                }
+            }).always(function () {
+                $btn.prop('disabled', false).text(originalText);
+            });
         },
 
         handleRelevanceChange: function () {
@@ -254,6 +312,56 @@
             // Update View
             this.$views.hide();
             $('#view-' + stepName).fadeIn(200);
+
+            if (stepName === 'analytics') {
+                this.loadAnalytics();
+            }
+        },
+
+        loadAnalytics: function () {
+            const self = this;
+            const $topParams = $('#ss-analytics-top tbody');
+            const $zeroParams = $('#ss-analytics-zero tbody');
+
+            // Set Loading
+            $topParams.html('<tr><td colspan="3">Loading...</td></tr>');
+            $zeroParams.html('<tr><td colspan="2">Loading...</td></tr>');
+
+            $.get(swiftSearchConfig.apiUrl + '/analytics', function (response) {
+                if (response.success) {
+                    const top = response.data.top_queries;
+                    const zero = response.data.no_results;
+
+                    // Render Top
+                    if (top.length > 0) {
+                        let html = '';
+                        top.forEach(row => {
+                            html += `<tr>
+                                <td>${row.query}</td>
+                                <td>${row.count}</td>
+                                <td>${Math.round(row.avg_hits)}</td>
+                            </tr>`;
+                        });
+                        $topParams.html(html);
+                    } else {
+                        $topParams.html('<tr><td colspan="3">No data yet.</td></tr>');
+                    }
+
+                    // Render Zero
+                    if (zero.length > 0) {
+                        let html = '';
+                        zero.forEach(row => {
+                            html += `<tr>
+                                <td>${row.query}</td>
+                                <td>${row.count}</td>
+                            </tr>`;
+                        });
+                        $zeroParams.html(html);
+                    } else {
+                        $zeroParams.html('<tr><td colspan="2">No zero-result searches.</td></tr>');
+                    }
+                }
+            });
         },
 
         handleConnect: function (e) {

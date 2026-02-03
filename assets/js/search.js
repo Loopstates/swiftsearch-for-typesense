@@ -81,6 +81,7 @@
     }
 
     let debounceTimer;
+    let logTimer;
 
     input.addEventListener('input', function (e) {
         clearTimeout(debounceTimer);
@@ -132,8 +133,11 @@
 
         if (data.found === 0) {
             hitsContainer.innerHTML = '<div class="ss-no-results">No results found.</div>';
+            logSearch(input.value.trim(), 0);
             return;
         }
+
+        logSearch(input.value.trim(), data.found);
 
         data.hits.forEach(hit => {
             const doc = hit.document;
@@ -170,6 +174,30 @@
             return h.snippet;
         }
         return hit.document[field];
+    }
+
+    function logSearch(query, hits) {
+        clearTimeout(logTimer);
+
+        // Don't log empty
+        if (!query || query.length < 2) return;
+
+        logTimer = setTimeout(() => {
+            const payload = {
+                query: query,
+                hits: hits
+            };
+
+            // Use Beacon if available for reliability on page unload, else fetch
+            // Using fetch for simple JSON support with WP REST API
+            fetch(config.apiUrl + '/log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).catch(e => console.error('Log error', e));
+        }, 2000); // 2s debounce for logging
     }
 
 })();

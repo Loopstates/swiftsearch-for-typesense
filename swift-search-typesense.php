@@ -61,6 +61,9 @@ function swift_search_fs()
 	return $swift_search_fs;
 }
 
+// Activation Hook
+register_activation_hook(__FILE__, array('\SwiftSearch\Core\DB', 'install'));
+
 // Init Plugin
 function swift_search_init()
 {

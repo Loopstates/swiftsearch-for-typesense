@@ -54,6 +54,7 @@ class SearchController
                 'apiKey' => $settings['search_key'],
                 'collection' => 'posts', // make dynamic later
                 'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
+                'apiUrl' => rest_url('swift-search/v1'),
             ));
         }
     }
@@ -97,7 +98,7 @@ class SearchController
 
         ob_start();
         ?>
-                ?>
+        ?>
         <div id="swift-search-wrapper" class="ss-wrapper" data-limit="<?php echo esc_attr($a['limit']); ?>"
             data-thumb="<?php echo esc_attr($a['show_thumbnail']); ?>" data-price="<?php echo esc_attr($a['show_price']); ?>"
             data-excerpt="<?php echo esc_attr($a['show_excerpt']); ?>">

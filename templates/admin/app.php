@@ -219,7 +219,8 @@
                 <div class="ss-card">
                     <div class="ss-card-header">
                         <h2><?php esc_html_e('Shortcode Builder', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Customize and generate your search shortcode.', 'swift-search-typesense'); ?></p>
+                        <p><?php esc_html_e('Customize and generate your search shortcode.', 'swift-search-typesense'); ?>
+                        </p>
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-form-group-row">
@@ -267,7 +268,7 @@
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-form-group-row">
-                             <div class="ss-form-group">
+                            <div class="ss-form-group">
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="ss-typo-tolerance" checked>
                                     <div class="info">
@@ -275,8 +276,8 @@
                                         <span class="meta">Show "Did you mean?" suggestions.</span>
                                     </div>
                                 </label>
-                             </div>
-                             <div class="ss-form-group">
+                            </div>
+                            <div class="ss-form-group">
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="ss-sort-enabled">
                                     <div class="info">
@@ -284,7 +285,7 @@
                                         <span class="meta">Allow users to sort by Date/Relevance.</span>
                                     </div>
                                 </label>
-                             </div>
+                            </div>
                         </div>
                         <div class="ss-form-group-row">
                             <div class="ss-form-group">
@@ -305,18 +306,51 @@
                 </div>
             </section>
 
-             <!-- Step 5: Analytics (Pro) -->
+            <!-- Step 5: Analytics (Pro) -->
             <section class="ss-step-view" id="view-analytics" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Search Analytics', 'swift-search-typesense'); ?> <span class="ss-pro-badge">PRO</span></h2>
-                        <p><?php esc_html_e('Insights into what your users are searching for.', 'swift-search-typesense'); ?></p>
+                        <h2><?php esc_html_e('Search Analytics', 'swift-search-typesense'); ?> <span
+                                class="ss-pro-badge">PRO</span></h2>
+                        <p><?php esc_html_e('Insights into what your users are searching for.', 'swift-search-typesense'); ?>
+                        </p>
                     </div>
                     <div class="ss-card-body">
-                         <div class="ss-pro-gate" data-feature="analytics">
-                            <div class="ss-empty-state">
-                                <h3>Analytics Dashboard</h3>
-                                <p>Track top searches and "0 result" queries here.</p>
+                        <div class="ss-analytics-dashboard" id="ss-analytics-dashboard">
+                            <div class="ss-form-group-row">
+                                <div class="ss-form-group" style="flex:1;">
+                                    <h3>Top Searches</h3>
+                                    <table class="wp-list-table widefat fixed striped" id="ss-analytics-top">
+                                        <thead>
+                                            <tr>
+                                                <th>Query</th>
+                                                <th>Count</th>
+                                                <th>Avg Hits</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="3">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="ss-form-group" style="flex:1;">
+                                    <h3>Zero Result Queries</h3>
+                                    <table class="wp-list-table widefat fixed striped" id="ss-analytics-zero">
+                                        <thead>
+                                            <tr>
+                                                <th>Query</th>
+                                                <th>Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="2">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -327,15 +361,17 @@
                 </div>
             </section>
 
-             <!-- Step 6: Results Pinning (Pro) -->
+            <!-- Step 6: Results Pinning (Pro) -->
             <section class="ss-step-view" id="view-pinning" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Pinned Results', 'swift-search-typesense'); ?> <span class="ss-pro-badge">PRO</span></h2>
-                        <p><?php esc_html_e('Manually fix specific products to the top of search results.', 'swift-search-typesense'); ?></p>
+                        <h2><?php esc_html_e('Pinned Results', 'swift-search-typesense'); ?> <span
+                                class="ss-pro-badge">PRO</span></h2>
+                        <p><?php esc_html_e('Manually fix specific products to the top of search results.', 'swift-search-typesense'); ?>
+                        </p>
                     </div>
                     <div class="ss-card-body">
-                         <div class="ss-pro-gate" data-feature="pinning">
+                        <div class="ss-pro-gate" data-feature="pinning">
                             <div class="ss-empty-state">
                                 <h3>Results Pinning</h3>
                                 <p>Drag and drop products to pin them for specific queries.</p>
