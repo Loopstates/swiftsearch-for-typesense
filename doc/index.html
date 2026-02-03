@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftSearch - Documentation</title>
+    <style>
+        :root {
+            --primary: #0047FF;
+            --secondary: #FF0000;
+            --dark: #1F2937;
+            --light: #F3F4F6;
+            --white: #FFFFFF;
+            --text: #374151;
+            --border: #E5E7EB;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            margin: 0;
+            background: var(--light);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--white);
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        header {
+            background: var(--white);
+            color: var(--dark);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: -1px;
+            color: var(--dark);
+        }
+
+        header p {
+            margin-top: 10px;
+            opacity: 0.8;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        .logo-img {
+            max-height: 50px;
+            vertical-align: middle;
+            margin-right: 15px;
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        main {
+            padding: 3rem 2rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+            scroll-margin-top: 80px;
+        }
+
+        h2 {
+            color: var(--dark);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--dark);
+            margin-top: 1.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 1rem;
+        }
+
+        .feature-card {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .pro-badge {
+            background: var(--secondary);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #ef4444;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            background: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 0;
+        }
+
+        .step h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .step p {
+            margin: 0;
+        }
+
+        footer {
+            background: #f8fafc;
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border);
+            color: #64748b;
+        }
+
+        footer a {
+            color: var(--text);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        footer a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <img src="../assets/images/loopstates.png" alt="Loopstates" class="logo-img">
+                <h1>SwiftSearch</h1>
+            </div>
+            <p>Lightning Fast Typesense Search for WordPress & WooCommerce</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#hooks">Developer</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="introduction">
+                <p><strong>SwiftSearch</strong> replaces your default WordPress search with an instant, typo-tolerant
+                    search engine powered by <a href="https://typesense.org" target="_blank">Typesense</a>. It's
+                    designed for speed, converting your visitors into customers with lightning-fast results.</p>
+            </section>
+
+            <section id="installation">
+                <h2>1. Installation</h2>
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>
+                        <h3>Install Typesense</h3>
+                        <p>You need a running Typesense server. You can self-host it using Docker (free) or use <a
+                                href="https://cloud.typesense.org" target="_blank">Typesense Cloud</a>.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>
+                        <h3>Install the Plugin</h3>
+                        <p>Upload the <code>swift-search-typesense.zip</code> file to your WordPress Plugins dashboard
+                            and activate it.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div>
+                        <h3>Setup Wizard</h3>
+                        <p>Go to the <strong>SwiftSearch</strong> menu in your admin dashboard. Enter your Typesense
+                            credentials (Node URL, API Key) to connect.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="configuration">
+                <h2>2. Configuration & Indexing</h2>
+                <p>Once connected, SwiftSearch provides a simple wizard to manage your index.</p>
+
+                <h3>API Keys Best Practice</h3>
+                <p>For optimal security, use two separate API keys:</p>
+                <ul>
+                    <li><strong>Admin Key:</strong> Provide this in the plugin settings. This allows WordPress to create
+                        schemas and index content.</li>
+                    <li><strong>Search-Only Key:</strong> Generate this in Typesense and use it for your Frontend
+                        configuration if you are customizing the JS manually.</li>
+                </ul>
+
+                <h3>Indexing</h3>
+                <p>Click "Index All" to start the process. Indexing runs in the background using your server's cron
+                    system. You can close the tab while it runs.</p>
+            </section>
+
+            <section id="features">
+                <h2>3. Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>⚡ Instant Search</h3>
+                        <p>Search results appear as you type. No page reloads.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔍 Typo Tolerance</h3>
+                        <p>Finds "iphone" even if the user types "iphoen". Powered by Typesense.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📦 WooCommerce Ready</h3>
+                        <p>Indexes Products, SKUs, Prices, and Stock Status automatically.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>✨ Smart Ranking <span class="pro-badge">PRO</span></h3>
+                        <p>Advanced ranking rules that prioritize matches in Titles over Content, and boost In-Stock
+                            items.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📚 Synonyms <span class="pro-badge">PRO</span></h3>
+                        <p>Define synonyms (e.g., "Parka" = "Jacket") to ensure users always find what they need.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="shortcode">
+                <h2>4. Displaying the Search</h2>
+                <p>To display the clean search bar anywhere on your site, use the shortcode:</p>
+                <pre>[swift_search]</pre>
+                <p>This will render the search input. Results will appear in an overlay/dropdown instantly.</p>
+            </section>
+
+            <section id="hooks">
+                <h2>5. Developer Hooks (Actions)</h2>
+                <p>You can customize the indexing process using standard WordPress actions.</p>
+
+                <h3>Async Indexing</h3>
+                <p>The plugin uses <code>swift_search_async_index_post</code> to process posts in the background. You
+                    can trigger a re-index programmatically:</p>
+                <pre>
+// Re-index post ID 123
+do_action('swift_search_async_index_post', 123);
+                </pre>
+            </section>
+
+            <section id="license">
+                <h2>5. Activating Pro License</h2>
+                <p>If you have purchased a <strong>Pro</strong> license, you need to activate it to unlock Smart Ranking
+                    and Synonyms.</p>
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>
+                        <h3>Enter License Key</h3>
+                        <p>After installing the plugin, you will see an opt-in screen from Freemius. Enter your License
+                            Key there.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>
+                        <h3>Access Account</h3>
+                        <p>You can manage your license, invoices, and subscription from the <strong>Account</strong> tab
+                            in the plugin settings.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="theming">
+                <h2>6. Theming & Customization</h2>
+                <p>The search interface is designed to inherit your theme's fonts, but you can override styles using
+                    standard CSS.</p>
+
+                <h3>Common Selectors</h3>
+                <pre>
+/* Main Container */
+.swift-search-container { }
+
+/* The Search Input */
+.swift-search-input { }
+
+/* The Dropdown/Results Area */
+.swift-search-results { }
+
+/* Individual Result Item */
+.ss-hit-item { }
+
+/* Highlighted Text (Matches) */
+.ss-highlight { 
+    background-color: #fef08a; 
+    color: black;
+}
+                </pre>
+            </section>
+
+            <section id="faq">
+                <h2>7. Troubleshooting & FAQ</h2>
+
+                <h3>Result "Connection Failed"</h3>
+                <ul>
+                    <li>Ensure your Typesense server is running and accessible (check Firewall).</li>
+                    <li>Ensure your API Key has correct permissions.</li>
+                    <li>Check your browser console (F12) for CORS errors.</li>
+                </ul>
+
+                <h3>Schema Mismatch Error</h3>
+                <p>If you see a "Critical Schema Mismatch" error, it means the plugin's data structure has changed
+                    (likely due to a Pro upgrade). Simply click <strong>Index All</strong> to reset the collection.</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Loopstates. All Rights Reserved.</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                <a href="privacy.html">Privacy Policy</a> |
+                <a href="terms.html">Terms of Service</a> |
+                <a href="support.html">Support</a>
+            </p>
+        </footer>
+    </div>
+
+</body>
+
+</html>
