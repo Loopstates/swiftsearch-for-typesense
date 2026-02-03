@@ -28,6 +28,14 @@ class DocumentBuilder
             return false;
         }
 
+        // 1. Strict Whitelist Check
+        $settings = get_option('swift_search_settings');
+        $allowed_types = isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : array('post', 'page', 'product');
+
+        if (!in_array($post->post_type, $allowed_types)) {
+            return false;
+        }
+
         // Prepare document
         $document = array(
             'id' => (string) $post->ID,

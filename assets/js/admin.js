@@ -142,13 +142,10 @@
             // Set Initial UI State
             this.renderConnectionState(this.$statusEl.hasClass('connected'));
 
-            // Indexed Post Types
-            if (swiftSearchConfig.indexed_post_types && Array.isArray(swiftSearchConfig.indexed_post_types)) {
-                this.$postTypeInputs.prop('checked', false); // Default unchecked
-                swiftSearchConfig.indexed_post_types.forEach(type => {
-                    $(`input[name="post_types[]"][value="${type}"]`).prop('checked', true);
-                });
-            }
+            // Render Content Settings
+            this.renderContentSettings();
+
+            // Set Experience State
 
             if (swiftSearchConfig.status.overrideDefault) {
                 this.$overrideToggle.prop('checked', true);
@@ -189,6 +186,36 @@
 
         restoreState: function () {
             // Already handled in init, but kept for structure if needed
+        },
+
+        renderContentSettings: function () {
+            const container = $('#ss-content-settings-container');
+            if (!container.length) return;
+
+            const available = swiftSearchConfig.available_post_types || [];
+            const saved = swiftSearchConfig.indexed_post_types || [];
+
+            console.log('Rendering Content Settings. Available:', available);
+            let html = '';
+
+            available.forEach(type => {
+                if (!type || !type.name) return;
+
+                const isChecked = saved.includes(type.name) ? 'checked' : '';
+                html += `<label class="ss-checkbox-card">
+                    <input type="checkbox" name="post_types[]" value="${type.name}" ${isChecked}>
+                    <div class="info">
+                        <span class="title">${type.label || type.name}</span>
+                        <span class="meta">${type.description || type.name}</span>
+                    </div>
+                </label>`;
+            });
+
+            if (html === '') {
+                html = '<p>No public post types found.</p>';
+            }
+
+            container.html(html);
         },
 
         // Helper for Authenticated Requests

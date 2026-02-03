@@ -154,28 +154,9 @@
                     </div>
                     <div class="ss-card-body">
                         <!-- Content Checkboxes will be rendered here -->
-                        <div class="ss-option-list">
-                            <label class="ss-checkbox-card">
-                                <input type="checkbox" name="post_types[]" value="post" checked>
-                                <div class="info">
-                                    <span class="title">Posts</span>
-                                    <span class="meta">Standard blog posts</span>
-                                </div>
-                            </label>
-                            <label class="ss-checkbox-card">
-                                <input type="checkbox" name="post_types[]" value="page" checked>
-                                <div class="info">
-                                    <span class="title">Pages</span>
-                                    <span class="meta">Static pages</span>
-                                </div>
-                            </label>
-                            <label class="ss-checkbox-card">
-                                <input type="checkbox" name="post_types[]" value="product">
-                                <div class="info">
-                                    <span class="title">Products</span>
-                                    <span class="meta">WooCommerce Products</span>
-                                </div>
-                            </label>
+                        <!-- Content Checkboxes will be rendered here -->
+                        <div class="ss-option-list" id="ss-content-settings-container">
+                            <!-- Dynamic Checkboxes -->
                         </div>
                         <div class="ss-form-actions">
                             <button type="button" class="ss-btn ss-btn-secondary"

@@ -105,6 +105,7 @@ class AdminController
                 'search_key' => isset($settings['search_key']) ? $settings['search_key'] : '',
             ),
             'indexed_post_types' => isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : array('post', 'page', 'product'),
+            'available_post_types' => $this->get_public_post_types(),
             'texts' => array(
                 'connecting' => __('Connecting to Typesense...', 'swift-search-typesense'),
                 'success' => __('Connected Successfully!', 'swift-search-typesense'),
@@ -113,6 +114,38 @@ class AdminController
                 'apiKeyWarning' => __('Security Warning: This looks like an Admin Key. For Frontend Search, please use a Search-Only API Key.', 'swift-search-typesense'),
             ),
         ));
+    }
+
+    /**
+     * Get list of public post types.
+     *
+     * @return array List of post types with labels.
+     */
+    private function get_public_post_types()
+    {
+        $args = array(
+            'public' => true,
+        );
+        $output = 'objects';
+        $post_types = get_post_types($args, $output);
+
+        $data = array();
+
+        // Always useful types
+        $exclude = array('attachment', 'revision', 'nav_menu_item', 'custom_css', 'customize_changeset', 'oembed_cache', 'user_request', 'wp_block', 'wp_template', 'wp_template_part', 'wp_global_styles', 'wp_navigation');
+
+        foreach ($post_types as $pt) {
+            if (in_array($pt->name, $exclude)) {
+                continue;
+            }
+            $data[] = array(
+                'name' => (string) $pt->name,
+                'label' => (string) $pt->label,
+                'description' => empty($pt->description) ? '' : substr(strip_tags((string) $pt->description), 0, 100),
+            );
+        }
+
+        return $data;
     }
 
     /**
