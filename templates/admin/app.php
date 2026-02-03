@@ -178,6 +178,8 @@
                             </label>
                         </div>
                         <div class="ss-form-actions">
+                            <button type="button" class="ss-btn ss-btn-secondary"
+                                id="ss-save-content"><?php esc_html_e('Save Settings', 'swift-search-typesense'); ?></button>
                             <button type="button" class="ss-btn ss-btn-primary next-step"
                                 data-target="relevance"><?php esc_html_e('Next: Relevance', 'swift-search-typesense'); ?></button>
                         </div>
@@ -207,6 +209,8 @@
                         </div>
                     </div>
                     <div class="ss-form-actions">
+                        <button type="button" class="ss-btn ss-btn-secondary"
+                            id="ss-save-relevance"><?php esc_html_e('Save Settings', 'swift-search-typesense'); ?></button>
                         <button type="button" class="ss-btn ss-btn-primary next-step"
                             data-target="search-ui"><?php esc_html_e('Next: Search UI', 'swift-search-typesense'); ?></button>
                     </div>
@@ -300,6 +304,8 @@
                         </div>
                     </div>
                     <div class="ss-form-actions">
+                        <button type="button" class="ss-btn ss-btn-secondary"
+                            id="ss-save-experience"><?php esc_html_e('Save Settings', 'swift-search-typesense'); ?></button>
                         <button type="button" class="ss-btn ss-btn-primary next-step"
                             data-target="analytics"><?php esc_html_e('Next: Analytics', 'swift-search-typesense'); ?></button>
                     </div>

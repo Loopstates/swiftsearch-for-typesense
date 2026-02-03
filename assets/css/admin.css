@@ -213,7 +213,8 @@
 .ss-form-group input[type="text"],
 .ss-form-group input[type="password"],
 .ss-form-group input[type="number"],
-.ss-form-group select {
+.ss-form-group select,
+.ss-form-group textarea {
 	width: 100%;
 	padding: 10px 12px;
 	border: 1px solid var(--ss-border);
@@ -233,6 +234,15 @@
 	font-style: italic;
 	font-size: 13px;
 	margin-top: 5px;
+}
+
+.ss-form-actions {
+	margin-top: 30px;
+	padding-top: 20px;
+	border-top: 1px solid var(--ss-border);
+	display: flex;
+	justify-content: flex-end;
+	gap: 15px;
 }
 
 /* Buttons */
@@ -273,13 +283,31 @@
 	gap: 15px;
 }
 
-.ss-checkbox-card {
+/* Fix specificity issue with .ss-form-group label */
+.swift-search-dashboard .ss-form-group .ss-checkbox-card {
 	display: flex;
 	align-items: center;
 	padding: 15px;
 	border: 1px solid var(--ss-border);
 	border-radius: 6px;
 	cursor: pointer;
+	background: #fff;
+	transition: all 0.2s;
+	width: 100%;
+	/* Ensure it takes full width of container */
+	box-sizing: border-box;
+}
+
+.swift-search-dashboard .ss-checkbox-card input {
+	margin-right: 15px !important;
+	/* Force margin */
+	margin-top: 0 !important;
+	/* Fix alignment */
+}
+
+.swift-search-dashboard .ss-checkbox-card.checked {
+	border-color: var(--ss-primary);
+	background: #fff5f8;
 }
 
 .ss-checkbox-card:hover {
