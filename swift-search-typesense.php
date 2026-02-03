@@ -42,10 +42,10 @@ function swift_search_fs()
 		require_once dirname(__FILE__) . '/vendor/freemius/wordpress-sdk/start.php';
 
 		$swift_search_fs = fs_dynamic_init(array(
-			'id' => '27183',
+			'id' => '22923',
 			'slug' => 'swift-search-typesense',
 			'type' => 'plugin',
-			'public_key' => 'pk_77021d24407829001e641dccb6f84',
+			'public_key' => 'pk_21f3e36876df9e81ac3203b9f16f5',
 			'is_premium' => true,
 			'has_addons' => false,
 			'has_paid_plans' => true,

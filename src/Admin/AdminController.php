@@ -33,7 +33,7 @@ class AdminController
             'manage_options',
             'swift-search',
             array($this, 'render_app'),
-            SWIFT_SEARCH_URL . 'assets/images/swift-search-typesense.png',
+            'dashicons-lightning',
             30
         );
     }
