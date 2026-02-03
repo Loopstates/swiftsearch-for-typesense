@@ -6,12 +6,79 @@
     }
 
     const config = swiftSearchVars;
+    const wrapper = document.getElementById('swift-search-wrapper');
     const input = document.getElementById('ss-search-input');
     const resultsContainer = document.querySelector('.ss-results-container');
     const hitsContainer = document.getElementById('ss-hits');
     const loader = document.querySelector('.ss-loader');
 
-    if (!input) return;
+    if (!input || !wrapper) return;
+
+    // Read Data Attributes
+    const limit = parseInt(wrapper.dataset.limit) || 10;
+    const showThumb = wrapper.dataset.thumb !== 'false';
+    const showPrice = wrapper.dataset.price !== 'false';
+    const showExcerpt = wrapper.dataset.excerpt === 'true';
+
+    // Experience Config
+    const useTypo = config.experience && config.experience.typo_tolerance !== false; // Default true if undefined
+    const enableSort = config.experience && config.experience.sort_enabled === true;
+
+    // Sort State
+    let currentSort = 'relevance'; // or 'created_at:desc'
+
+    // Inject Sort UI if enabled
+    if (enableSort) {
+        const sortContainer = document.createElement('div');
+        sortContainer.className = 'ss-sort-container';
+        sortContainer.innerHTML = `
+            <select id="ss-sort-select" class="ss-sort-select">
+                <option value="relevance">Relevance</option>
+                <option value="post_date:desc">Newest First</option>
+                <option value="post_date:asc">Oldest First</option>
+            </select>
+        `;
+        // Insert before results
+        resultsContainer.insertBefore(sortContainer, hitsContainer);
+
+        document.getElementById('ss-sort-select').addEventListener('change', function (e) {
+            currentSort = e.target.value;
+            if (input.value.trim().length > 0) {
+                performSearch(input.value.trim());
+            }
+        });
+    }
+
+    // Mobile Button logic
+    if (config.experience && config.experience.mobile_btn) {
+        const btn = document.createElement('div');
+        btn.className = 'ss-mobile-btn';
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+
+        // Inline styles
+        Object.assign(btn.style, {
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            width: '50px',
+            height: '50px',
+            backgroundColor: '#0073aa',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+            zIndex: '99999'
+        });
+
+        document.body.appendChild(btn);
+
+        btn.addEventListener('click', function () {
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => input.focus(), 500);
+        });
+    }
 
     let debounceTimer;
 
@@ -32,7 +99,14 @@
     });
 
     function performSearch(query) {
-        const url = `${config.protocol}://${config.host}:${config.port}/collections/${config.collection}/documents/search?q=${encodeURIComponent(query)}&query_by=post_title,post_content&per_page=10`;
+        let sortParam = '';
+        if (currentSort !== 'relevance') {
+            sortParam = `&sort_by=${currentSort}`;
+        }
+
+        const numTypos = useTypo ? 2 : 0;
+
+        const url = `${config.protocol}://${config.host}:${config.port}/collections/${config.collection}/documents/search?q=${encodeURIComponent(query)}&query_by=post_title,post_content&per_page=${limit}&num_typos=${numTypos}${sortParam}`;
 
         fetch(url, {
             method: 'GET',
@@ -65,16 +139,27 @@
             const doc = hit.document;
             const el = document.createElement('div');
             el.className = 'ss-hit';
-            el.innerHTML = `
-				<a href="${doc.permalink}" class="ss-hit-link">
-					${doc.thumbnail_url ? `<img src="${doc.thumbnail_url}" alt="" class="ss-hit-thumb">` : ''}
-					<div class="ss-hit-content">
-						<h3 class="ss-hit-title">${highlight(hit, 'post_title')}</h3>
-						<p class="ss-hit-excerpt">${doc.post_excerpt || ''}</p>
-						<span class="ss-hit-price">${doc.price ? '$' + doc.price : ''}</span>
-					</div>
-				</a>
-			`;
+
+            let html = `<a href="${doc.permalink}" class="ss-hit-link">`;
+
+            if (showThumb && doc.thumbnail_url) {
+                html += `<img src="${doc.thumbnail_url}" alt="" class="ss-hit-thumb">`;
+            }
+
+            html += `<div class="ss-hit-content">`;
+            html += `<h3 class="ss-hit-title">${highlight(hit, 'post_title')}</h3>`;
+
+            if (showExcerpt && doc.post_excerpt) {
+                html += `<p class="ss-hit-excerpt">${doc.post_excerpt}</p>`;
+            }
+
+            if (showPrice && doc.price) {
+                html += `<span class="ss-hit-price">$${doc.price}</span>`;
+            }
+
+            html += `</div></a>`;
+
+            el.innerHTML = html;
             hitsContainer.appendChild(el);
         });
     }

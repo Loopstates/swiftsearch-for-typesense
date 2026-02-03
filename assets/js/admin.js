@@ -30,10 +30,17 @@
 
             // Shortcode Builder
             this.$scPlaceholder = $('#sc-placeholder');
+            this.$scLimit = $('#sc-limit');
+            this.$scShowThumbnail = $('#sc-show-thumbnail');
+            this.$scShowPrice = $('#sc-show-price');
+            this.$scShowExcerpt = $('#sc-show-excerpt');
             this.$scPreview = $('#sc-preview');
             this.$scCopyBtn = $('#ss-copy-sc');
 
-            this.$scCopyBtn = $('#ss-copy-sc');
+            // Experience Options
+            this.$ssTypoTolerance = $('#ss-typo-tolerance');
+            this.$ssSortEnabled = $('#ss-sort-enabled');
+            this.$ssMobileBtn = $('#ss-mobile-btn');
 
             // Relevance
             this.$relevanceRange = $('#ss-relevance-range');
@@ -59,7 +66,16 @@
 
             // Shortcode Actions
             this.$scPlaceholder.on('input', this.updateShortcodePreview.bind(this));
+            this.$scLimit.on('input', this.updateShortcodePreview.bind(this));
+            this.$scShowThumbnail.on('change', this.updateShortcodePreview.bind(this));
+            this.$scShowPrice.on('change', this.updateShortcodePreview.bind(this));
+            this.$scShowExcerpt.on('change', this.updateShortcodePreview.bind(this));
             this.$scCopyBtn.on('click', this.copyShortcode.bind(this));
+
+            // Experience Options
+            this.$ssTypoTolerance.on('change', this.handleExperienceChange.bind(this));
+            this.$ssSortEnabled.on('change', this.handleExperienceChange.bind(this));
+            this.$ssMobileBtn.on('change', this.handleExperienceChange.bind(this));
 
             // Relevance
             this.$relevanceRange.on('change', this.handleRelevanceChange.bind(this));
@@ -75,6 +91,13 @@
             // Set Initial State
             if (swiftSearchConfig.status.overrideDefault) {
                 this.$overrideToggle.prop('checked', true);
+            }
+
+            // Set Experience State
+            if (swiftSearchConfig.experience) {
+                this.$ssTypoTolerance.prop('checked', !!swiftSearchConfig.experience.typo_tolerance);
+                this.$ssSortEnabled.prop('checked', !!swiftSearchConfig.experience.sort_enabled);
+                this.$ssMobileBtn.prop('checked', !!swiftSearchConfig.experience.mobile_btn);
             }
 
             // Set Relevance State
@@ -95,6 +118,9 @@
                     this.$synonymsInput.val(text.trim());
                 }
             }
+
+            // Trigger initial shortcode preview
+            this.updateShortcodePreview();
         },
 
         handleRelevanceChange: function () {
@@ -160,9 +186,39 @@
             });
         },
 
+        handleExperienceChange: function () {
+            const payload = {
+                experience_settings: {
+                    typo_tolerance: this.$ssTypoTolerance.is(':checked'),
+                    sort_enabled: this.$ssSortEnabled.is(':checked'),
+                    mobile_btn: this.$ssMobileBtn.is(':checked')
+                }
+            };
+
+            $.post(swiftSearchConfig.apiUrl + '/settings', payload, function (response) {
+                if (!response.success) {
+                    alert('Failed to save settings.');
+                }
+            });
+        },
+
         updateShortcodePreview: function () {
             const placeholder = this.$scPlaceholder.val() || 'Search...';
-            this.$scPreview.text(`[swift_search placeholder="${placeholder}"]`);
+            const limit = this.$scLimit.val() || 10;
+            const thumb = this.$scShowThumbnail.is(':checked') ? 'true' : 'false';
+            const price = this.$scShowPrice.is(':checked') ? 'true' : 'false';
+            const excerpt = this.$scShowExcerpt.is(':checked') ? 'true' : 'false';
+
+            let shortcode = `[swift_search placeholder="${placeholder}" limit="${limit}"`;
+
+            // Only add defaults if they differ? No, be explicit for clarity.
+            if (thumb === 'false') shortcode += ` show_thumbnail="false"`;
+            if (price === 'false') shortcode += ` show_price="false"`;
+            if (excerpt === 'true') shortcode += ` show_excerpt="true"`; // Default is likely hidden/false
+
+            shortcode += `]`;
+
+            this.$scPreview.text(shortcode);
         },
 
         copyShortcode: function () {

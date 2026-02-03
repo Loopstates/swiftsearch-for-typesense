@@ -31,8 +31,20 @@
                         <span class="step-num">3</span>
                         <span class="step-label"><?php esc_html_e('Relevance', 'swift-search-typesense'); ?></span>
                     </li>
-                    <li class="ss-nav-item" data-step="sync">
+                    <li class="ss-nav-item" data-step="search-ui">
                         <span class="step-num">4</span>
+                        <span class="step-label"><?php esc_html_e('Search UI', 'swift-search-typesense'); ?></span>
+                    </li>
+                    <li class="ss-nav-item" data-step="analytics">
+                        <span class="step-num">5</span>
+                        <span class="step-label"><?php esc_html_e('Analytics', 'swift-search-typesense'); ?></span>
+                    </li>
+                    <li class="ss-nav-item" data-step="pinning">
+                        <span class="step-num">6</span>
+                        <span class="step-label"><?php esc_html_e('Pinning', 'swift-search-typesense'); ?></span>
+                    </li>
+                    <li class="ss-nav-item" data-step="sync">
+                        <span class="step-num">7</span>
                         <span class="step-label"><?php esc_html_e('Sync', 'swift-search-typesense'); ?></span>
                     </li>
                 </ul>
@@ -196,12 +208,148 @@
                     </div>
                     <div class="ss-form-actions">
                         <button type="button" class="ss-btn ss-btn-primary next-step"
-                            data-target="sync"><?php esc_html_e('Next: Sync & Usage', 'swift-search-typesense'); ?></button>
+                            data-target="search-ui"><?php esc_html_e('Next: Search UI', 'swift-search-typesense'); ?></button>
                     </div>
                 </div>
             </section>
 
-            <!-- Step 4: Sync & Usage -->
+            <!-- Step 4: Search UI -->
+            <section class="ss-step-view" id="view-search-ui" style="display:none;">
+                <!-- Shortcode Builder -->
+                <div class="ss-card">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Shortcode Builder', 'swift-search-typesense'); ?></h2>
+                        <p><?php esc_html_e('Customize and generate your search shortcode.', 'swift-search-typesense'); ?></p>
+                    </div>
+                    <div class="ss-card-body">
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label>Placeholder Text</label>
+                                <input type="text" id="sc-placeholder" class="ss-input" value="Search...">
+                            </div>
+                            <div class="ss-form-group">
+                                <label>Results Limit</label>
+                                <input type="number" id="sc-limit" class="ss-input" value="10" min="1" max="50">
+                            </div>
+                        </div>
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="sc-show-thumbnail" checked>
+                                    <div class="info"><span class="title">Show Thumbnail</span></div>
+                                </label>
+                            </div>
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="sc-show-price" checked>
+                                    <div class="info"><span class="title">Show Price</span></div>
+                                </label>
+                            </div>
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="sc-show-excerpt">
+                                    <div class="info"><span class="title">Show Excerpt</span></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="ss-code-preview">
+                            <code id="sc-preview">[swift_search placeholder="Search..." limit="10"]</code>
+                            <button type="button" class="ss-btn ss-btn-sm ss-btn-secondary"
+                                id="ss-copy-sc">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features (Toggles) -->
+                <div class="ss-card">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Experience Options', 'swift-search-typesense'); ?></h2>
+                    </div>
+                    <div class="ss-card-body">
+                        <div class="ss-form-group-row">
+                             <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="ss-typo-tolerance" checked>
+                                    <div class="info">
+                                        <span class="title">Typo Tolerance</span>
+                                        <span class="meta">Show "Did you mean?" suggestions.</span>
+                                    </div>
+                                </label>
+                             </div>
+                             <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="ss-sort-enabled">
+                                    <div class="info">
+                                        <span class="title">Sort Dropdown</span>
+                                        <span class="meta">Allow users to sort by Date/Relevance.</span>
+                                    </div>
+                                </label>
+                             </div>
+                        </div>
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="ss-mobile-btn">
+                                    <div class="info">
+                                        <span class="title">Floating Mobile Button</span>
+                                        <span class="meta">Sticky search icon on mobile devices.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ss-form-actions">
+                        <button type="button" class="ss-btn ss-btn-primary next-step"
+                            data-target="analytics"><?php esc_html_e('Next: Analytics', 'swift-search-typesense'); ?></button>
+                    </div>
+                </div>
+            </section>
+
+             <!-- Step 5: Analytics (Pro) -->
+            <section class="ss-step-view" id="view-analytics" style="display:none;">
+                <div class="ss-card">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Search Analytics', 'swift-search-typesense'); ?> <span class="ss-pro-badge">PRO</span></h2>
+                        <p><?php esc_html_e('Insights into what your users are searching for.', 'swift-search-typesense'); ?></p>
+                    </div>
+                    <div class="ss-card-body">
+                         <div class="ss-pro-gate" data-feature="analytics">
+                            <div class="ss-empty-state">
+                                <h3>Analytics Dashboard</h3>
+                                <p>Track top searches and "0 result" queries here.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ss-form-actions">
+                        <button type="button" class="ss-btn ss-btn-primary next-step"
+                            data-target="pinning"><?php esc_html_e('Next: Results Pinning', 'swift-search-typesense'); ?></button>
+                    </div>
+                </div>
+            </section>
+
+             <!-- Step 6: Results Pinning (Pro) -->
+            <section class="ss-step-view" id="view-pinning" style="display:none;">
+                <div class="ss-card">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Pinned Results', 'swift-search-typesense'); ?> <span class="ss-pro-badge">PRO</span></h2>
+                        <p><?php esc_html_e('Manually fix specific products to the top of search results.', 'swift-search-typesense'); ?></p>
+                    </div>
+                    <div class="ss-card-body">
+                         <div class="ss-pro-gate" data-feature="pinning">
+                            <div class="ss-empty-state">
+                                <h3>Results Pinning</h3>
+                                <p>Drag and drop products to pin them for specific queries.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ss-form-actions">
+                        <button type="button" class="ss-btn ss-btn-primary next-step"
+                            data-target="sync"><?php esc_html_e('Next: Sync', 'swift-search-typesense'); ?></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 7: Sync & Usage -->
             <section class="ss-step-view" id="view-sync" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
@@ -217,28 +365,6 @@
                                 class="ss-btn ss-btn-primary"><?php esc_html_e('Index All Content', 'swift-search-typesense'); ?></button>
                             <button type="button" id="ss-reset-btn"
                                 class="ss-btn ss-btn-danger"><?php esc_html_e('Delete Index & Reset', 'swift-search-typesense'); ?></button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Shortcode Builder -->
-                <div class="ss-card">
-                    <div class="ss-card-header">
-                        <h2><?php esc_html_e('Shortcode Builder', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Generate a custom shortcode for your pages.', 'swift-search-typesense'); ?>
-                        </p>
-                    </div>
-                    <div class="ss-card-body">
-                        <div class="ss-form-group-row">
-                            <div class="ss-form-group">
-                                <label>Placeholder Text</label>
-                                <input type="text" id="sc-placeholder" class="ss-input" value="Search...">
-                            </div>
-                        </div>
-                        <div class="ss-code-preview">
-                            <code id="sc-preview">[swift_search placeholder="Search..."]</code>
-                            <button type="button" class="ss-btn ss-btn-sm ss-btn-secondary"
-                                id="ss-copy-sc">Copy</button>
                         </div>
                     </div>
                 </div>

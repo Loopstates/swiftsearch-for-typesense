@@ -52,7 +52,8 @@ class SearchController
                 'port' => $settings['port'],
                 'protocol' => $settings['protocol'],
                 'apiKey' => $settings['search_key'],
-                'collection' => 'posts' // make dynamic later
+                'collection' => 'posts', // make dynamic later
+                'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
             ));
         }
     }
@@ -85,6 +86,10 @@ class SearchController
     {
         $a = shortcode_atts(array(
             'placeholder' => __('Search...', 'swift-search-typesense'),
+            'limit' => 10,
+            'show_thumbnail' => 'true',
+            'show_price' => 'true',
+            'show_excerpt' => 'false',
         ), $atts);
 
         wp_enqueue_style('swift-search-frontend');
@@ -92,7 +97,10 @@ class SearchController
 
         ob_start();
         ?>
-        <div id="swift-search-wrapper" class="ss-wrapper">
+                ?>
+        <div id="swift-search-wrapper" class="ss-wrapper" data-limit="<?php echo esc_attr($a['limit']); ?>"
+            data-thumb="<?php echo esc_attr($a['show_thumbnail']); ?>" data-price="<?php echo esc_attr($a['show_price']); ?>"
+            data-excerpt="<?php echo esc_attr($a['show_excerpt']); ?>">
             <div class="ss-search-box">
                 <input type="text" id="ss-search-input" placeholder="<?php echo esc_attr($a['placeholder']); ?>"
                     autocomplete="off">

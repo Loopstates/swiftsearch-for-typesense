@@ -96,6 +96,7 @@ class AdminController
                 'weights' => isset($settings['weights']) ? $settings['weights'] : array(),
                 'synonyms' => isset($settings['synonyms']) ? $settings['synonyms'] : array(),
             ),
+            'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
             'texts' => array(
                 'connecting' => __('Connecting to Typesense...', 'swift-search-typesense'),
                 'success' => __('Connected Successfully!', 'swift-search-typesense'),

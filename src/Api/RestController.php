@@ -253,6 +253,21 @@ class RestController extends WP_REST_Controller
             update_option('swift_search_settings', $current_settings);
         }
 
+        // Handle Experience Settings (Free Features)
+        if (isset($params['experience_settings'])) {
+            $current_settings = get_option('swift_search_settings', array());
+            $new_exp = $params['experience_settings'];
+
+            $experience = array(
+                'typo_tolerance' => isset($new_exp['typo_tolerance']) ? filter_var($new_exp['typo_tolerance'], FILTER_VALIDATE_BOOLEAN) : true,
+                'sort_enabled' => isset($new_exp['sort_enabled']) ? filter_var($new_exp['sort_enabled'], FILTER_VALIDATE_BOOLEAN) : false,
+                'mobile_btn' => isset($new_exp['mobile_btn']) ? filter_var($new_exp['mobile_btn'], FILTER_VALIDATE_BOOLEAN) : false,
+            );
+
+            $current_settings['experience'] = $experience;
+            update_option('swift_search_settings', $current_settings);
+        }
+
         return new \WP_REST_Response(array('success' => true), 200);
     }
 
