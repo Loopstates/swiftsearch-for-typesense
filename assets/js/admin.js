@@ -131,13 +131,16 @@
 
             // Set Initial State
             // Populate Credentials
-            if (swiftSearchConfig.credentials) {
+            if (swiftSearchConfig.credentials && (swiftSearchConfig.credentials.host || swiftSearchConfig.credentials.api_key)) {
                 if (swiftSearchConfig.credentials.host) $('#ts-host').val(swiftSearchConfig.credentials.host);
                 if (swiftSearchConfig.credentials.port) $('#ts-port').val(swiftSearchConfig.credentials.port);
                 if (swiftSearchConfig.credentials.protocol) $('#ts-protocol').val(swiftSearchConfig.credentials.protocol);
                 if (swiftSearchConfig.credentials.api_key) $('#ts-api-key').val(swiftSearchConfig.credentials.api_key);
                 if (swiftSearchConfig.credentials.search_key) $('#ts-search-key').val(swiftSearchConfig.credentials.search_key);
             }
+
+            // Set Initial UI State
+            this.renderConnectionState(this.$statusEl.hasClass('connected'));
 
             // Indexed Post Types
             if (swiftSearchConfig.indexed_post_types && Array.isArray(swiftSearchConfig.indexed_post_types)) {
@@ -492,12 +495,43 @@
             this.request('POST', '/pinning/items', payload);
         },
 
+
+        renderConnectionState: function (isConnected) {
+            const $btn = this.$connectForm.find('button[type="submit"]');
+            const $inputs = this.$connectForm.find('input, select');
+
+            if (isConnected) {
+                $inputs.prop('disabled', true);
+                $btn.removeClass('ss-btn-primary').addClass('ss-btn-danger')
+                    .text('Disconnect')
+                    .attr('data-action', 'disconnect') // Tag it
+                    .prop('disabled', false); // Ensure button is clickable
+
+                // Allow user to copy keys if needed, but not edit
+                $inputs.css('cursor', 'default');
+            } else {
+                $inputs.prop('disabled', false);
+                $btn.removeClass('ss-btn-danger').addClass('ss-btn-primary')
+                    .text(swiftSearchConfig.texts.save_connect || 'Save & Test Connection')
+                    .removeAttr('data-action') // Untag
+                    .prop('disabled', false);
+
+                $inputs.css('cursor', 'text');
+            }
+        },
+
         handleConnect: function (e) {
             e.preventDefault();
+            const $btn = this.$connectForm.find('button[type="submit"]');
+
+            // Check if Disconnect Action
+            if ($btn.attr('data-action') === 'disconnect') {
+                this.handleDisconnect();
+                return;
+            }
 
             const formData = this.$connectForm.serialize();
             const self = this;
-            const $btn = this.$connectForm.find('button[type="submit"]');
             const oldText = $btn.text();
 
             this.clearConnectionError();
@@ -513,11 +547,13 @@
                 if (response.success) {
                     alert(swiftSearchConfig.texts.success);
                     self.updateStatus(true, response.data.doc_count);
+                    self.renderConnectionState(true);
                 } else {
                     console.warn('SwiftSearch: Connect Success=False', response);
                     const msg = response.data && response.data.message ? response.data.message : swiftSearchConfig.texts.error;
                     self.showConnectionError(msg);
                     self.updateStatus(false);
+                    self.renderConnectionState(false);
                 }
             }).fail(function (xhr, status, error) {
                 console.error('SwiftSearch: Connect Failed', { status: xhr.status, response: xhr.responseJSON });
@@ -533,8 +569,35 @@
 
                 self.showConnectionError(msg + ' (HTTP ' + xhr.status + ')');
                 self.updateStatus(false);
+                self.renderConnectionState(false);
             }).always(function () {
-                $btn.prop('disabled', false).text(oldText);
+                // If connected, renderConnectionState handles the button text/state
+                // Only reset if we failed/didn't switch to 'Disconnect' mode
+                const isConnected = self.$statusEl.hasClass('connected');
+                if (!isConnected) {
+                    $btn.prop('disabled', false).text(oldText);
+                }
+            });
+        },
+
+        handleDisconnect: function () {
+            if (!confirm('Are you sure you want to disconnect? This will stop search functionality.')) return;
+
+            const self = this;
+            const $btn = this.$connectForm.find('button[type="submit"]');
+            $btn.prop('disabled', true).text('Disconnecting...');
+
+            this.request('POST', '/disconnect', {}).done(function (response) {
+                self.updateStatus(false, 0);
+                self.renderConnectionState(false);
+                alert('Disconnected.');
+                // Clear fields
+                $('#ts-host').val('');
+                $('#ts-port').val('443');
+                $('#ts-api-key').val('');
+                $('#ts-search-key').val('');
+            }).always(function () {
+                // Render state handles enabling inputs
             });
         },
 
@@ -588,6 +651,8 @@
             } else {
                 this.$statusEl.removeClass('connected').addClass('disconnected').text('Disconnected');
             }
+
+            this.renderConnectionState(isConnected);
 
             if (docCount !== undefined) {
                 this.$docCountEl.text(docCount);

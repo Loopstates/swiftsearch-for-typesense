@@ -39,6 +39,12 @@ class RestController extends WP_REST_Controller
             'permission_callback' => array($this, 'check_permission'),
         ));
 
+        register_rest_route($this->namespace, '/disconnect', array(
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => array($this, 'handle_disconnect'),
+            'permission_callback' => array($this, 'check_permission'),
+        ));
+
         register_rest_route($this->namespace, '/status', array(
             'methods' => WP_REST_Server::READABLE,
             'callback' => array($this, 'get_status'),
