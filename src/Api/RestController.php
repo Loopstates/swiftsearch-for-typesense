@@ -3,6 +3,7 @@
 namespace SwiftSearch\Api;
 
 use SwiftSearch\Client\Client;
+use SwiftSearch\Core\Gatekeeper;
 use WP_REST_Controller;
 use WP_REST_Server;
 use WP_Error;
@@ -54,6 +55,18 @@ class RestController extends WP_REST_Controller
         register_rest_route($this->namespace, '/sync/batch', array(
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => array($this, 'handle_batch_sync'),
+            'permission_callback' => array($this, 'check_permission'),
+        ));
+
+        register_rest_route($this->namespace, '/sync/start', array(
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => array($this, 'handle_sync_start'),
+            'permission_callback' => array($this, 'check_permission'),
+        ));
+
+        register_rest_route($this->namespace, '/sync/status', array(
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => array($this, 'handle_sync_status'),
             'permission_callback' => array($this, 'check_permission'),
         ));
 
@@ -229,7 +242,9 @@ class RestController extends WP_REST_Controller
         $indexer = new \SwiftSearch\Engine\Indexer();
         $processed = 0;
         $total_pages = 0;
-        $complete = false;
+        if (!Gatekeeper::can_index($type)) {
+            return new \WP_REST_Response(array('success' => false, 'message' => 'Indexing not allowed. Check connection or plan limits.', 'complete' => true), 403);
+        }
 
         if ($type === 'terms') {
             // Sync Terms
@@ -335,6 +350,52 @@ class RestController extends WP_REST_Controller
                 'complete' => $complete,
                 'type' => $type
             ),
+        ), 200);
+    }
+
+    /**
+     * Start Background Sync.
+     */
+    public function handle_sync_start($request)
+    {
+        if (!Gatekeeper::can_index()) {
+            return new \WP_REST_Response(array('success' => false, 'message' => 'Indexing not allowed. Check connection or plan limits.'), 403);
+        }
+
+        $indexer = new \SwiftSearch\Engine\Indexer();
+        $total = $indexer->start_bulk_index();
+
+        return new \WP_REST_Response(array(
+            'success' => true,
+            'data' => array(
+                'message' => 'Background indexing started.',
+                'total_jobs' => $total
+            )
+        ), 200);
+    }
+
+    /**
+     * Get Background Sync Status.
+     */
+    public function handle_sync_status($request)
+    {
+        $status = get_option('swift_search_index_status', array());
+
+        // Defaults
+        $response = array(
+            'active' => false,
+            'processed' => 0,
+            'total' => 0,
+            'message' => 'Idle'
+        );
+
+        if (!empty($status)) {
+            $response = array_merge($response, $status);
+        }
+
+        return new \WP_REST_Response(array(
+            'success' => true,
+            'data' => $response
         ), 200);
     }
 
@@ -545,6 +606,10 @@ class RestController extends WP_REST_Controller
         global $wpdb;
         $table_name = \SwiftSearch\Core\DB::get_table_name();
 
+        if (!Gatekeeper::can_use_features('analytics')) {
+            return new \WP_REST_Response(array('success' => false, 'message' => 'Pro License Required for Analytics.'), 403);
+        }
+
         // Top Searches
         $top_queries = $wpdb->get_results("
             SELECT query, COUNT(*) as count, AVG(hits) as avg_hits 
@@ -584,6 +649,10 @@ class RestController extends WP_REST_Controller
      */
     public function handle_pinning_search($request)
     {
+        if (!Gatekeeper::can_use_features('pinning')) {
+            return new \WP_REST_Response(array('success' => false, 'message' => 'Pro License Required for Pinning.'), 403);
+        }
+
         $term = sanitize_text_field($request->get_param('term'));
         if (empty($term))
             return new \WP_REST_Response(array('success' => true, 'data' => array()), 200);
@@ -617,6 +686,10 @@ class RestController extends WP_REST_Controller
      */
     public function handle_pinning_save($request)
     {
+        if (!Gatekeeper::can_use_features('pinning')) {
+            return new \WP_REST_Response(array('success' => false, 'message' => 'Pro License Required for Pinning.'), 403);
+        }
+
         $items = $request->get_param('items');
         if (!is_array($items))
             $items = array();

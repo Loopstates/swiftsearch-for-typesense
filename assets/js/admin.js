@@ -665,23 +665,45 @@
             const $btn = this.$connectForm.find('button[type="submit"]');
             const $inputs = this.$connectForm.find('input, select');
 
+            // Elements to lock if disconnected
+            const $tabs = this.$navItems.not('[data-step="connect"]');
+            const $syncBtn = this.$syncBtn;
+            const $saveBtns = $('.button-primary').not($btn); // All other save buttons
+
             if (isConnected) {
+                // Connected State
                 $inputs.prop('disabled', true);
                 $btn.removeClass('ss-btn-primary').addClass('ss-btn-danger')
                     .text('Disconnect')
-                    .attr('data-action', 'disconnect') // Tag it
-                    .prop('disabled', false); // Ensure button is clickable
+                    .attr('data-action', 'disconnect')
+                    .prop('disabled', false);
 
-                // Allow user to copy keys if needed, but not edit
                 $inputs.css('cursor', 'default');
+
+                // Unlock UI
+                $tabs.removeClass('ss-disabled').css('pointer-events', 'auto').css('opacity', '1');
+                $syncBtn.prop('disabled', false);
+                $saveBtns.prop('disabled', false);
+
             } else {
+                // Disconnected State
                 $inputs.prop('disabled', false);
                 $btn.removeClass('ss-btn-danger').addClass('ss-btn-primary')
                     .text(swiftSearchConfig.texts.save_connect || 'Save & Test Connection')
-                    .removeAttr('data-action') // Untag
+                    .removeAttr('data-action')
                     .prop('disabled', false);
 
                 $inputs.css('cursor', 'text');
+
+                // Lock UI
+                $tabs.addClass('ss-disabled').css('pointer-events', 'none').css('opacity', '0.5');
+                $syncBtn.prop('disabled', true);
+                $saveBtns.prop('disabled', true);
+
+                // Force switch to Connect tab if not there
+                if (!$('.ss-nav-item[data-step="connect"]').hasClass('active')) {
+                    this.switchView('connect');
+                }
             }
         },
 
@@ -825,57 +847,55 @@
         },
 
         startSync: function () {
-            if (!confirm(swiftSearchConfig.texts.confirmSync || 'This will index all selected content. Continue?')) return;
+            if (!confirm(swiftSearchConfig.texts.confirmSync || 'This will index all selected content in the background. You can leave this page.')) return;
 
+            const self = this;
             this.$syncBtn.prop('disabled', true);
             this.$resetBtn.prop('disabled', true);
-            this.$syncStatusText.text('Initializing...');
-            this.updateProgress(0);
+            this.$syncStatusText.text('Initializing Background Job...');
+            this.updateProgress(0, 'Starting...');
 
-            this.syncQueue = ['posts', 'terms', 'users'];
-            this.processNextInQueue();
+            this.request('POST', '/sync/start', {}).done(function (response) {
+                if (response.success) {
+                    self.pollStatus();
+                } else {
+                    self.syncError(response.data.message || 'Failed to start.');
+                }
+            }).fail(function () {
+                self.syncError('Network error starting sync.');
+            });
         },
 
-        processNextInQueue: function () {
-            if (this.syncQueue.length === 0) {
-                this.finishSync();
-                return;
-            }
-
-            const type = this.syncQueue.shift();
-            let label = 'Content';
-            if (type === 'posts') label = 'Posts';
-            else if (type === 'terms') label = 'Taxonomies';
-            else if (type === 'users') label = 'Authors';
-
-            this.$syncStatusText.text(`Indexing ${label}...`);
-            this.processBatch(1, type);
-        },
-
-        processBatch: function (page, type) {
+        pollStatus: function () {
             const self = this;
-
-            this.request('POST', '/sync/batch', { page: page, type: type }).done(function (response) {
+            this.request('GET', '/sync/status').done(function (response) {
                 if (response.success) {
                     const data = response.data;
 
-                    // Progress Calculation is tricky with multiple queues.
-                    // Simplified: Just show percentage of current phase
-                    const percent = data.total_pages > 0 ? Math.round((data.page / data.total_pages) * 100) : 100;
-                    self.updateProgress(percent, type);
+                    if (data.active) {
+                        // Calculate Percent
+                        // total might be 0 initially
+                        const total = parseInt(data.total) || 1;
+                        const processed = parseInt(data.processed) || 0;
+                        const percent = Math.round((processed / total) * 100);
 
-                    if (!data.complete) {
-                        self.processBatch(data.page + 1, type);
+                        self.updateProgress(Math.min(percent, 99), data.message || 'Indexing...');
+
+                        // Poll again
+                        setTimeout(function () {
+                            self.pollStatus();
+                        }, 2000);
                     } else {
-                        // Phase Complete
-                        self.processNextInQueue();
+                        // Finished?
+                        if (data.processed >= data.total && data.total > 0) {
+                            self.updateProgress(100, 'Complete!');
+                            self.finishSync();
+                        } else if (data.processed === 0 && data.total === 0) {
+                            // Idle state, maybe just loaded page or reset
+                            // Do nothing specific unless we thought we were running
+                        }
                     }
-                } else {
-                    self.syncError(response.data.message || 'Error processing batch.');
                 }
-            }).fail(function (xhr) {
-                const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Network Error';
-                self.syncError(msg);
             });
         },
 
@@ -883,21 +903,44 @@
             this.$syncStatusText.text('Indexing Complete!');
             this.$syncBtn.prop('disabled', false);
             this.$resetBtn.prop('disabled', false);
-            this.checkStatus();
+            this.checkStatus(); // Update doc count
 
             setTimeout(function () {
-                alert('Success: All selected content has been indexed.');
-            }, 100);
+                alert('Success: Background indexing complete.');
+            }, 500);
         },
 
-        updateProgress: function (percent, type) {
-            let label = 'Indexing...';
-            if (type === 'posts') label = 'Indexing Posts...';
-            else if (type === 'terms') label = 'Indexing Taxonomies...';
-            else if (type === 'users') label = 'Indexing Authors...';
+        updateProgress: function (percent, text) {
+            this.$syncStatusText.text(text);
 
-            this.$progressCircle.text(percent + '%');
-            this.$syncStatusText.text(`${label} ${percent}%`);
+            // Render SVG Circle if not present
+            if (this.$progressCircle.find('svg').length === 0) {
+                this.$progressCircle.html(`
+                <svg viewBox="0 0 36 36" class="circular-chart">
+                    <path class="circle-bg"
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                        style="fill: none; stroke: #eee; stroke-width: 3;"
+                    />
+                    <path class="circle"
+                        stroke-dasharray="0, 100"
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                        style="fill: none; stroke: #2271b1; stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray 0.3s ease;"
+                    />
+                    <text x="18" y="20.35" class="percentage" style="fill: #666; font-family: sans-serif; font-size: 0.5em; text-anchor: middle;">0%</text>
+                </svg>
+                `);
+            }
+
+            // Update Stroke
+            const $path = this.$progressCircle.find('.circle');
+            const $text = this.$progressCircle.find('.percentage');
+
+            $path.attr('stroke-dasharray', `${percent}, 100`);
+            $text.text(`${percent}%`);
         },
 
         syncError: function (msg) {

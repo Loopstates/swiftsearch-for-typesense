@@ -1,6 +1,8 @@
 <?php
 namespace SwiftSearch\Admin;
 
+use SwiftSearch\Core\Gatekeeper;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -81,6 +83,8 @@ class AdminController
         $settings = get_option('swift_search_settings', array());
 
         wp_localize_script('swift-search-admin', 'swiftSearchConfig', array(
+            'isConnected' => Gatekeeper::is_connected(),
+            'canIndex' => Gatekeeper::can_index(),
             'apiUrl' => rest_url('swift-search/v1'),
             'nonce' => wp_create_nonce('wp_rest'),
             'plan' => array(

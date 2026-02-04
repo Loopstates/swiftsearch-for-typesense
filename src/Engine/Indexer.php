@@ -51,8 +51,114 @@ class Indexer
         add_action('swift_search_async_delete_term', array($this, 'delete_term_from_index'));
 
         add_action('swift_search_async_index_user', array($this, 'index_user'));
-        add_action('swift_search_async_delete_user', array($this, 'delete_user_from_index'));
+        add_action('swift_search_async_batch_process', array($this, 'process_bulk_batch'), 10, 2);
     }
+
+    /**
+     * Start Bulk Indexing.
+     * Calculates totals and triggers first batch.
+     */
+    public function start_bulk_index()
+    {
+        $config = $this->config_loader->get_config();
+
+        // 1. Calculate Totals
+        // For MVP we only count Posts. In future we can sequence Terms/Users.
+        $post_types = isset($config['indexed_post_types']) ? $config['indexed_post_types'] : array('post', 'page', 'product');
+
+        $args = array(
+            'post_type' => $post_types,
+            'post_status' => 'publish',
+            'fields' => 'ids',
+            'posts_per_page' => -1,
+        );
+
+        $query = new \WP_Query($args);
+        $total = $query->found_posts;
+
+        // 2. Init Status
+        $status = array(
+            'active' => true,
+            'total' => $total,
+            'processed' => 0,
+            'last_updated' => time(),
+            'message' => 'Initializing...'
+        );
+        update_option('swift_search_index_status', $status);
+
+        // 3. Schedule First Batch
+        if (function_exists('as_enqueue_async_action')) {
+            as_enqueue_async_action('swift_search_async_batch_process', array('offset' => 0, 'limit' => 50));
+        } else {
+            wp_schedule_single_event(time(), 'swift_search_async_batch_process', array(0, 50));
+        }
+
+        return $total;
+    }
+
+    /**
+     * Recursive Worker: Process Batch.
+     */
+    public function process_bulk_batch($offset, $limit = 50)
+    {
+        $config = $this->config_loader->get_config();
+        $post_types = isset($config['indexed_post_types']) ? $config['indexed_post_types'] : array('post', 'page', 'product');
+
+        $args = array(
+            'post_type' => $post_types,
+            'post_status' => 'publish',
+            'fields' => 'ids',
+            'posts_per_page' => $limit,
+            'offset' => $offset,
+            'orderby' => 'ID',
+            'order' => 'ASC',
+        );
+
+        $query = new \WP_Query($args);
+        $ids = $query->posts;
+
+        if (empty($ids)) {
+            // DONE
+            update_option('swift_search_index_status', array(
+                'active' => false,
+                'total' => $query->found_posts, // Adjust in case it changed?
+                'processed' => $offset, // Or just mark complete
+                'message' => 'Complete!'
+            ));
+            return;
+        }
+
+        // PROCESS BATCH
+        $documents = array();
+        foreach ($ids as $id) {
+            $doc = $this->index_post($id, true); // Pass true to return doc instead of sending
+            if ($doc) {
+                $documents[] = $doc;
+            }
+        }
+
+        // BULK IMPORT
+        if (!empty($documents)) {
+            $this->client->import('posts', $documents);
+        }
+
+        // UPDATE STATUS
+        $new_processed = $offset + count($ids);
+        $status = get_option('swift_search_index_status', array());
+        $status['processed'] = $new_processed;
+        $status['last_updated'] = time();
+        $status['message'] = "Indexed {$new_processed} / {$status['total']}";
+        update_option('swift_search_index_status', $status);
+
+        // SCHEDULE NEXT
+        if (function_exists('as_enqueue_async_action')) {
+            as_enqueue_async_action('swift_search_async_batch_process', array('offset' => $new_processed, 'limit' => $limit));
+        } else {
+            wp_schedule_single_event(time() + 1, 'swift_search_async_batch_process', array($new_processed, $limit));
+        }
+    }
+
+    // ... existing hooks ...
 
     /**
      * Hook: Schedule Indexing on Save.
@@ -177,7 +283,14 @@ class Indexer
      *
      * @param int $post_id
      */
-    public function index_post($post_id)
+    /**
+     * WORKER: Index a single post.
+     *
+     * @param int $post_id
+     * @param bool $return_doc If true, returns document array instead of sending to API.
+     * @return array|void
+     */
+    public function index_post($post_id, $return_doc = false)
     {
         $this->ensure_schema_safety();
 
@@ -191,8 +304,15 @@ class Indexer
         $document = $this->builder->build($post);
         if (!$document) {
             // If Post -> Draft or Post Type Disabled, remove from index
-            $this->delete_post_from_index($post_id);
+            // ONLY if strictly processing single item. If batch, we just skip adding it.
+            if (!$return_doc) {
+                $this->delete_post_from_index($post_id);
+            }
             return;
+        }
+
+        if ($return_doc) {
+            return $document;
         }
 
         $this->client->request('/collections/posts/documents?action=upsert', 'POST', $document);

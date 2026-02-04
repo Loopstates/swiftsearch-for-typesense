@@ -163,4 +163,62 @@ class Client
     {
         return $this->request('/collections/posts/overrides/' . $id, 'PUT', $rule);
     }
+
+    /**
+     * Import documents (Bulk).
+     * Uses the /import endpoint with JSONL.
+     * 
+     * @param string $collection Collection name.
+     * @param array  $documents  Array of document arrays.
+     * @param string $action     'create', 'upsert', 'update'.
+     * @return array|bool
+     */
+    public function import($collection, $documents, $action = 'upsert')
+    {
+        if (empty($documents)) {
+            return array('success' => true, 'num_items' => 0);
+        }
+
+        // Convert to JSONL
+        $jsonl = '';
+        foreach ($documents as $doc) {
+            $jsonl .= json_encode($doc) . "\n";
+        }
+
+        $endpoint = "/collections/{$collection}/documents/import?action={$action}";
+
+        $this->last_error = '';
+        $url = $this->get_base_url() . $endpoint;
+
+        $args = array(
+            'method' => 'POST',
+            'headers' => array(
+                'X-TYPESENSE-API-KEY' => $this->api_key,
+                'Content-Type' => 'text/plain', // Important for JSONL? Or app/json works? Typesense docs say text/plain usually best for raw body
+            ),
+            'body' => $jsonl,
+            'timeout' => 30, // Higher timeout for bulk
+        );
+
+        $response = wp_remote_request($url, $args);
+
+        if (is_wp_error($response)) {
+            $this->last_error = $response->get_error_message();
+            error_log('SwiftSearch Bulk Import Error: ' . $this->last_error);
+            return false;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+
+        if ($code < 200 || $code >= 300) {
+            $this->last_error = "HTTP $code: " . $body;
+            return false;
+        }
+
+        // Response is also JSONL (one result per line)
+        // We can parse it to check for individual errors if we want strict mode
+        // For now, assume success if 200 OK.
+        return array('success' => true, 'raw_response' => $body);
+    }
 }

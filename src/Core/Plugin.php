@@ -3,6 +3,7 @@
 namespace SwiftSearch\Core;
 
 use SwiftSearch\Admin\AdminController;
+use SwiftSearch\Core\SettingsIntegrity;
 use SwiftSearch\Frontend\SearchController;
 use SwiftSearch\Engine\EngineController;
 use SwiftSearch\Integrations\IntegrationManager;
@@ -56,6 +57,11 @@ class Plugin
     {
         // Localization
         add_action('plugins_loaded', array($this, 'load_textdomain'));
+
+        // Security & Integrity
+        add_action('updated_option', array('\SwiftSearch\Core\SettingsIntegrity', 'sign_option'), 10, 2);
+        add_action('added_option', array('\SwiftSearch\Core\SettingsIntegrity', 'sign_option'), 10, 2);
+        add_action('admin_init', array($this, 'verify_integrity'));
     }
 
     /**
@@ -93,5 +99,18 @@ class Plugin
             false,
             dirname(plugin_basename(SWIFT_SEARCH_FILE)) . '/languages'
         );
+    }
+
+    /**
+     * Verify settings integrity.
+     */
+    public function verify_integrity()
+    {
+        if (!SettingsIntegrity::verify_option('swift_search_settings')) {
+            // Tampering Detected!
+            add_action('admin_notices', function () {
+                echo '<div class="notice notice-error"><p><strong>Security Warning:</strong> SwiftSearch settings appear to have been tampered with directly in the database. Security check failed.</p></div>';
+            });
+        }
     }
 }
