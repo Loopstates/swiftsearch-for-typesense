@@ -214,11 +214,13 @@
     <div class="container">
         <header>
             <div style="display: flex; align-items: center; justify-content: center;">
-                <img src="../assets/images/loopstates.png" alt="Loopstates" class="logo-img">
-                <h1>SwiftSearch</h1>
+                <img src="../assets/images/swift-search-typesense.png" alt="Swift Search Typesense" class="logo-img">
+                <h1>Swift Search Typesense</h1>
             </div>
             <p>Lightning Fast Typesense Search for WordPress & WooCommerce</p>
         </header>
+
+
 
         <nav>
             <ul>
@@ -295,81 +297,109 @@
 
             <section id="configuration">
                 <h2>2. Configuration & Indexing</h2>
-                <p>Once connected, SwiftSearch provides a simple wizard to manage your index.</p>
+                <p>SwiftSearch simplifies index management with a robust dashboard.</p>
 
                 <h3>API Keys Best Practice</h3>
-                <p>For optimal security, use two separate API keys:</p>
+                <p>For optimal security, we recommend using two separate API keys:</p>
                 <ul>
-                    <li><strong>Admin Key:</strong> Provide this in the plugin settings. This allows WordPress to create
-                        schemas and index content.</li>
-                    <li><strong>Search-Only Key:</strong> Generate this in Typesense and use it for your Frontend
-                        configuration if you are customizing the JS manually.</li>
+                    <li><strong>Admin Key:</strong> Used by the plugin to create schemas and index content securely from
+                        the backend.</li>
+                    <li><strong>Search-Only Key:</strong> Used by the frontend/browser to fetch results. This key is
+                        read-only and safe to expose.</li>
                 </ul>
 
-                <h3>Indexing</h3>
-                <p>Click "Index All" to start the process. Indexing runs in the background using your server's cron
-                    system. You can close the tab while it runs.</p>
+                <h3>Reliable Background Indexing</h3>
+                <p>Click "Index All" to start building your search index. The plugin uses the industry-standard
+                    <strong>Action Scheduler</strong> (the same library used by WooCommerce) to process thousands of
+                    items in the background without slowing down your site.
+                </p>
             </section>
 
             <section id="features">
-                <h2>3. Features</h2>
+                <h2>3. Features & Capabilities</h2>
                 <div class="feature-grid">
                     <div class="feature-card">
                         <h3>⚡ Instant Search</h3>
-                        <p>Search results appear as you type. No page reloads.</p>
+                        <p>Results appear instantly as you type. Provides a "Google-like" autocomplete experience for
+                            your site.</p>
                     </div>
                     <div class="feature-card">
-                        <h3>🔍 Typo Tolerance</h3>
-                        <p>Finds "iphone" even if the user types "iphoen". Powered by Typesense.</p>
+                        <h3>🔍 Smart Typo Tolerance</h3>
+                        <p>State-of-the-art spell correction. Finds "iPhone" even if a user types "iphoen". Never lose a
+                            sale to a typo.</p>
                     </div>
                     <div class="feature-card">
-                        <h3>📦 WooCommerce Ready</h3>
-                        <p>Indexes Products, SKUs, Prices, and Stock Status automatically.</p>
+                        <h3>📦 WooCommerce Integration</h3>
+                        <p>Fully compatible with WooCommerce. Indexes Products, SKUs, Prices, Categories, and Stock
+                            Status out of the box.</p>
                     </div>
                     <div class="feature-card">
                         <h3>🗂️ Unified Search</h3>
-                        <p>Search across Posts, Pages, Products, Categories, and Authors in a single query.</p>
+                        <p>Search everything in one place: Posts, Pages, Products, Custom Post Types, Categories, and
+                            Authors.</p>
                     </div>
                     <div class="feature-card">
-                        <h3>📂 Faceted Navigation <span class="pro-badge">PRO</span></h3>
-                        <p>Sidebar filters for Categories, Price Ranges, and Attributes. Works instantly.</p>
+                        <h3>📂 Faceted Filtering <span class="pro-badge">PRO</span></h3>
+                        <p>Let users refine results by Category, Price Range, Brand, or any custom attribute. Instant
+                            updates without page reloads.</p>
                     </div>
                     <div class="feature-card">
-                        <h3>✨ Smart Ranking <span class="pro-badge">PRO</span></h3>
-                        <p>Advanced ranking rules that prioritize matches in Titles over Content, and boost In-Stock
-                            items.</p>
+                        <h3>✨ Precision Ranking <span class="pro-badge">PRO</span></h3>
+                        <p>Control exactly how results are ranked. Prioritize matches in Titles, boost In-Stock
+                            products, or demote older content.</p>
                     </div>
                     <div class="feature-card">
-                        <h3>📚 Synonyms <span class="pro-badge">PRO</span></h3>
-                        <p>Define synonyms (e.g., "Parka" = "Jacket") to ensure users always find what they need.</p>
+                        <h3>📚 AI-Ready Synonyms <span class="pro-badge">PRO</span></h3>
+                        <p>Define synonyms (e.g., "Parka" = "Jacket") so users always find what they are looking for,
+                            regardless of the term they use.</p>
                     </div>
                     <div class="feature-card">
-                        <h3>📌 Result Pinning <span class="pro-badge">PRO</span></h3>
-                        <p>Manually drag-and-drop specific items to the #1 spot for specific search terms.</p>
+                        <h3>📌 Merchandising (Pinning) <span class="pro-badge">PRO</span></h3>
+                        <p>Manually pin specific products to the #1 spot for high-value search terms (e.g., promote a
+                            specific "Running Shoe").</p>
                     </div>
                     <div class="feature-card">
-                        <h3>🔧 Custom Fields <span class="pro-badge">PRO</span></h3>
-                        <p>Index and search within ACF fields, SEO meta, or any custom post meta data.</p>
+                        <h3>🔧 Custom Fields Support <span class="pro-badge">PRO</span></h3>
+                        <p>Index and search fast within ACF (Advanced Custom Fields) or map any custom database field
+                            (e.g. SEO Meta Data).</p>
                     </div>
                     <div class="feature-card">
                         <h3>📊 Search Analytics <span class="pro-badge">PRO</span></h3>
-                        <p>See what your users are searching for. Track "Top Queries" and "No Result" queries to
-                            optimize content.</p>
+                        <p>Gain insights into user behavior. Track "Top Queries" and specifically "No Result Queries" to
+                            discover missing content opportunities.</p>
                     </div>
                 </div>
             </section>
 
             <section id="shortcode">
                 <h2>4. Displaying the Search</h2>
-                <p>To display the clean search bar anywhere on your site, use the shortcode:</p>
+                <p>To display the clean search bar anywhere on your site (header, sidebar, or inside a page), use the
+                    shortcode:</p>
                 <pre>[swift_search]</pre>
-                <p>This will render the search input. Results will appear in an overlay/dropdown instantly.</p>
+
+                <h3>Advanced Options</h3>
+                <p>You can customize the search behavior using specific attributes:</p>
+                <ul>
+                    <li><code>placeholder</code>: Custom placeholder text (Default: "Search...").</li>
+                    <li><code>limit</code>: Maximum number of results to display (Default: 10).</li>
+                    <li><code>show_thumbnail</code>: "true" to show images, "false" for text-only.</li>
+                    <li><code>show_price</code>: "true" to display WooCommerce prices.</li>
+                    <li><code>show_excerpt</code>: "true" to display post content snippets (Default: false).</li>
+                    <li><code>instant_search</code>: "true" (Overlay), "false" (Standard Form), or "default".</li>
+                    <li><code>scope</code>: "posts" (Articles/Products) or "terms" (Categories/Tags) or "users"
+                        (Authors).</li>
+                    <li><code>post_types</code>: Comma-separated list (e.g. "product,post").</li>
+                </ul>
+
+                <h3>Example Usage</h3>
+                <pre>[swift_search placeholder="Find products..." limit="8" post_types="product" show_price="true"]</pre>
             </section>
 
             <section id="license">
                 <h2>5. Activating Pro License</h2>
-                <p>If you have purchased a <strong>Pro</strong> license, you need to activate it to unlock Smart Ranking
-                    and Synonyms.</p>
+                <p>If you have purchased a <strong>Pro</strong> license, you need to activate it to unlock
+                    <strong>Advanced and Pro features</strong> like Smart Ranking, Facets, Custom Fields, and Analytics.
+                </p>
                 <div class="step">
                     <div class="step-num">1</div>
                     <div>
@@ -391,39 +421,60 @@
             <section id="theming">
                 <h2>6. Theming & Customization</h2>
                 <p>The search interface is designed to inherit your theme's fonts, but you can override styles using
-                    standard CSS.</p>
+                    standard CSS. The plugin uses a BEM-like naming convention.</p>
 
                 <h3>Common Selectors</h3>
                 <pre>
-/* Main Container */
-.swift-search-container { }
+/* The Outer Wrapper */
+.ss-wrapper { 
+    max-width: 600px; /* Adjust width */
+}
 
-/* The Search Input */
-.swift-search-input { }
+/* The Search Input Box */
+.ss-search-box input { 
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+}
 
-/* The Dropdown/Results Area */
-.swift-search-results { }
+/* The Results Dropdown */
+.ss-results-container { 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
 
-/* Individual Result Item */
-.ss-hit-item { }
+/* Result Items */
+.ss-hit { 
+    border-bottom: 1px solid #eee;
+}
 
-/* Highlighted Text (Matches) */
-.ss-highlight { 
-    background-color: #fef08a; 
-    color: black;
+.ss-hit-title { 
+    font-weight: bold;
+    color: #111;
+}
+
+.ss-hit-thumb { 
+    width: 60px; 
+    height: 60px;
+    border-radius: 4px; 
+}
+
+/* Highlighted Matches */
+.ss-hit-title mark { 
+    background-color: rgba(255, 0, 85, 0.1);
+    color: #ff0055;
 }
                 </pre>
             </section>
 
             <section id="hooks">
                 <h2>7. Developer Hooks (Actions)</h2>
-                <p>You can customize the indexing process using standard WordPress actions.</p>
+                <p>You can interact with the indexing engine programmatically. This is useful for custom import scripts
+                    or 3rd-party integrations.</p>
 
                 <h3>Async Indexing</h3>
-                <p>The plugin uses <code>swift_search_async_index_post</code> to process posts in the background. You
-                    can trigger a re-index programmatically:</p>
+                <p>The plugin uses <strong>Action Scheduler</strong> to process posts in the background. You can
+                    manually trigger a re-index for any post:</p>
                 <pre>
-// Re-index post ID 123
+// Trigger re-index for Post ID 123 (Runs in background)
 do_action('swift_search_async_index_post', 123);
                 </pre>
             </section>
@@ -433,19 +484,30 @@ do_action('swift_search_async_index_post', 123);
 
                 <h3>Result "Connection Failed"</h3>
                 <ul>
-                    <li>Ensure your Typesense server is running and accessible (check Firewall).</li>
-                    <li>Ensure your API Key has correct permissions.</li>
-                    <li>Check your browser console (F12) for CORS errors.</li>
+                    <li><strong>Mixed Content:</strong> If your site uses HTTPS, your Typesense server MUST also use
+                        HTTPS (wss://).</li>
+                    <li><strong>CORS:</strong> Check your browser console (F12). If you see CORS errors, configure your
+                        Typesense server to allow your domain.</li>
+                    <li><strong>Firewall:</strong> Ensure port 443 (or your custom port) is open on the Typesense
+                        server.</li>
                 </ul>
 
-                <h3>Schema Mismatch Error</h3>
-                <p>If you see a "Critical Schema Mismatch" error, it means the plugin's data structure has changed
-                    (likely due to a Pro upgrade). Simply click <strong>Index All</strong> to reset the collection.</p>
+                <h3>Search Bar Not Appearing?</h3>
+                <p>If the standard search bar isn't replaced, go to <strong>SwiftSearch Settings</strong> and ensure
+                    <strong>"Override Default Search"</strong> is enabled. Alternatively, place the
+                    <code>[swift_search]</code> shortcode manually.
+                </p>
+
+                <h3>Schema Mismatch / Re-Index Required</h3>
+                <p>If you see a "Critical Schema Mismatch" error, it means your data structure has changed (e.g., you
+                    added a new Custom Field or upgraded the plugin).</p>
+                <p><strong>Solution:</strong> Simply click the <strong>Index All</strong> button in the plugin settings
+                    to rebuild the collection.</p>
             </section>
         </main>
 
         <footer>
-            <p>&copy; 2024 Loopstates. All Rights Reserved.</p>
+            <p>&copy; 2026 Swift Search Typesense. All Rights Reserved.</p>
             <p style="margin-top: 10px; font-size: 0.9em;">
                 <a href="privacy.html">Privacy Policy</a> |
                 <a href="terms.html">Terms of Service</a> |
