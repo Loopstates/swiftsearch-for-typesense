@@ -225,6 +225,8 @@
                 <li><a href="#installation">Installation</a></li>
                 <li><a href="#configuration">Configuration</a></li>
                 <li><a href="#features">Features</a></li>
+                <li><a href="#license">License</a></li>
+                <li><a href="#theming">Theming</a></li>
                 <li><a href="#hooks">Developer</a></li>
                 <li><a href="#faq">FAQ</a></li>
             </ul>
@@ -235,6 +237,32 @@
                 <p><strong>SwiftSearch</strong> replaces your default WordPress search with an instant, typo-tolerant
                     search engine powered by <a href="https://typesense.org" target="_blank">Typesense</a>. It's
                     designed for speed, converting your visitors into customers with lightning-fast results.</p>
+            </section>
+
+            <section id="advantages">
+                <h2>Why SwiftSearch?</h2>
+                <div class="feature-grid">
+                    <div class="feature-card" style="border-left: 4px solid var(--primary);">
+                        <h3>🚀 Zero Latency</h3>
+                        <p>Runs entirely in the browser. No waiting for your WordPress database (MySQL) to query
+                            results.</p>
+                    </div>
+                    <div class="feature-card" style="border-left: 4px solid var(--primary);">
+                        <h3>🔒 Most Secure Plugin</h3>
+                        <p>We use digital signatures to protect your API keys. Your connection settings are
+                            tamper-proof.</p>
+                    </div>
+                    <div class="feature-card" style="border-left: 4px solid var(--primary);">
+                        <h3>📉 Reduced Server Load</h3>
+                        <p>Offload search queries to Typesense. Your WordPress server breathes easier, even during
+                            traffic spikes.</p>
+                    </div>
+                    <div class="feature-card" style="border-left: 4px solid var(--primary);">
+                        <h3>📱 Mobile First</h3>
+                        <p>Includes a sticky mobile search button and a responsive overlay UI designed for touch
+                            devices.</p>
+                    </div>
+                </div>
             </section>
 
             <section id="installation">
@@ -299,6 +327,14 @@
                         <p>Indexes Products, SKUs, Prices, and Stock Status automatically.</p>
                     </div>
                     <div class="feature-card">
+                        <h3>🗂️ Unified Search</h3>
+                        <p>Search across Posts, Pages, Products, Categories, and Authors in a single query.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📂 Faceted Navigation <span class="pro-badge">PRO</span></h3>
+                        <p>Sidebar filters for Categories, Price Ranges, and Attributes. Works instantly.</p>
+                    </div>
+                    <div class="feature-card">
                         <h3>✨ Smart Ranking <span class="pro-badge">PRO</span></h3>
                         <p>Advanced ranking rules that prioritize matches in Titles over Content, and boost In-Stock
                             items.</p>
@@ -306,6 +342,19 @@
                     <div class="feature-card">
                         <h3>📚 Synonyms <span class="pro-badge">PRO</span></h3>
                         <p>Define synonyms (e.g., "Parka" = "Jacket") to ensure users always find what they need.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📌 Result Pinning <span class="pro-badge">PRO</span></h3>
+                        <p>Manually drag-and-drop specific items to the #1 spot for specific search terms.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔧 Custom Fields <span class="pro-badge">PRO</span></h3>
+                        <p>Index and search within ACF fields, SEO meta, or any custom post meta data.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📊 Search Analytics <span class="pro-badge">PRO</span></h3>
+                        <p>See what your users are searching for. Track "Top Queries" and "No Result" queries to
+                            optimize content.</p>
                     </div>
                 </div>
             </section>
@@ -315,19 +364,6 @@
                 <p>To display the clean search bar anywhere on your site, use the shortcode:</p>
                 <pre>[swift_search]</pre>
                 <p>This will render the search input. Results will appear in an overlay/dropdown instantly.</p>
-            </section>
-
-            <section id="hooks">
-                <h2>5. Developer Hooks (Actions)</h2>
-                <p>You can customize the indexing process using standard WordPress actions.</p>
-
-                <h3>Async Indexing</h3>
-                <p>The plugin uses <code>swift_search_async_index_post</code> to process posts in the background. You
-                    can trigger a re-index programmatically:</p>
-                <pre>
-// Re-index post ID 123
-do_action('swift_search_async_index_post', 123);
-                </pre>
             </section>
 
             <section id="license">
@@ -379,8 +415,21 @@ do_action('swift_search_async_index_post', 123);
                 </pre>
             </section>
 
+            <section id="hooks">
+                <h2>7. Developer Hooks (Actions)</h2>
+                <p>You can customize the indexing process using standard WordPress actions.</p>
+
+                <h3>Async Indexing</h3>
+                <p>The plugin uses <code>swift_search_async_index_post</code> to process posts in the background. You
+                    can trigger a re-index programmatically:</p>
+                <pre>
+// Re-index post ID 123
+do_action('swift_search_async_index_post', 123);
+                </pre>
+            </section>
+
             <section id="faq">
-                <h2>7. Troubleshooting & FAQ</h2>
+                <h2>8. Troubleshooting & FAQ</h2>
 
                 <h3>Result "Connection Failed"</h3>
                 <ul>
