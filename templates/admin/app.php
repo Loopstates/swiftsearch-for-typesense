@@ -274,13 +274,26 @@
                         <div class="ss-form-group" style="margin-top: 10px;">
                             <label style="display:block; margin-bottom: 8px; font-weight: 500;">Search Scope
                                 Override</label>
-                            <div style="display: flex; gap: 15px;">
+                            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                                 <label><input type="checkbox" id="sc-scope-posts" checked disabled> Posts</label>
                                 <label><input type="checkbox" id="sc-scope-terms" checked> Taxonomies</label>
                                 <label><input type="checkbox" id="sc-scope-users"> Users</label>
                             </div>
+
+                            <label style="display:block; margin-bottom: 8px; font-weight: 500;">Limit Post Types
+                                (Optional)</label>
+                            <div class="ss-checkbox-list"
+                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
+                                <?php foreach ($data['available_post_types'] as $pt): ?>
+                                    <label class="ss-checkbox-inline">
+                                        <input type="checkbox" class="sc-post-type-selector"
+                                            value="<?php echo esc_attr($pt['name']); ?>">
+                                        <?php echo esc_html($pt['label']); ?>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
                             <p class="ss-hint">
-                                <?php esc_html_e('Select which collections to search. Default uses global settings.', 'swift-search-typesense'); ?>
+                                <?php esc_html_e('Leave all unchecked to search all indexed post types.', 'swift-search-typesense'); ?>
                             </p>
                         </div>
                         <div class="ss-code-preview">
@@ -288,27 +301,6 @@
                             <button type="button" class="ss-btn ss-btn-sm ss-btn-secondary"
                                 id="ss-copy-sc">Copy</button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Faceted Navigation (Pro) -->
-                <div class="ss-card ss-pro-gate">
-                    <div class="ss-card-header">
-                        <h2><?php esc_html_e('Faceted Navigation (Sidebar)', 'swift-search-typesense'); ?> <span
-                                class="ss-pro-badge">PRO</span></h2>
-                        <p><?php esc_html_e('Configure filters for your search results sidebar.', 'swift-search-typesense'); ?>
-                        </p>
-                    </div>
-                    <div class="ss-card-body">
-                        <div id="ss-facets-config-container">
-                            <div style="padding: 20px; text-align: center; color: #6b7280;">
-                                <span class="ss-loader"></span> Loading Facets...
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ss-form-actions">
-                        <button type="button" class="ss-btn ss-btn-secondary"
-                            id="ss-save-facets"><?php esc_html_e('Save Facets', 'swift-search-typesense'); ?></button>
                     </div>
                 </div>
 
@@ -379,6 +371,21 @@
                                     Authors
                                 </label>
                             </div>
+
+                            <label style="display:block; margin-top: 15px; margin-bottom: 8px; font-weight: 500;">Global
+                                Post Type Filter</label>
+                            <p class="description" style="margin-bottom:10px;">Limit search to specific post types
+                                globally (unless overridden by shortcode).</p>
+                            <div class="ss-checkbox-list"
+                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
+                                <?php foreach ($data['available_post_types'] as $pt): ?>
+                                    <label class="ss-checkbox-inline">
+                                        <input type="checkbox" class="ss-global-post-type-selector"
+                                            value="<?php echo esc_attr($pt['name']); ?>">
+                                        <?php echo esc_html($pt['label']); ?>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     </div>
                     <div class="ss-form-actions">
@@ -386,6 +393,27 @@
                             id="ss-save-experience"><?php esc_html_e('Save Settings', 'swift-search-typesense'); ?></button>
                         <button type="button" class="ss-btn ss-btn-primary next-step"
                             data-target="analytics"><?php esc_html_e('Next: Analytics', 'swift-search-typesense'); ?></button>
+                    </div>
+                </div>
+
+                <!-- Faceted Navigation (Pro) -->
+                <div class="ss-card ss-pro-gate">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Faceted Navigation (Sidebar)', 'swift-search-typesense'); ?> <span
+                                class="ss-pro-badge">PRO</span></h2>
+                        <p><?php esc_html_e('Configure filters for your search results sidebar.', 'swift-search-typesense'); ?>
+                        </p>
+                    </div>
+                    <div class="ss-card-body">
+                        <div id="ss-facets-config-container">
+                            <div style="padding: 20px; text-align: center; color: #6b7280;">
+                                <span class="ss-loader"></span> Loading Facets...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ss-form-actions">
+                        <button type="button" class="ss-btn ss-btn-secondary"
+                            id="ss-save-facets"><?php esc_html_e('Save Facets', 'swift-search-typesense'); ?></button>
                     </div>
                 </div>
             </section>

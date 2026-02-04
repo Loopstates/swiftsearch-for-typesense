@@ -97,6 +97,7 @@ class SearchController
             'show_excerpt' => 'false',
             'instant_search' => 'default', // 'true', 'false', or 'default' (fallback to global)
             'scope' => 'default', // 'posts,terms,users' or 'default'
+            'post_types' => '', // comma separated 'product,post'
         ), $atts);
 
         wp_enqueue_style('swift-search-frontend');
@@ -107,7 +108,8 @@ class SearchController
         <div id="swift-search-wrapper" class="ss-wrapper" data-limit="<?php echo esc_attr($a['limit']); ?>"
             data-thumb="<?php echo esc_attr($a['show_thumbnail']); ?>" data-price="<?php echo esc_attr($a['show_price']); ?>"
             data-excerpt="<?php echo esc_attr($a['show_excerpt']); ?>"
-            data-instant="<?php echo esc_attr($a['instant_search']); ?>" data-scope="<?php echo esc_attr($a['scope']); ?>">
+            data-instant="<?php echo esc_attr($a['instant_search']); ?>" data-scope="<?php echo esc_attr($a['scope']); ?>"
+            data-post-types="<?php echo esc_attr($a['post_types']); ?>">
             <div class="ss-search-box">
                 <input type="text" id="ss-search-input" placeholder="<?php echo esc_attr($a['placeholder']); ?>"
                     autocomplete="off">

@@ -476,6 +476,7 @@ class RestController extends WP_REST_Controller
                     'terms' => isset($new_exp['search_scope']['terms']) ? filter_var($new_exp['search_scope']['terms'], FILTER_VALIDATE_BOOLEAN) : false,
                     'users' => isset($new_exp['search_scope']['users']) ? filter_var($new_exp['search_scope']['users'], FILTER_VALIDATE_BOOLEAN) : false,
                 ),
+                'post_types' => isset($new_exp['post_types']) && is_array($new_exp['post_types']) ? array_map('sanitize_text_field', $new_exp['post_types']) : array(),
             );
 
             $current_settings['experience'] = $experience;

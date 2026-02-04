@@ -128,7 +128,24 @@
         }
 
         const numTypos = useTypo ? 2 : 0;
-        const filterString = buildFilterString();
+        const baseFilter = buildFilterString();
+
+        // Resolve Post Type Filter
+        let ptFilter = '';
+        if (wrapper.dataset.postTypes) {
+            const pts = wrapper.dataset.postTypes.split(',').map(s => s.trim()).filter(s => s);
+            if (pts.length > 0) {
+                ptFilter = `post_type:=[${pts.map(v => '`' + v + '`').join(',')}]`;
+            }
+        } else if (config.experience && config.experience.post_types && Array.isArray(config.experience.post_types) && config.experience.post_types.length > 0) {
+            const pts = config.experience.post_types;
+            ptFilter = `post_type:=[${pts.map(v => '`' + v + '`').join(',')}]`;
+        }
+
+        let finalFilter = baseFilter;
+        if (ptFilter) {
+            finalFilter = baseFilter ? `(${baseFilter}) && ${ptFilter}` : ptFilter;
+        }
 
         // Build Multi-Search Requests
         const searches = [];
@@ -144,8 +161,8 @@
             facet_by: facetFields
         };
 
-        if (filterString) {
-            postsParams.filter_by = filterString;
+        if (finalFilter) {
+            postsParams.filter_by = finalFilter;
         }
 
         searches.push(postsParams);

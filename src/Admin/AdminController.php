@@ -198,6 +198,11 @@ class AdminController
             }
         }
 
+        // Prepare Data for View
+        $data = array(
+            'available_post_types' => $this->get_public_post_types(),
+        );
+
         require_once SWIFT_SEARCH_PATH . 'templates/admin/app.php';
     }
 }

@@ -181,6 +181,12 @@
                     $('#ss-scope-terms').prop('checked', !!swiftSearchConfig.experience.search_scope.terms);
                     $('#ss-scope-users').prop('checked', !!swiftSearchConfig.experience.search_scope.users);
                 }
+
+                if (swiftSearchConfig.experience.post_types && Array.isArray(swiftSearchConfig.experience.post_types)) {
+                    swiftSearchConfig.experience.post_types.forEach(pt => {
+                        $(`.ss-global-post-type-selector[value="${pt}"]`).prop('checked', true);
+                    });
+                }
             }
 
             // Set Relevance State
@@ -205,8 +211,10 @@
             }
 
             // Trigger initial shortcode preview
-            // Trigger initial shortcode preview
             this.updateShortcodePreview();
+
+            // Late binding for dynamic elements or shortcode specific
+            $('.sc-post-type-selector').on('change', this.updateShortcodePreview.bind(this));
         },
 
         restoreState: function () {
@@ -409,7 +417,14 @@
                         posts: true, // Always true
                         terms: $('#ss-scope-terms').is(':checked'),
                         users: $('#ss-scope-users').is(':checked')
-                    }
+                    },
+                    post_types: (function () {
+                        const pts = [];
+                        $('.ss-global-post-type-selector:checked').each(function () {
+                            pts.push($(this).val());
+                        });
+                        return pts;
+                    })()
                 }
             };
 
@@ -437,6 +452,13 @@
             if (this.$scScopeUsers.is(':checked')) scopes.push('users');
             const scopeStr = scopes.join(',');
 
+            // Post Types
+            const postTypes = [];
+            $('.sc-post-type-selector:checked').each(function () {
+                postTypes.push($(this).val());
+            });
+            const ptStr = postTypes.join(',');
+
             let shortcode = `[swift_search placeholder="${placeholder}" limit="${limit}"`;
 
             if (thumb === 'false') shortcode += ` show_thumbnail="false"`;
@@ -446,6 +468,8 @@
             // Always output experience overrides for clarity in builder
             shortcode += ` instant_search="${instant}"`;
             shortcode += ` scope="${scopeStr}"`;
+
+            if (ptStr) shortcode += ` post_types="${ptStr}"`;
 
             shortcode += `]`;
 
@@ -993,46 +1017,47 @@
             const container = $('#ss-facets-config-container');
             if (!container.length) return;
 
-            const facetsConfig = swiftSearchConfig.facets_config || [];
+            try {
+                const facetsConfig = swiftSearchConfig.facets_config || [];
 
-            // 1. Gather Sources
-            let sources = [];
+                // 1. Gather Sources
+                let sources = [];
 
-            // Taxonomies
-            const taxes = swiftSearchConfig.available_taxonomies || [];
-            taxes.forEach(tax => {
-                sources.push({
-                    source: tax.name,
-                    label: tax.label,
-                    type: 'taxonomy'
+                // Taxonomies safely
+                const taxes = Array.isArray(swiftSearchConfig.available_taxonomies) ? swiftSearchConfig.available_taxonomies : [];
+                taxes.forEach(tax => {
+                    sources.push({
+                        source: tax.name,
+                        label: tax.label,
+                        type: 'taxonomy'
+                    });
                 });
-            });
 
-            // Custom Fields (configured & faceted)
-            const customFields = swiftSearchConfig.custom_fields || {};
-            const uniqueCustomFacets = {};
+                // Custom Fields safely
+                const customFields = swiftSearchConfig.custom_fields || {};
+                const uniqueCustomFacets = {};
 
-            if (customFields && typeof customFields === 'object') {
-                Object.values(customFields).forEach(fields => {
-                    if (Array.isArray(fields)) {
-                        fields.forEach(f => {
-                            if (f.facet) {
-                                if (!uniqueCustomFacets[f.key]) {
-                                    uniqueCustomFacets[f.key] = {
-                                        source: f.key,
-                                        label: f.name, // Use mapped name
-                                        type: 'meta'
-                                    };
+                if (customFields && typeof customFields === 'object') {
+                    Object.values(customFields).forEach(fields => {
+                        if (Array.isArray(fields)) {
+                            fields.forEach(f => {
+                                if (f.facet) {
+                                    if (!uniqueCustomFacets[f.key]) {
+                                        uniqueCustomFacets[f.key] = {
+                                            source: f.key,
+                                            label: f.name || f.key,
+                                            type: 'meta'
+                                        };
+                                    }
                                 }
-                            }
-                        });
-                    }
-                });
-            }
-            Object.values(uniqueCustomFacets).forEach(f => sources.push(f));
+                            });
+                        }
+                    });
+                }
+                Object.values(uniqueCustomFacets).forEach(f => sources.push(f));
 
-            // 2. Render Table
-            let html = `<table class="wp-list-table widefat fixed striped">
+                // 2. Render Table
+                let html = `<table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
                         <th style="width: 50px; text-align:center;">Enable</th>
@@ -1043,33 +1068,42 @@
                 </thead>
                 <tbody>`;
 
-            if (sources.length === 0) {
-                html += `<tr><td colspan="4" style="text-align:center; padding: 20px;">No available facets found. Ensure you have indexed Taxonomies or mapped Custom Fields as a 'Facet'.</td></tr>`;
-            } else {
-                sources.forEach(src => {
-                    // Check saved config
-                    const saved = facetsConfig.find(f => f.source === src.source && f.type === src.type);
-                    const isEnabled = saved ? saved.enabled : false;
-                    const label = (saved && saved.label) ? saved.label : src.label;
+                if (sources.length === 0) {
+                    html += `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #6b7280;">No available facets found.<br>Enable indexing for Taxonomies or map Custom Fields as 'Facet'.</td></tr>`;
+                } else {
+                    sources.forEach(src => {
+                        // Check saved config
+                        const existing = facetsConfig.find(f => f.source === src.source && f.type === src.type);
+                        const isChecked = !!existing;
+                        const displayLabel = existing ? existing.label : src.label;
 
-                    html += `<tr>
+                        html += `<tr>
                         <td style="text-align:center;">
                             <input type="checkbox" class="ss-facet-enable" 
-                                data-source="${src.source}" data-type="${src.type}"
-                                ${isEnabled ? 'checked' : ''}>
+                                data-source="${src.source}" 
+                                data-type="${src.type}"
+                                ${isChecked ? 'checked' : ''}>
                         </td>
-                        <td><strong>${src.source}</strong></td>
                         <td>
-                            <input type="text" class="regular-text ss-facet-label" 
-                                value="${label}" style="width:100%; border: 1px solid #ddd;">
+                            <code>${src.source}</code>
                         </td>
-                         <td><span class="ss-badge ${src.type === 'taxonomy' ? 'ss-badge-tax' : 'ss-badge-meta'}">${src.type === 'taxonomy' ? 'Taxonomy' : 'Meta Field'}</span></td>
+                        <td>
+                            <input type="text" class="ss-facet-label" value="${displayLabel}" style="width: 100%;">
+                        </td>
+                        <td>
+                            <span class="ss-badge ${src.type}">${src.type === 'meta' ? 'Field' : 'Tax'}</span>
+                        </td>
                     </tr>`;
-                });
-            }
-            html += `</tbody></table>`;
+                    });
+                }
 
-            container.html(html);
+                html += `</tbody></table>`;
+                container.html(html);
+
+            } catch (e) {
+                console.error("SwiftSearch: Facet Render Error", e);
+                container.html(`<div style="color:red; padding:20px;">Error loading facets: ${e.message}</div>`);
+            }
         },
 
         saveFacetsConfig: function () {
