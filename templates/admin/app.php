@@ -292,7 +292,7 @@
                 </div>
 
                 <!-- Faceted Navigation (Pro) -->
-                <div class="ss-card ss-pro-gate" style="margin-top: 20px;">
+                <div class="ss-card ss-pro-gate">
                     <div class="ss-card-header">
                         <h2><?php esc_html_e('Faceted Navigation (Sidebar)', 'swift-search-typesense'); ?> <span
                                 class="ss-pro-badge">PRO</span></h2>
@@ -524,7 +524,8 @@
     <div class="ss-footer"
         style="text-align: center; margin-top: 30px; padding: 20px; color: #6b7280; font-size: 13px;">
         <p>A <a href="https://loopstates.com" target="_blank"
-                style="color: inherit; text-decoration: none; font-weight: 500;">Loopstates</a> Product. SwiftSearch Typesense
+                style="color: inherit; text-decoration: none; font-weight: 500;">Loopstates</a> Product. SwiftSearch
+            Typesense
             v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?>.</p>
     </div>
 </div>
