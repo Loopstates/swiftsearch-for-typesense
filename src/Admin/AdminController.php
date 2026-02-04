@@ -33,7 +33,7 @@ class AdminController
             'manage_options',
             'swift-search',
             array($this, 'render_app'),
-            'dashicons-lightning',
+            'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xMyAyTDMgMTRoOWwtMSAxMiAxMC0xMmgtOWwxLTEyeiIvPjwvc3ZnPg==',
             30
         );
     }
