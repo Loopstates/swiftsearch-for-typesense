@@ -24,68 +24,35 @@
     const useTypo = config.experience && config.experience.typo_tolerance !== false; // Default true if undefined
     const enableSort = config.experience && config.experience.sort_enabled === true;
 
-    // Sort State
-    let currentSort = 'relevance'; // or 'created_at:desc'
+    // Data Attributes Override & Global Fallback
+    const rawInstant = wrapper.dataset.instant; // 'true', 'false', 'default'
+    const rawScope = wrapper.dataset.scope; // 'posts,terms', 'default'
 
-    // Inject Sort UI if enabled
-    if (enableSort) {
-        const sortContainer = document.createElement('div');
-        sortContainer.className = 'ss-sort-container';
-        sortContainer.innerHTML = `
-            <select id="ss-sort-select" class="ss-sort-select">
-                <option value="relevance">Relevance</option>
-                <option value="post_date:desc">Newest First</option>
-                <option value="post_date:asc">Oldest First</option>
-            </select>
-        `;
-        // Insert before results
-        resultsContainer.insertBefore(sortContainer, hitsContainer);
+    const globalInstant = config.experience && typeof config.experience.instant_search !== 'undefined' ? config.experience.instant_search : true;
+    const globalScopeTerms = config.experience && config.experience.search_scope ? config.experience.search_scope.terms : (config.indexed_taxonomies && config.indexed_taxonomies.length > 0);
+    const globalScopeUsers = config.experience && config.experience.search_scope ? config.experience.search_scope.users : config.indexed_users;
 
-        document.getElementById('ss-sort-select').addEventListener('change', function (e) {
-            currentSort = e.target.value;
-            if (input.value.trim().length > 0) {
-                performSearch(input.value.trim());
-            }
-        });
+    // Resolve Instant Search
+    let instantSearch = globalInstant;
+    if (rawInstant && rawInstant !== 'default') {
+        instantSearch = rawInstant === 'true';
     }
 
-    // Mobile Button logic
-    if (config.experience && config.experience.mobile_btn) {
-        const btn = document.createElement('div');
-        btn.className = 'ss-mobile-btn';
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
-
-        // Inline styles
-        Object.assign(btn.style, {
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            width: '50px',
-            height: '50px',
-            backgroundColor: '#0073aa',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
-            zIndex: '99999'
-        });
-
-        document.body.appendChild(btn);
-
-        btn.addEventListener('click', function () {
-            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => input.focus(), 500);
-        });
+    // Resolve Scope
+    let scopeTerms = globalScopeTerms;
+    let scopeUsers = globalScopeUsers;
+    if (rawScope && rawScope !== 'default') {
+        const scopes = rawScope.split(',');
+        scopeTerms = scopes.includes('terms');
+        scopeUsers = scopes.includes('users');
     }
 
     let debounceTimer;
     let logTimer;
 
-    input.addEventListener('input', function (e) {
+    function handleInput(e) {
         clearTimeout(debounceTimer);
-        const query = e.target.value.trim();
+        const query = input.value.trim();
 
         if (query.length === 0) {
             resultsContainer.style.display = 'none';
@@ -97,7 +64,18 @@
         debounceTimer = setTimeout(function () {
             performSearch(query);
         }, 200);
-    });
+    }
+
+    if (instantSearch) {
+        input.addEventListener('input', handleInput);
+    } else {
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submit if inside form
+                handleInput(e);
+            }
+        });
+    }
 
     function performSearch(query) {
         let sortParam = '';
@@ -107,19 +85,56 @@
 
         const numTypos = useTypo ? 2 : 0;
 
-        const url = `${config.protocol}://${config.host}:${config.port}/collections/${config.collection}/documents/search?q=${encodeURIComponent(query)}&query_by=post_title,post_content&per_page=${limit}&num_typos=${numTypos}${sortParam}`;
+        // Build Multi-Search Requests
+        const searches = [];
+
+        // 1. Posts (Always)
+        searches.push({
+            collection: 'posts',
+            q: query,
+            query_by: 'post_title,post_content',
+            per_page: limit,
+            num_typos: numTypos,
+            sort_by: currentSort === 'relevance' ? '_text_match:desc' : currentSort // Default sort if relevance
+        });
+
+        // 2. Taxonomies (If enabled in Scope)
+        if (scopeTerms && config.indexed_taxonomies && config.indexed_taxonomies.length > 0) {
+            searches.push({
+                collection: 'terms',
+                q: query,
+                query_by: 'name,taxonomy',
+                per_page: Math.ceil(limit / 2),
+                num_typos: numTypos
+            });
+        }
+
+        // 3. Users (If enabled in Scope)
+        if (scopeUsers && config.indexed_users) {
+            searches.push({
+                collection: 'users',
+                q: query,
+                query_by: 'display_name,user_login',
+                per_page: Math.ceil(limit / 2),
+                num_typos: numTypos
+            });
+        }
+
+        const url = `${config.protocol}://${config.host}:${config.port}/multi_search`;
+        const commonParams = { 'x-typesense-api-key': config.apiKey };
 
         fetch(url, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'X-TYPESENSE-API-KEY': config.apiKey,
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ searches: searches })
         })
             .then(response => response.json())
             .then(data => {
                 loader.style.display = 'none';
-                renderHits(data);
+                renderHits(data, searches);
             })
             .catch(err => {
                 console.error(err);
@@ -127,45 +142,91 @@
             });
     }
 
-    function renderHits(data) {
+    function renderHits(data, searches) {
         resultsContainer.style.display = 'flex';
         hitsContainer.innerHTML = '';
 
-        if (data.found === 0) {
+        // data.results matches searches array order
+        const results = data.results || [];
+
+        let totalFound = 0;
+        let hasHits = false;
+
+        results.forEach((result, index) => {
+            const searchParams = searches[index];
+            const collection = searchParams.collection;
+
+            if (result.found > 0) {
+                totalFound += result.found;
+                hasHits = true;
+
+                // Section Header
+                let title = 'Posts';
+                if (collection === 'terms') title = 'Categories & Tags';
+                else if (collection === 'users') title = 'Authors';
+
+                // Only show header if we have mixed results
+                if (results.length > 1) {
+                    const header = document.createElement('h4');
+                    header.className = 'ss-section-header';
+                    header.style.margin = '10px 0 5px 0';
+                    header.style.fontSize = '12px';
+                    header.style.textTransform = 'uppercase';
+                    header.style.color = '#888';
+                    header.innerText = title;
+                    hitsContainer.appendChild(header);
+                }
+
+                result.hits.forEach(hit => {
+                    const doc = hit.document;
+                    const el = document.createElement('div');
+                    el.className = 'ss-hit';
+
+                    let html = '';
+
+                    if (collection === 'posts') {
+                        html = `<a href="${doc.permalink}" class="ss-hit-link">`;
+                        if (showThumb && doc.thumbnail_url) {
+                            html += `<img src="${doc.thumbnail_url}" alt="" class="ss-hit-thumb">`;
+                        }
+                        html += `<div class="ss-hit-content">`;
+                        html += `<h3 class="ss-hit-title">${highlight(hit, 'post_title')}</h3>`;
+                        if (showExcerpt && doc.post_excerpt) {
+                            html += `<p class="ss-hit-excerpt">${doc.post_excerpt}</p>`;
+                        }
+                        if (showPrice && doc.price) {
+                            html += `<span class="ss-hit-price">$${doc.price}</span>`;
+                        }
+                        html += `</div></a>`;
+                    } else if (collection === 'terms') {
+                        html = `<a href="${doc.url}" class="ss-hit-link ss-hit-term">`;
+                        html += `<div class="ss-hit-content">`;
+                        html += `<h3 class="ss-hit-title">${highlight(hit, 'name')}</h3>`;
+                        html += `<span class="ss-hit-meta">${doc.taxonomy}</span>`;
+                        html += `</div></a>`;
+                    } else if (collection === 'users') {
+                        html = `<a href="${doc.url}" class="ss-hit-link ss-hit-user">`;
+                        if (doc.avatar_url) {
+                            html += `<img src="${doc.avatar_url}" alt="" class="ss-hit-avatar" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;">`;
+                        }
+                        html += `<div class="ss-hit-content">`;
+                        html += `<h3 class="ss-hit-title">${highlight(hit, 'display_name')}</h3>`;
+                        html += `</div></a>`;
+                    }
+
+                    el.innerHTML = html;
+                    hitsContainer.appendChild(el);
+                });
+            }
+        });
+
+        if (!hasHits) {
             hitsContainer.innerHTML = '<div class="ss-no-results">No results found.</div>';
             logSearch(input.value.trim(), 0);
             return;
         }
 
-        logSearch(input.value.trim(), data.found);
-
-        data.hits.forEach(hit => {
-            const doc = hit.document;
-            const el = document.createElement('div');
-            el.className = 'ss-hit';
-
-            let html = `<a href="${doc.permalink}" class="ss-hit-link">`;
-
-            if (showThumb && doc.thumbnail_url) {
-                html += `<img src="${doc.thumbnail_url}" alt="" class="ss-hit-thumb">`;
-            }
-
-            html += `<div class="ss-hit-content">`;
-            html += `<h3 class="ss-hit-title">${highlight(hit, 'post_title')}</h3>`;
-
-            if (showExcerpt && doc.post_excerpt) {
-                html += `<p class="ss-hit-excerpt">${doc.post_excerpt}</p>`;
-            }
-
-            if (showPrice && doc.price) {
-                html += `<span class="ss-hit-price">$${doc.price}</span>`;
-            }
-
-            html += `</div></a>`;
-
-            el.innerHTML = html;
-            hitsContainer.appendChild(el);
-        });
+        logSearch(input.value.trim(), totalFound);
     }
 
     function highlight(hit, field) {

@@ -52,7 +52,9 @@ class SearchController
                 'port' => $settings['port'],
                 'protocol' => $settings['protocol'],
                 'apiKey' => $settings['search_key'],
-                'collection' => 'posts', // make dynamic later
+                'collection' => 'posts',
+                'indexed_taxonomies' => isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array(),
+                'indexed_users' => isset($settings['indexed_users']) ? (bool) $settings['indexed_users'] : false,
                 'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
                 'apiUrl' => rest_url('swift-search/v1'),
             ));
@@ -91,6 +93,8 @@ class SearchController
             'show_thumbnail' => 'true',
             'show_price' => 'true',
             'show_excerpt' => 'false',
+            'instant_search' => 'default', // 'true', 'false', or 'default' (fallback to global)
+            'scope' => 'default', // 'posts,terms,users' or 'default'
         ), $atts);
 
         wp_enqueue_style('swift-search-frontend');
@@ -98,10 +102,10 @@ class SearchController
 
         ob_start();
         ?>
-        ?>
         <div id="swift-search-wrapper" class="ss-wrapper" data-limit="<?php echo esc_attr($a['limit']); ?>"
             data-thumb="<?php echo esc_attr($a['show_thumbnail']); ?>" data-price="<?php echo esc_attr($a['show_price']); ?>"
-            data-excerpt="<?php echo esc_attr($a['show_excerpt']); ?>">
+            data-excerpt="<?php echo esc_attr($a['show_excerpt']); ?>"
+            data-instant="<?php echo esc_attr($a['instant_search']); ?>" data-scope="<?php echo esc_attr($a['scope']); ?>">
             <div class="ss-search-box">
                 <input type="text" id="ss-search-input" placeholder="<?php echo esc_attr($a['placeholder']); ?>"
                     autocomplete="off">

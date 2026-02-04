@@ -107,6 +107,7 @@ class AdminController
             'indexed_post_types' => isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : array('post', 'page', 'product'),
             'indexed_taxonomies' => isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array('category', 'post_tag', 'product_cat'),
             'indexed_users' => isset($settings['indexed_users']) ? (bool) $settings['indexed_users'] : false,
+            'custom_fields' => isset($settings['custom_fields']) ? $settings['custom_fields'] : array(),
             'available_post_types' => $this->get_public_post_types(),
             'available_taxonomies' => $this->get_public_taxonomies(),
             'texts' => array(

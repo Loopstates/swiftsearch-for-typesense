@@ -167,6 +167,22 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Advanced Data (Pro) -->
+                <div class="ss-card ss-pro-gate" style="margin-top: 20px;">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Advanced Data', 'swift-search-typesense'); ?> <span
+                                class="ss-pro-badge">PRO</span></h2>
+                        <p><?php esc_html_e('Map custom meta fields to Typesense schema (e.g. Price, SKU, Brand).', 'swift-search-typesense'); ?>
+                        </p>
+                    </div>
+                    <div class="ss-card-body" id="ss-custom-fields-container">
+                        <!-- Rendered by JS -->
+                        <div style="padding: 20px; text-align: center; color: #6b7280;">
+                            <span class="ss-loader"></span> Loading Fields...
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- Step 3: Relevance (Pro) -->
@@ -244,6 +260,28 @@
                                 </label>
                             </div>
                         </div>
+                        <!-- Experience Overrides -->
+                        <div class="ss-form-group-row"
+                            style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="sc-instant-search" checked>
+                                    <div class="info"><span class="title">Instant Search</span></div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="ss-form-group" style="margin-top: 10px;">
+                            <label style="display:block; margin-bottom: 8px; font-weight: 500;">Search Scope
+                                Override</label>
+                            <div style="display: flex; gap: 15px;">
+                                <label><input type="checkbox" id="sc-scope-posts" checked disabled> Posts</label>
+                                <label><input type="checkbox" id="sc-scope-terms" checked> Taxonomies</label>
+                                <label><input type="checkbox" id="sc-scope-users"> Users</label>
+                            </div>
+                            <p class="ss-hint">
+                                <?php esc_html_e('Select which collections to search. Default uses global settings.', 'swift-search-typesense'); ?>
+                            </p>
+                        </div>
                         <div class="ss-code-preview">
                             <code id="sc-preview">[swift_search placeholder="Search..." limit="10"]</code>
                             <button type="button" class="ss-btn ss-btn-sm ss-btn-secondary"
@@ -286,6 +324,37 @@
                                         <span class="title">Floating Mobile Button</span>
                                         <span class="meta">Sticky search icon on mobile devices.</span>
                                     </div>
+                                </label>
+                            </div>
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="ss-instant-search" checked>
+                                    <div class="info">
+                                        <span class="title">Instant Search</span>
+                                        <span class="meta">Search as you type (Autocomplete).</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Search Scope -->
+                        <div class="ss-form-group" style="margin-top: 20px;">
+                            <label style="display:block; margin-bottom:10px; font-weight:600;">Search Scope
+                                (Frontend)</label>
+                            <p class="description" style="margin-bottom:10px;">Select which collections are queried by
+                                the search bar.</p>
+                            <div class="ss-form-group-row">
+                                <label class="ss-checkbox-inline">
+                                    <input type="checkbox" id="ss-scope-posts" checked disabled>
+                                    Posts (Always Enabled)
+                                </label>
+                                <label class="ss-checkbox-inline">
+                                    <input type="checkbox" id="ss-scope-terms">
+                                    Taxonomies (Categories, Tags)
+                                </label>
+                                <label class="ss-checkbox-inline">
+                                    <input type="checkbox" id="ss-scope-users">
+                                    Authors
                                 </label>
                             </div>
                         </div>

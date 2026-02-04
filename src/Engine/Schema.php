@@ -43,6 +43,31 @@ class Schema
             $fields[] = array('name' => 'in_stock', 'type' => 'bool', 'facet' => true, 'optional' => true);
         }
 
+        // Custom Fields (Pro)
+        if (isset($config['custom_fields']) && is_array($config['custom_fields'])) {
+            $existing_names = array_column($fields, 'name');
+            foreach ($config['custom_fields'] as $pt => $cf_list) {
+                if (!is_array($cf_list))
+                    continue;
+                foreach ($cf_list as $cf) {
+                    if (empty($cf['name']) || empty($cf['type']))
+                        continue;
+
+                    // Deduplicate
+                    if (in_array($cf['name'], $existing_names))
+                        continue;
+
+                    $fields[] = array(
+                        'name' => $cf['name'],
+                        'type' => $cf['type'],
+                        'facet' => isset($cf['facet']) && $cf['facet'],
+                        'optional' => true,
+                    );
+                    $existing_names[] = $cf['name'];
+                }
+            }
+        }
+
         // Smart Config Overrides
         $default_sort = isset($config['default_sorting_field']) ? $config['default_sorting_field'] : 'published_at';
 

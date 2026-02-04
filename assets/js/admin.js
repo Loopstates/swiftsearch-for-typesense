@@ -47,6 +47,10 @@
             this.$scShowThumbnail = $('#sc-show-thumbnail');
             this.$scShowPrice = $('#sc-show-price');
             this.$scShowExcerpt = $('#sc-show-excerpt');
+            this.$scInstantSearch = $('#sc-instant-search');
+            this.$scScopePosts = $('#sc-scope-posts');
+            this.$scScopeTerms = $('#sc-scope-terms');
+            this.$scScopeUsers = $('#sc-scope-users');
             this.$scPreview = $('#sc-preview');
             this.$scCopyBtn = $('#ss-copy-sc');
 
@@ -95,6 +99,9 @@
             this.$scShowThumbnail.on('change', this.updateShortcodePreview.bind(this));
             this.$scShowPrice.on('change', this.updateShortcodePreview.bind(this));
             this.$scShowExcerpt.on('change', this.updateShortcodePreview.bind(this));
+            this.$scInstantSearch.on('change', this.updateShortcodePreview.bind(this));
+            this.$scScopeTerms.on('change', this.updateShortcodePreview.bind(this));
+            this.$scScopeUsers.on('change', this.updateShortcodePreview.bind(this));
             this.$scCopyBtn.on('click', this.copyShortcode.bind(this));
 
             // Experience Options
@@ -145,6 +152,9 @@
             // Render Content Settings
             this.renderContentSettings();
 
+            // Render Custom Fields (Pro)
+            this.renderCustomFields();
+
             // Set Experience State
 
             if (swiftSearchConfig.status.overrideDefault) {
@@ -156,6 +166,18 @@
                 this.$ssTypoTolerance.prop('checked', !!swiftSearchConfig.experience.typo_tolerance);
                 this.$ssSortEnabled.prop('checked', !!swiftSearchConfig.experience.sort_enabled);
                 this.$ssMobileBtn.prop('checked', !!swiftSearchConfig.experience.mobile_btn);
+
+                // New Fields Phase 7
+                if (typeof swiftSearchConfig.experience.instant_search !== 'undefined') {
+                    $('#ss-instant-search').prop('checked', !!swiftSearchConfig.experience.instant_search);
+                } else {
+                    $('#ss-instant-search').prop('checked', true); // Default true
+                }
+
+                if (swiftSearchConfig.experience.search_scope) {
+                    $('#ss-scope-terms').prop('checked', !!swiftSearchConfig.experience.search_scope.terms);
+                    $('#ss-scope-users').prop('checked', !!swiftSearchConfig.experience.search_scope.users);
+                }
             }
 
             // Set Relevance State
@@ -287,10 +309,32 @@
 
             const indexUsers = $('#ss-index-users').is(':checked');
 
+            // Collect Custom Fields (Pro)
+            const customFields = {};
+            $('#ss-custom-fields-container tbody').each(function () {
+                const pt = $(this).data('pt');
+                const fields = [];
+                $(this).find('tr').each(function () {
+                    const row = $(this);
+                    const key = row.find('input[name*="[key]"]').val();
+                    const name = row.find('input[name*="[name]"]').val();
+                    const type = row.find('select[name*="[type]"]').val();
+                    const facet = row.find('input[name*="[facet]"]').is(':checked');
+
+                    if (key && name) {
+                        fields.push({ key: key.trim(), name: name.trim(), type: type, facet: facet });
+                    }
+                });
+                if (fields.length > 0) {
+                    customFields[pt] = fields;
+                }
+            });
+
             const payload = {
                 post_types: postTypes,
                 taxonomies: taxonomies,
-                index_users: indexUsers
+                index_users: indexUsers,
+                custom_fields: customFields
             };
 
             this.request('POST', '/settings', payload).done(function (response) {
@@ -356,7 +400,13 @@
                 experience_settings: {
                     typo_tolerance: this.$ssTypoTolerance.is(':checked'),
                     sort_enabled: this.$ssSortEnabled.is(':checked'),
-                    mobile_btn: this.$ssMobileBtn.is(':checked')
+                    mobile_btn: this.$ssMobileBtn.is(':checked'),
+                    instant_search: $('#ss-instant-search').is(':checked'),
+                    search_scope: {
+                        posts: true, // Always true
+                        terms: $('#ss-scope-terms').is(':checked'),
+                        users: $('#ss-scope-users').is(':checked')
+                    }
                 }
             };
 
@@ -375,11 +425,24 @@
             const price = this.$scShowPrice.is(':checked') ? 'true' : 'false';
             const excerpt = this.$scShowExcerpt.is(':checked') ? 'true' : 'false';
 
+            // Experience Overrides
+            const instant = this.$scInstantSearch.is(':checked') ? 'true' : 'false';
+
+            const scopes = [];
+            if (this.$scScopePosts.is(':checked')) scopes.push('posts');
+            if (this.$scScopeTerms.is(':checked')) scopes.push('terms');
+            if (this.$scScopeUsers.is(':checked')) scopes.push('users');
+            const scopeStr = scopes.join(',');
+
             let shortcode = `[swift_search placeholder="${placeholder}" limit="${limit}"`;
 
             if (thumb === 'false') shortcode += ` show_thumbnail="false"`;
             if (price === 'false') shortcode += ` show_price="false"`;
             if (excerpt === 'true') shortcode += ` show_excerpt="true"`;
+
+            // Always output experience overrides for clarity in builder
+            shortcode += ` instant_search="${instant}"`;
+            shortcode += ` scope="${scopeStr}"`;
 
             shortcode += `]`;
 
@@ -834,10 +897,168 @@
                 self.$syncStatusText.text('Error resetting index.');
                 self.$resetBtn.prop('disabled', false);
             });
+        },
+
+        // --- Custom Fields (Pro) ---
+
+        renderCustomFields: function () {
+            const container = $('#ss-custom-fields-container');
+            if (!container.length) return;
+
+            // Get Settings
+            const mappings = swiftSearchConfig.custom_fields || {};
+            const availableTypes = swiftSearchConfig.available_post_types || [];
+
+            let html = '';
+
+            // Group by Post Type
+            availableTypes.forEach(pt => {
+                // Only show if selected in Content Settings? Or show all?
+                // Better to show all or maybe just checked ones. 
+                // Let's iterate all available, but maybe collapse them?
+                // For now, simple stacked tables.
+
+                const fields = mappings[pt.name] || [];
+
+                html += `<div class="ss-cf-section" style="margin-bottom: 30px; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden;">`;
+                html += `<div style="background: #f9fafb; padding: 10px 15px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin:0; font-size: 14px; font-weight: 600;">${pt.label} (${pt.name})</h3>
+                    <button type="button" class="button ss-add-field-btn" data-pt="${pt.name}">+ Add Field</button>
+                 </div>`;
+
+                html += `<table class="wp-list-table widefat fixed striped" style="border: none; box-shadow: none;">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">Meta Key</th>
+                            <th style="width: 30%;">Field Name (in Typesense)</th>
+                            <th style="width: 15%;">Type</th>
+                            <th style="width: 15%;">Facet?</th>
+                            <th style="width: 10%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="ss-cf-body" data-pt="${pt.name}">`;
+
+                if (fields.length > 0) {
+                    fields.forEach((field, index) => {
+                        html += this.getCustomFieldRowHtml(pt.name, index, field);
+                    });
+                } else {
+                    html += `<tr class="ss-cf-empty"><td colspan="5">No custom fields mapped.</td></tr>`;
+                }
+
+                html += `</tbody></table></div>`;
+            });
+
+            container.html(html);
+        },
+
+        getCustomFieldRowHtml: function (postType, index, field = {}) {
+            return `
+                <tr>
+                    <td>
+                        <input type="text" class="regular-text" style="width: 100%;" 
+                            name="custom_fields[${postType}][${index}][key]" 
+                            value="${field.key || ''}" placeholder="_sku, event_date...">
+                    </td>
+                    <td>
+                        <input type="text" class="regular-text" style="width: 100%;" 
+                            name="custom_fields[${postType}][${index}][name]" 
+                            value="${field.name || ''}" placeholder="sku, date...">
+                    </td>
+                    <td>
+                        <select style="width: 100%;" name="custom_fields[${postType}][${index}][type]">
+                            <option value="string" ${field.type === 'string' ? 'selected' : ''}>String</option>
+                            <option value="int32" ${field.type === 'int32' ? 'selected' : ''}>Integer</option>
+                            <option value="float" ${field.type === 'float' ? 'selected' : ''}>Float</option>
+                            <option value="bool" ${field.type === 'bool' ? 'selected' : ''}>Boolean</option>
+                            <option value="string[]" ${field.type === 'string[]' ? 'selected' : ''}>Array (String)</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="checkbox" name="custom_fields[${postType}][${index}][facet]" value="1" ${field.facet ? 'checked' : ''}>
+                    </td>
+                    <td>
+                        <button type="button" class="button-link ss-remove-field-btn" style="color: #ef4444;">Remove</button>
+                    </td>
+                </tr>
+            `;
         }
     };
 
     $(document).ready(function () {
+        // --- Custom Fields Event Binding (Delegation) ---
+        const $container = $('#ss-custom-fields-container');
+
+        // Add
+        $container.on('click', '.ss-add-field-btn', function (e) {
+            e.preventDefault();
+            const pt = $(this).data('pt');
+            const $tbody = $container.find(`.ss-cf-body[data-pt="${pt}"]`);
+            const index = $tbody.children('tr').not('.ss-cf-empty').length + Date.now(); // Ensure unique index for new items (basic timestamp)
+
+            // Remove empty row if exists
+            $tbody.find('.ss-cf-empty').remove();
+
+            $tbody.append(SwiftSearchAdmin.getCustomFieldRowHtml(pt, index));
+        });
+
+        // Remove
+        $container.on('click', '.ss-remove-field-btn', function (e) {
+            e.preventDefault();
+            $(this).closest('tr').remove();
+        });
+
+        // Save Button for Custom Fields
+        $('#ss-save-custom-fields').on('click', function (e) {
+            e.preventDefault();
+            const $btn = $(this);
+            const originalText = $btn.text();
+            $btn.prop('disabled', true).text('Saving...');
+
+            // Serialize Form Data
+            // We need to parse name="custom_fields[pt][idx][key]" manually or use serializeArray
+            // But we can just use jQuery serializeArray on the container inputs
+            const raw = $container.find('input, select').serializeArray();
+            const customFields = {};
+
+            // Helper to build deep object from name
+            raw.forEach(item => {
+                // name format: custom_fields[post_type][index][prop]
+                // Regex to pull parts
+                const match = item.name.match(/custom_fields\[(.*?)\]\[(.*?)\]\[(.*?)\]/);
+                if (match) {
+                    const pt = match[1];
+                    const idx = match[2]; // Use as key temporarily
+                    const prop = match[3];
+
+                    if (!customFields[pt]) customFields[pt] = {};
+                    if (!customFields[pt][idx]) customFields[pt][idx] = {};
+
+                    if (prop === 'facet') {
+                        customFields[pt][idx][prop] = true;
+                    } else {
+                        customFields[pt][idx][prop] = item.value;
+                    }
+                }
+            });
+
+            // Convert object of objects to array of objects
+            const finalPayload = {};
+            Object.keys(customFields).forEach(pt => {
+                finalPayload[pt] = Object.values(customFields[pt]).filter(f => f.key && f.name); // basic validation
+            });
+
+            SwiftSearchAdmin.request('POST', '/settings', { custom_fields: finalPayload }).done(function (response) {
+                if (response.success) {
+                    alert('Custom Fields Saved!');
+                } else {
+                    alert('Failed to save.');
+                }
+            }).always(function () {
+                $btn.prop('disabled', false).text(originalText);
+            });
+        });
+
         SwiftSearchAdmin.init();
     });
 

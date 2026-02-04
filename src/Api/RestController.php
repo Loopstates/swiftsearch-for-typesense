@@ -378,6 +378,35 @@ class RestController extends WP_REST_Controller
             update_option('swift_search_settings', $current_settings);
         }
 
+        // Handle Custom Fields (Pro)
+        if (isset($params['custom_fields'])) {
+            $current_settings = get_option('swift_search_settings', array());
+
+            // Deep sanitize
+            $custom_fields = $params['custom_fields'];
+            if (is_array($custom_fields)) {
+                $sanitized = array();
+                foreach ($custom_fields as $pt => $fields) {
+                    if (!is_array($fields))
+                        continue;
+                    $sanitized[$pt] = array();
+                    foreach ($fields as $field) {
+                        if (empty($field['key']) || empty($field['name']))
+                            continue;
+
+                        $sanitized[$pt][] = array(
+                            'key' => sanitize_text_field($field['key']),
+                            'name' => sanitize_text_field($field['name']),
+                            'type' => sanitize_text_field($field['type']),
+                            'facet' => isset($field['facet']) ? true : false,
+                        );
+                    }
+                }
+                $current_settings['custom_fields'] = $sanitized;
+                update_option('swift_search_settings', $current_settings);
+            }
+        }
+
         // Handle Relevance Settings (Pro)
         if (isset($params['relevance_settings'])) {
             // Retrieve current settings to merge
@@ -418,6 +447,12 @@ class RestController extends WP_REST_Controller
                 'typo_tolerance' => isset($new_exp['typo_tolerance']) ? filter_var($new_exp['typo_tolerance'], FILTER_VALIDATE_BOOLEAN) : true,
                 'sort_enabled' => isset($new_exp['sort_enabled']) ? filter_var($new_exp['sort_enabled'], FILTER_VALIDATE_BOOLEAN) : false,
                 'mobile_btn' => isset($new_exp['mobile_btn']) ? filter_var($new_exp['mobile_btn'], FILTER_VALIDATE_BOOLEAN) : false,
+                'instant_search' => isset($new_exp['instant_search']) ? filter_var($new_exp['instant_search'], FILTER_VALIDATE_BOOLEAN) : true,
+                'search_scope' => array(
+                    'posts' => true, // Always true
+                    'terms' => isset($new_exp['search_scope']['terms']) ? filter_var($new_exp['search_scope']['terms'], FILTER_VALIDATE_BOOLEAN) : false,
+                    'users' => isset($new_exp['search_scope']['users']) ? filter_var($new_exp['search_scope']['users'], FILTER_VALIDATE_BOOLEAN) : false,
+                ),
             );
 
             $current_settings['experience'] = $experience;

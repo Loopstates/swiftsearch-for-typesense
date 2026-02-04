@@ -80,6 +80,39 @@ class DocumentBuilder
             }
         }
 
+        // Custom Fields Retrieval
+        if (isset($settings['custom_fields']) && is_array($settings['custom_fields'])) {
+            $pt = $post->post_type;
+            if (isset($settings['custom_fields'][$pt])) {
+                foreach ($settings['custom_fields'][$pt] as $field) {
+                    if (empty($field['key']) || empty($field['name']))
+                        continue;
+
+                    $meta_val = get_post_meta($post_id, $field['key'], true);
+
+                    // Cast Types
+                    if ($field['type'] === 'int32') {
+                        $document[$field['name']] = (int) $meta_val;
+                    } elseif ($field['type'] === 'float') {
+                        $document[$field['name']] = (float) $meta_val;
+                    } elseif ($field['type'] === 'bool') {
+                        $document[$field['name']] = (bool) $meta_val;
+                    } elseif ($field['type'] === 'string[]') {
+                        // Handle array or comma-separated string
+                        if (is_array($meta_val)) {
+                            $document[$field['name']] = array_values($meta_val);
+                        } else {
+                            // Assume comma separated if string
+                            $document[$field['name']] = array_map('trim', explode(',', (string) $meta_val));
+                        }
+                    } else {
+                        // Default String
+                        $document[$field['name']] = (string) $meta_val;
+                    }
+                }
+            }
+        }
+
         return $document;
     }
 }
