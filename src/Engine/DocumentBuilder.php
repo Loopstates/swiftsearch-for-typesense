@@ -57,15 +57,20 @@ class DocumentBuilder
         }
 
         // Taxonomies
-        $taxonomies = get_object_taxonomies($post);
-        foreach ($taxonomies as $taxonomy) {
+        $allowed_taxonomies = isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array('category', 'post_tag');
+
+        foreach ($allowed_taxonomies as $taxonomy) {
             $terms = get_the_terms($post, $taxonomy);
             if (!empty($terms) && !is_wp_error($terms)) {
                 $term_names = wp_list_pluck($terms, 'name');
+
                 if ('category' === $taxonomy) {
                     $document['category'] = $term_names;
                 } elseif ('post_tag' === $taxonomy) {
                     $document['tag'] = $term_names;
+                } else {
+                    // Dynamic Taxonomy
+                    $document['tax_' . $taxonomy] = $term_names;
                 }
             }
         }

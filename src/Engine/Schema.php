@@ -43,6 +43,20 @@ class Schema
             $fields[] = array('name' => 'in_stock', 'type' => 'bool', 'facet' => true, 'optional' => true);
         }
 
+        // Dynamic Taxonomies
+        if (isset($config['indexed_taxonomies']) && is_array($config['indexed_taxonomies'])) {
+            foreach ($config['indexed_taxonomies'] as $tax) {
+                if ($tax === 'category' || $tax === 'post_tag')
+                    continue; // Handled above
+                $fields[] = array(
+                    'name' => 'tax_' . $tax,
+                    'type' => 'string[]',
+                    'facet' => true,
+                    'optional' => true
+                );
+            }
+        }
+
         // Custom Fields (Pro)
         if (isset($config['custom_fields']) && is_array($config['custom_fields'])) {
             $existing_names = array_column($fields, 'name');

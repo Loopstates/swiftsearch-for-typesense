@@ -290,6 +290,27 @@
                     </div>
                 </div>
 
+                <!-- Faceted Navigation (Pro) -->
+                <div class="ss-card ss-pro-gate" style="margin-top: 20px;">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Faceted Navigation (Sidebar)', 'swift-search-typesense'); ?> <span
+                                class="ss-pro-badge">PRO</span></h2>
+                        <p><?php esc_html_e('Configure filters for your search results sidebar.', 'swift-search-typesense'); ?>
+                        </p>
+                    </div>
+                    <div class="ss-card-body">
+                        <div id="ss-facets-config-container">
+                            <div style="padding: 20px; text-align: center; color: #6b7280;">
+                                <span class="ss-loader"></span> Loading Facets...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ss-form-actions">
+                        <button type="button" class="ss-btn ss-btn-secondary"
+                            id="ss-save-facets"><?php esc_html_e('Save Facets', 'swift-search-typesense'); ?></button>
+                    </div>
+                </div>
+
                 <!-- Features (Toggles) -->
                 <div class="ss-card">
                     <div class="ss-card-header">

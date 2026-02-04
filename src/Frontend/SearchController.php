@@ -56,6 +56,8 @@ class SearchController
                 'indexed_taxonomies' => isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array(),
                 'indexed_users' => isset($settings['indexed_users']) ? (bool) $settings['indexed_users'] : false,
                 'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
+                'facets_config' => isset($settings['facets_config']) ? $settings['facets_config'] : array(),
+                'custom_fields' => isset($settings['custom_fields']) ? $settings['custom_fields'] : array(),
                 'apiUrl' => rest_url('swift-search/v1'),
             ));
         }

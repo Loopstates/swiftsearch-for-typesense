@@ -15,6 +15,8 @@
             this.checkStatus();
             this.checkPlan();
             this.restoreState();
+            this.renderCustomFields();
+            this.renderFacetsConfig();
         },
 
         cacheDOM: function () {
@@ -117,6 +119,7 @@
             this.$saveContentBtn.on('click', this.saveContentSettings.bind(this));
             this.$saveRelevanceBtn.on('click', this.handleRelevanceChange.bind(this));
             this.$saveExperienceBtn.on('click', this.handleExperienceChange.bind(this));
+            $('#ss-save-facets').on('click', this.saveFacetsConfig.bind(this));
 
             // Pinning
             this.$pinningSearch.on('input', this.handlePinningSearch.bind(this));
@@ -982,6 +985,119 @@
                     </td>
                 </tr>
             `;
+        },
+
+        // --- Faceted Navigation (Pro) ---
+
+        renderFacetsConfig: function () {
+            const container = $('#ss-facets-config-container');
+            if (!container.length) return;
+
+            const facetsConfig = swiftSearchConfig.facets_config || [];
+
+            // 1. Gather Sources
+            let sources = [];
+
+            // Taxonomies
+            const taxes = swiftSearchConfig.available_taxonomies || [];
+            taxes.forEach(tax => {
+                sources.push({
+                    source: tax.name,
+                    label: tax.label,
+                    type: 'taxonomy'
+                });
+            });
+
+            // Custom Fields (configured & faceted)
+            const customFields = swiftSearchConfig.custom_fields || {};
+            const uniqueCustomFacets = {};
+
+            if (customFields && typeof customFields === 'object') {
+                Object.values(customFields).forEach(fields => {
+                    if (Array.isArray(fields)) {
+                        fields.forEach(f => {
+                            if (f.facet) {
+                                if (!uniqueCustomFacets[f.key]) {
+                                    uniqueCustomFacets[f.key] = {
+                                        source: f.key,
+                                        label: f.name, // Use mapped name
+                                        type: 'meta'
+                                    };
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            Object.values(uniqueCustomFacets).forEach(f => sources.push(f));
+
+            // 2. Render Table
+            let html = `<table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th style="width: 50px; text-align:center;">Enable</th>
+                        <th>Source</th>
+                        <th>Display Label</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            if (sources.length === 0) {
+                html += `<tr><td colspan="4" style="text-align:center; padding: 20px;">No available facets found. Ensure you have indexed Taxonomies or mapped Custom Fields as a 'Facet'.</td></tr>`;
+            } else {
+                sources.forEach(src => {
+                    // Check saved config
+                    const saved = facetsConfig.find(f => f.source === src.source && f.type === src.type);
+                    const isEnabled = saved ? saved.enabled : false;
+                    const label = (saved && saved.label) ? saved.label : src.label;
+
+                    html += `<tr>
+                        <td style="text-align:center;">
+                            <input type="checkbox" class="ss-facet-enable" 
+                                data-source="${src.source}" data-type="${src.type}"
+                                ${isEnabled ? 'checked' : ''}>
+                        </td>
+                        <td><strong>${src.source}</strong></td>
+                        <td>
+                            <input type="text" class="regular-text ss-facet-label" 
+                                value="${label}" style="width:100%; border: 1px solid #ddd;">
+                        </td>
+                         <td><span class="ss-badge ${src.type === 'taxonomy' ? 'ss-badge-tax' : 'ss-badge-meta'}">${src.type === 'taxonomy' ? 'Taxonomy' : 'Meta Field'}</span></td>
+                    </tr>`;
+                });
+            }
+            html += `</tbody></table>`;
+
+            container.html(html);
+        },
+
+        saveFacetsConfig: function () {
+            const facets = [];
+            $('#ss-facets-config-container tbody tr').each(function () {
+                const $row = $(this);
+                const $cb = $row.find('.ss-facet-enable');
+                if ($cb.length) {
+                    facets.push({
+                        source: $cb.data('source'),
+                        type: $cb.data('type'),
+                        label: $row.find('.ss-facet-label').val(),
+                        enabled: $cb.is(':checked')
+                    });
+                }
+            });
+
+            const self = this;
+            const $btn = $('#ss-save-facets');
+            $btn.prop('disabled', true).text('Saving...');
+
+            this.request('POST', '/settings', { facets_config: facets }).done(function (resp) {
+                $btn.prop('disabled', false).text('Save Facets');
+                alert('Facets Configuration Saved!');
+            }).fail(function () {
+                $btn.prop('disabled', false).text('Save Facets');
+                alert('Error saving facets.');
+            });
         }
     };
 

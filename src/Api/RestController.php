@@ -438,6 +438,29 @@ class RestController extends WP_REST_Controller
             update_option('swift_search_settings', $current_settings);
         }
 
+        // Handle Facets Configuration (Pro)
+        if (isset($params['facets_config'])) {
+            $current_settings = get_option('swift_search_settings', array());
+
+            $facets = $params['facets_config'];
+            if (is_array($facets)) {
+                $sanitized_facets = array();
+                foreach ($facets as $facet) {
+                    if (empty($facet['source']) || empty($facet['type'])) {
+                        continue;
+                    }
+                    $sanitized_facets[] = array(
+                        'source' => sanitize_text_field($facet['source']),
+                        'type' => sanitize_text_field($facet['type']), // 'taxonomy' or 'meta'
+                        'label' => sanitize_text_field($facet['label']),
+                        'enabled' => isset($facet['enabled']) ? filter_var($facet['enabled'], FILTER_VALIDATE_BOOLEAN) : false,
+                    );
+                }
+                $current_settings['facets_config'] = $sanitized_facets;
+                update_option('swift_search_settings', $current_settings);
+            }
+        }
+
         // Handle Experience Settings (Free Features)
         if (isset($params['experience_settings'])) {
             $current_settings = get_option('swift_search_settings', array());
