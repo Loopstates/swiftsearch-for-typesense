@@ -33,7 +33,7 @@ class Autoloader
         $prefix = 'SwiftSearch\\';
 
         // Base directory for the namespace prefix
-        $base_dir = SWIFT_SEARCH_PATH . 'src/';
+        $base_dir = untrailingslashit(SWIFT_SEARCH_PATH) . '/src/';
 
         // Does the class use the namespace prefix?
         $len = strlen($prefix);

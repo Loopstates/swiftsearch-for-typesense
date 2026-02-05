@@ -556,9 +556,9 @@ input[type=range]::-ms-track {
 }
 
 .ss-log-entry {
-	margin-bottom: 15px;
+	margin-bottom: 8px;
 	border-bottom: 1px solid #374151;
-	padding-bottom: 10px;
+	padding-bottom: 8px;
 }
 
 .ss-log-entry:last-child {
@@ -569,13 +569,16 @@ input[type=range]::-ms-track {
 
 .ss-log-entry strong {
 	color: #ef4444;
-	display: block;
-	margin-bottom: 4px;
-	font-size: 13px;
+	display: inline-block;
+	/* Inline-block to save vertical space if needed, or keep block but smaller margin */
+	margin-bottom: 2px;
+	font-size: 12px;
 }
 
 .ss-log-entry .ids {
 	color: #9ca3af;
 	word-break: break-all;
 	font-size: 11px;
+	margin-top: 2px;
+}
 }

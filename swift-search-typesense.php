@@ -3,7 +3,7 @@
  * Plugin Name: SwiftSearch - Typesense Search for WordPress
  * Plugin URI:  https://loopstates.com/products/swift-search-typesense/
  * Description: Extremely fast, client-side search for WordPress & WooCommerce powered by Typesense.
- * Version:           1.0.17
+ * Version:           1.0.18
  * Author:      Loopstates
  * Author URI:  https://loopstates.com
  * License:     GPL-2.0+
@@ -16,21 +16,21 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('SWIFT_SEARCH_VERSION', '1.0.17');
-define('SWIFT_SEARCH_DB_VERSION', '1.0.17');
+define('SWIFT_SEARCH_VERSION', '1.0.18');
+define('SWIFT_SEARCH_DB_VERSION', '1.0.18');
 define('SWIFT_SEARCH_FILE', __FILE__);
 define('SWIFT_SEARCH_PATH', plugin_dir_path(__FILE__));
 define('SWIFT_SEARCH_URL', plugin_dir_url(__FILE__));
 
 // Require Autoloader
-require_once SWIFT_SEARCH_PATH . 'src/Core/Autoloader.php';
+require_once untrailingslashit(SWIFT_SEARCH_PATH) . '/src/Core/Autoloader.php';
 
 // Initialize Autoloader
 \SwiftSearch\Core\Autoloader::register();
 
 // Require Vendor Autoloader (if exists) via a helper, or directly if standard
-if (file_exists(SWIFT_SEARCH_PATH . 'vendor/autoload.php')) {
-	require_once SWIFT_SEARCH_PATH . 'vendor/autoload.php';
+if (file_exists(untrailingslashit(SWIFT_SEARCH_PATH) . '/vendor/autoload.php')) {
+	require_once untrailingslashit(SWIFT_SEARCH_PATH) . '/vendor/autoload.php';
 }
 
 // Initialize Freemius
@@ -63,7 +63,7 @@ function swift_search_fs()
 }
 
 // Activation Hook
-register_activation_hook(__FILE__, array('\SwiftSearch\Core\DB', 'install'));
+register_activation_hook(__FILE__, array(\SwiftSearch\Core\DB::class, 'install'));
 
 // Init Plugin
 function swift_search_init()

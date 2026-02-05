@@ -48,6 +48,22 @@ class DB
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
 
+        // Create Batch Logs Table
+        $batch_table_name = $wpdb->prefix . 'swift_search_batch_logs';
+        $sql_batch = "CREATE TABLE $batch_table_name (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            batch_offset bigint(20) NOT NULL,
+            status varchar(20) NOT NULL DEFAULT 'success',
+            error_message text DEFAULT NULL,
+            failed_ids longtext DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY status (status),
+            KEY created_at (created_at)
+        ) $charset_collate;";
+
+        dbDelta($sql_batch);
+
         // Initialize Options
         add_option('swift_search_sync_errors', array());
         add_option('swift_search_index_status', array());

@@ -43,6 +43,11 @@ class Indexer
         add_action('profile_update', array($this, 'handle_user_save_hook'));
         add_action('delete_user', array($this, 'handle_user_delete_hook'));
 
+        // Hook: WooCommerce & Meta Safety
+        add_action('woocommerce_update_product', array($this, 'handle_save_hook'), 10, 1);
+        add_action('woocommerce_reduce_order_stock', array($this, 'handle_wc_order_stock_hook'));
+        add_action('transition_post_status', array($this, 'handle_status_transition'), 10, 3);
+
         // Register the actual background process
         add_action('swift_search_async_index_post', array($this, 'index_post'));
         add_action('swift_search_async_delete_post', array($this, 'delete_post_from_index'));
@@ -138,58 +143,32 @@ class Indexer
 
         // PROCESS BATCH
         $documents = array();
-        $errors = get_option('swift_search_sync_errors', array());
+        $batch_errors = array();
 
         foreach ($ids as $id) {
             try {
-                $doc = $this->index_post($id, true); // Pass true to return doc instead of sending
+                $doc = $this->index_post($id, true);
                 if ($doc) {
                     $documents[] = $doc;
-                } else {
-                    // Potentially a draft or filtered out item, strictly not an 'error' but skipped.
-                    // If we want to verify real failures, we'd need index_post to throw or return error info.
                 }
             } catch (\Exception $e) {
-                // Log failure
-                $errors[] = array('id' => $id, 'error' => $e->getMessage());
+                $batch_errors[] = array('id' => $id, 'error' => $e->getMessage());
             }
-        }
-
-        // Save errors if any new ones
-        if (!empty($errors)) {
-            // Compressed Grouping Logic
-            $grouped_errors = get_option('swift_search_sync_errors', array());
-
-            foreach ($errors as $err) {
-                $msg = $err['error'];
-                $id = $err['id'];
-
-                // If this error type doesn't exist, init it
-                if (!isset($grouped_errors[$msg])) {
-                    $grouped_errors[$msg] = array();
-                }
-
-                // Append ID if not already there (avoid dupes)
-                if (!in_array($id, $grouped_errors[$msg])) {
-                    $grouped_errors[$msg][] = $id;
-                }
-            }
-
-            update_option('swift_search_sync_errors', $grouped_errors);
         }
 
         // BULK IMPORT
         if (!empty($documents)) {
             $result = $this->client->import('posts', $documents);
-            // Check for Bulk API level errors?
-            // Client::import returns array('success' => true, 'raw_response' => ...) or false
             if ($result === false) {
-                // The entire batch failed at API level
-                $batch_error = array('batch_offset' => $offset, 'error' => $this->client->get_last_error());
-                $errors[] = $batch_error;
-                update_option('swift_search_sync_errors', $errors);
+                // Batch Level Error
+                $batch_errors[] = array('id' => 'BATCH_API', 'error' => $this->client->get_last_error());
+            } elseif (is_array($result) && isset($result['success']) && !$result['success']) {
+                // Check deep errors if import returns partial success
             }
         }
+
+        // LOG BATCH
+        $this->log_batch($offset, $batch_errors);
 
         // UPDATE STATUS
         $new_processed = $offset + count($ids);
@@ -217,7 +196,41 @@ class Indexer
                 'last_updated' => time(),
                 'last_sync_completed_at' => time()
             ));
+
+            // Clean Old Logs
+            $this->cleanup_logs();
         }
+    }
+
+    private function log_batch($offset, $errors)
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'swift_search_batch_logs';
+
+        $status = empty($errors) ? 'success' : 'failed';
+        $error_msg = empty($errors) ? null : 'Batch completed with ' . count($errors) . ' errors.';
+        $failed_ids = empty($errors) ? null : json_encode($errors);
+
+        // Insert
+        $wpdb->insert(
+            $table,
+            array(
+                'batch_offset' => $offset,
+                'status' => $status,
+                'error_message' => $error_msg,
+                'failed_ids' => $failed_ids,
+                'created_at' => current_time('mysql')
+            ),
+            array('%d', '%s', '%s', '%s', '%s')
+        );
+    }
+
+    private function cleanup_logs()
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'swift_search_batch_logs';
+        // Delete older than 7 days
+        $wpdb->query("DELETE FROM $table WHERE created_at < NOW() - INTERVAL 7 DAY");
     }
 
     // ... existing hooks ...
@@ -402,12 +415,46 @@ class Indexer
         $this->index_post($post_id);
     }
 
-    /**
-     * WORKER: Delete a post from index.
-     */
     public function delete_post_from_index($post_id)
     {
         $this->client->request('/collections/posts/documents/' . $post_id, 'DELETE');
+    }
+
+    // --- Extra Hooks ---
+
+    public function handle_wc_order_stock_hook($order)
+    {
+        // When stock reduces, re-index items in order
+        if (!$order)
+            return;
+
+        $items = $order->get_items();
+        foreach ($items as $item) {
+            $product_id = $item->get_product_id();
+            $this->handle_save_hook($product_id);
+            // Also variation if exists
+            $variation_id = $item->get_variation_id();
+            if ($variation_id) {
+                // Typically changes persist to parent or we index variation. 
+                // For now, re-index parent is usually enough if schema handles it.
+                // Or if main Product ID is indexed.
+            }
+        }
+    }
+
+    public function handle_status_transition($new_status, $old_status, $post)
+    {
+        if ($new_status === $old_status)
+            return;
+
+        // If moved to trash/draft -> Delete
+        if ($new_status === 'trash' || $new_status === 'draft' || $new_status === 'auto-draft') {
+            $this->handle_delete_hook($post->ID);
+        }
+        // If moved to publish -> Index (only if not already caught by save_post, which usually fires too, but this is safe double-check)
+        elseif ($new_status === 'publish') {
+            $this->handle_save_hook($post->ID);
+        }
     }
 
     /**

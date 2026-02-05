@@ -380,13 +380,34 @@ class RestController extends WP_REST_Controller
     public function handle_sync_status($request)
     {
         $status = get_option('swift_search_index_status', array());
-        $errors = get_option('swift_search_sync_errors', array());
 
-        // Calculate Error Count from Grouped Array
-        $error_count = 0;
-        foreach ($errors as $msg => $ids) {
-            $error_count += count($ids);
+        // Fetch Error Count from Custom Table
+        global $wpdb;
+        $table = $wpdb->prefix . 'swift_search_batch_logs';
+
+        $error_count = $wpdb->get_var("SELECT SUM(JSON_LENGTH(failed_ids)) FROM $table WHERE status = 'failed'");
+        $error_count = $error_count ? (int) $error_count : 0;
+
+        // Fetch Recent Errors (Limit to 50 items flat, or just list batches?)
+        // Let's return the simplified list of batch errors for the UI
+        $raw_errors = $wpdb->get_results("SELECT failed_ids, error_message FROM $table WHERE status = 'failed' ORDER BY created_at DESC LIMIT 20");
+
+        $errors = array();
+        foreach ($raw_errors as $row) {
+            $ids = json_decode($row->failed_ids, true); // this is array of {id, error}
+            $msg = $row->error_message;
+
+            // Transform for UI (which expects grouped errors or flat list of strings?)
+            // admin.js log viewer expects { "Error Msg": [id1, id2] } or array of {error: "msg"}
+            // Let's stick to array of {id, error} for simplicity now, flattening the batch
+            if (is_array($ids)) {
+                foreach ($ids as $err_item) {
+                    $errors[] = $err_item; // {id: 123, error: "..."}
+                }
+            }
         }
+        // Cap UI return
+        $errors = array_slice($errors, 0, 50);
 
         // Defaults
         $response = array(
@@ -396,14 +417,14 @@ class RestController extends WP_REST_Controller
             'message' => 'Idle',
             'last_sync_completed_at' => null,
             'error_count' => $error_count,
-            'errors' => $errors // Now returns { "Error A": [1,2,3], "Error B": [4] }
+            'errors' => $errors
         );
 
         if (!empty($status)) {
             $response = array_merge($response, $status);
         }
 
-        // Ensure error data is present even if merge overwrote something (unlikely)
+        // Ensure error data is present
         $response['error_count'] = $error_count;
         $response['errors'] = $errors;
 

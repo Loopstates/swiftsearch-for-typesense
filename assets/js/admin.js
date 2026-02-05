@@ -17,6 +17,9 @@
             this.restoreState();
             this.renderCustomFields();
             this.renderFacetsConfig();
+
+            // Initial Status Check
+            this.pollStatus(true);
         },
 
         cacheDOM: function () {
@@ -30,7 +33,7 @@
             this.$syncBtn = $('#ss-sync-btn');
             this.$resetBtn = $('#ss-reset-btn');
             this.$progressCircle = $('.progress-circle');
-            this.$syncStatusText = $('.ss-sync-status p');
+            this.$syncStatusText = $('#ss-sync-msg');
             this.$logContainer = $('#ss-sync-log-container');
 
             // Save Btns
