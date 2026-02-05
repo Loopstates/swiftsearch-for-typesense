@@ -548,6 +548,21 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Sync Logs Panel -->
+                <div class="ss-card" style="margin-top: 20px;">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Sync Logs', 'swift-search-typesense'); ?></h2>
+                        <p><?php esc_html_e('Recent errors and status messages.', 'swift-search-typesense'); ?></p>
+                    </div>
+                    <div class="ss-card-body">
+                        <div id="ss-sync-log-container" class="ss-log-viewer" style="min-height: 100px;">
+                            <div class="ss-log-placeholder" style="color: #9ca3af; text-align: center; padding: 20px;">
+                                <?php esc_html_e('No errors recorded.', 'swift-search-typesense'); ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
         </main>

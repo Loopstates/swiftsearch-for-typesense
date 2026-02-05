@@ -532,3 +532,50 @@ input[type=range]::-ms-track {
 .remove-pin:hover {
 	color: #ef4444;
 }
+
+/* Sync Logs */
+.ss-log-viewer {
+	background: #1f2937;
+	color: #e5e7eb;
+	padding: 15px;
+	border-radius: 6px;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+	font-size: 12px;
+	line-height: 1.5;
+	max-height: 300px;
+	overflow-y: auto;
+	white-space: pre-wrap;
+	border: 1px solid #374151;
+}
+
+.ss-log-placeholder {
+	color: #9ca3af;
+	text-align: center;
+	padding: 20px;
+	font-style: italic;
+}
+
+.ss-log-entry {
+	margin-bottom: 15px;
+	border-bottom: 1px solid #374151;
+	padding-bottom: 10px;
+}
+
+.ss-log-entry:last-child {
+	border-bottom: none;
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+.ss-log-entry strong {
+	color: #ef4444;
+	display: block;
+	margin-bottom: 4px;
+	font-size: 13px;
+}
+
+.ss-log-entry .ids {
+	color: #9ca3af;
+	word-break: break-all;
+	font-size: 11px;
+}

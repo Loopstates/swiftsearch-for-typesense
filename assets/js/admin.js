@@ -31,6 +31,7 @@
             this.$resetBtn = $('#ss-reset-btn');
             this.$progressCircle = $('.progress-circle');
             this.$syncStatusText = $('.ss-sync-status p');
+            this.$logContainer = $('#ss-sync-log-container');
 
             // Save Btns
             this.$saveContentBtn = $('#ss-save-content');
@@ -1019,15 +1020,17 @@
                                 // Display breakdown as tooltip or subtext?
                                 // For now, keep it simple. The count is accurate.
                             } else {
-                                statusHtml += ` (Success)`;
+                                statusHtml += ` ( <span style="color: #10b981; font-weight: bold;">Success</span> )`;
                             }
 
                             // Only update text if we are not showing "Complete!" animation
                             if (isInitCheck) {
-                                self.$syncStatusText.html(statusHtml);
-                                self.updateProgress(data.processed > 0 ? 100 : 0); // Visuals
+                                self.updateProgress(data.processed > 0 ? 100 : 0, statusHtml);
                             }
                         }
+
+                        // Render Logs
+                        self.renderLogs(data.errors);
 
                         // Finished JUST NOW?
                         if (!isInitCheck && data.processed >= data.total && data.total > 0) {
@@ -1049,13 +1052,21 @@
             this.$resetBtn.prop('disabled', false);
             this.checkStatus(); // Update doc count
 
+            // Refresh to show Last Sync stats after a moment
+            const self = this;
+            setTimeout(function () {
+                self.pollStatus(true);
+            }, 1000);
+
             setTimeout(function () {
                 alert('Success: Background indexing complete.');
             }, 500);
         },
 
         updateProgress: function (percent, text) {
-            this.$syncStatusText.text(text);
+            if (text) {
+                this.$syncStatusText.html(text);
+            }
 
             // Render SVG Circle if not present
             if (this.$progressCircle.find('svg').length === 0) {
@@ -1085,6 +1096,32 @@
 
             $path.attr('stroke-dasharray', `${percent}, 100`);
             $text.text(`${percent}%`);
+        },
+
+        renderLogs: function (errors) {
+            if (!errors || (Array.isArray(errors) && errors.length === 0) || (typeof errors === 'object' && Object.keys(errors).length === 0)) {
+                this.$logContainer.html('<div class="ss-log-placeholder">No errors recorded.</div>');
+                return;
+            }
+
+            let html = '';
+
+            if (Array.isArray(errors)) {
+                errors.forEach(err => {
+                    html += `<div class="ss-log-entry">
+                        <strong>[Error] ${this.escapeHtml(err.error || JSON.stringify(err))}</strong>
+                     </div>`;
+                });
+            } else {
+                for (const [msg, ids] of Object.entries(errors)) {
+                    html += `<div class="ss-log-entry">
+                        <strong>[Error] ${this.escapeHtml(msg)} <span style="color:#d1d5db; font-weight:normal; font-size:11px;">(${ids ? ids.length : 0} items)</span></strong>
+                        <div class="ids">IDs: ${ids ? ids.join(', ') : ''}</div>
+                    </div>`;
+                }
+            }
+
+            this.$logContainer.html(html);
         },
 
         syncError: function (msg) {
