@@ -390,19 +390,17 @@ class RestController extends WP_REST_Controller
 
         // Fetch Recent Errors (Limit to 50 items flat, or just list batches?)
         // Let's return the simplified list of batch errors for the UI
-        $raw_errors = $wpdb->get_results("SELECT failed_ids, error_message FROM $table WHERE status = 'failed' ORDER BY created_at DESC LIMIT 20");
+        $raw_errors = $wpdb->get_results("SELECT failed_ids, error_message, created_at FROM $table WHERE status = 'failed' ORDER BY created_at DESC LIMIT 20");
 
         $errors = array();
         foreach ($raw_errors as $row) {
             $ids = json_decode($row->failed_ids, true); // this is array of {id, error}
-            $msg = $row->error_message;
 
-            // Transform for UI (which expects grouped errors or flat list of strings?)
-            // admin.js log viewer expects { "Error Msg": [id1, id2] } or array of {error: "msg"}
-            // Let's stick to array of {id, error} for simplicity now, flattening the batch
             if (is_array($ids)) {
                 foreach ($ids as $err_item) {
-                    $errors[] = $err_item; // {id: 123, error: "..."}
+                    // Inject timestamp into each error item
+                    $err_item['timestamp'] = $row->created_at;
+                    $errors[] = $err_item;
                 }
             }
         }

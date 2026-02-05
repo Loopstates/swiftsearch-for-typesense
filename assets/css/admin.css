@@ -556,29 +556,28 @@ input[type=range]::-ms-track {
 }
 
 .ss-log-entry {
-	margin-bottom: 8px;
-	border-bottom: 1px solid #374151;
-	padding-bottom: 8px;
+	margin-bottom: 0;
+	border-bottom: 1px dashed #374151;
+	padding: 4px 0;
+	line-height: 1.4;
 }
 
 .ss-log-entry:last-child {
 	border-bottom: none;
-	margin-bottom: 0;
-	padding-bottom: 0;
 }
 
 .ss-log-entry strong {
 	color: #ef4444;
-	display: inline-block;
-	/* Inline-block to save vertical space if needed, or keep block but smaller margin */
-	margin-bottom: 2px;
-	font-size: 12px;
+	display: inline;
+	margin-bottom: 0;
+	font-size: 11px;
 }
 
 .ss-log-entry .ids {
 	color: #9ca3af;
 	word-break: break-all;
 	font-size: 11px;
-	margin-top: 2px;
-}
+	margin-top: 0;
+	display: inline;
+	margin-left: 5px;
 }

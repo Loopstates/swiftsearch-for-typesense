@@ -1111,11 +1111,19 @@
 
             if (Array.isArray(errors)) {
                 errors.forEach(err => {
-                    html += `<div class="ss-log-entry">
-                        <strong>[Error] ${this.escapeHtml(err.error || JSON.stringify(err))}</strong>
+                    const time = err.timestamp ? new Date(err.timestamp).toLocaleString() : '';
+                    const errText = this.escapeHtml(err.error || JSON.stringify(err));
+                    const idText = err.id ? `(ID: ${err.id})` : '';
+
+                    html += `<div class="ss-log-entry" style="font-family: monospace; font-size: 11px;">
+                        <span style="color: #6b7280;">[${time}]</span> 
+                        <span style="color: #ef4444; font-weight: 600;">[Error]</span> 
+                        <span style="color: #e5e7eb;">${errText}</span> 
+                        <span style="color: #9ca3af;">${idText}</span>
                      </div>`;
                 });
             } else {
+                // Fallback for old format if any (though we flattened it)
                 for (const [msg, ids] of Object.entries(errors)) {
                     html += `<div class="ss-log-entry">
                         <strong>[Error] ${this.escapeHtml(msg)} <span style="color:#d1d5db; font-weight:normal; font-size:11px;">(${ids ? ids.length : 0} items)</span></strong>

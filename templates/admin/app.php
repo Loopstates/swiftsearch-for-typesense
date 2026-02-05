@@ -489,9 +489,9 @@
                         <div class="ss-pro-gate" data-feature="pinning">
                             <div class="ss-pinning-ui">
                                 <div class="ss-form-group" style="position:relative;">
-                                    <label><?php esc_html_e('Search for Product', 'swift-search-typesense'); ?></label>
+                                    <label><?php esc_html_e('Select Pinned Item', 'swift-search-typesense'); ?></label>
                                     <input type="text" id="ss-pinning-search" class="ss-input"
-                                        placeholder="Type a product name..." autocomplete="off">
+                                        placeholder="Type a product or an item name that you want to pin..." autocomplete="off">
                                     <div id="ss-pinning-results" class="ss-autocomplete-results"></div>
                                 </div>
 
