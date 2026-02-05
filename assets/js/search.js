@@ -291,6 +291,7 @@
         if (!hasHits) {
             hitsContainer.innerHTML = '<div class="ss-no-results">No results found.</div>';
             loader.style.display = 'none';
+            logSearch(input.value.trim(), 0); // Log zero results
         } else {
             logSearch(input.value.trim(), totalFound);
         }
@@ -367,12 +368,26 @@
     function logSearch(query, hits) {
         clearTimeout(logTimer);
         if (!query || query.length < 2) return;
+
+        // Debounce to avoid spamming while typing
         logTimer = setTimeout(() => {
             const payload = { query: query, hits: hits };
+
+            // console.log('SwiftSearch Logging:', payload); // Debug
+
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (config.nonce) {
+                headers['X-WP-Nonce'] = config.nonce;
+            }
+
             fetch(config.apiUrl + '/log', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify(payload)
+            }).then(response => {
+                if (!response.ok) console.warn('SwiftSearch Log Failed', response.status);
             }).catch(e => console.error('Log error', e));
         }, 2000);
     }
