@@ -7,6 +7,7 @@ use SwiftSearch\Core\SettingsIntegrity;
 use SwiftSearch\Frontend\SearchController;
 use SwiftSearch\Engine\EngineController;
 use SwiftSearch\Integrations\IntegrationManager;
+use SwiftSearch\Core\Cron;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -87,6 +88,9 @@ class Plugin
 
         // Integrations
         new IntegrationManager();
+
+        // Scheduled Tasks
+        (new Cron())->init();
     }
 
     /**

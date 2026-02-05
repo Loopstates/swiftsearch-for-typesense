@@ -584,14 +584,14 @@ class RestController extends WP_REST_Controller
         global $wpdb;
         $table_name = \SwiftSearch\Core\DB::get_table_name();
 
-        $wpdb->insert(
-            $table_name,
-            array(
-                'query' => $query,
-                'hits' => $hits,
-            ),
-            array('%s', '%d')
-        );
+        // Attempt Insert
+        $wpdb->query($wpdb->prepare(
+            "INSERT INTO $table_name (query, frequency, result_count, created_at, updated_at) 
+             VALUES (%s, 1, %d, NOW(), NOW()) 
+             ON DUPLICATE KEY UPDATE frequency = frequency + 1, result_count = VALUES(result_count), updated_at = NOW()",
+            $query,
+            $hits
+        ));
 
         return new \WP_REST_Response(array('success' => true), 200);
     }
@@ -612,21 +612,19 @@ class RestController extends WP_REST_Controller
 
         // Top Searches
         $top_queries = $wpdb->get_results("
-            SELECT query, COUNT(*) as count, AVG(hits) as avg_hits 
+            SELECT query, frequency as count, updated_at as last_hit 
             FROM $table_name 
-            WHERE hits > 0 
-            GROUP BY query 
-            ORDER BY count DESC 
+            WHERE frequency > 0 
+            ORDER BY frequency DESC 
             LIMIT 10
         ");
 
         // Zero Result Queries
         $no_results = $wpdb->get_results("
-            SELECT query, COUNT(*) as count 
+            SELECT query, frequency as count 
             FROM $table_name 
-            WHERE hits = 0 
-            GROUP BY query 
-            ORDER BY count DESC 
+            WHERE result_count = 0 
+            ORDER BY frequency DESC 
             LIMIT 10
         ");
 

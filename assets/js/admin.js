@@ -233,7 +233,7 @@
 
             const savedUsers = swiftSearchConfig.indexed_users || false;
 
-            console.log('Rendering Content Settings.', { postTypes, taxonomies });
+
             let html = '';
 
             // Section: Post Types
@@ -290,7 +290,22 @@
             container.html(html);
         },
 
-        // Helper for Authenticated Requests
+
+        /**
+         * Escape HTML to prevent XSS.
+         */
+        escapeHtml: function (text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.toString().replace(/[&<>"']/g, function (m) { return map[m]; });
+        },
+
         request: function (method, endpoint, data = {}) {
             return $.ajax({
                 url: swiftSearchConfig.apiUrl + endpoint,
@@ -516,42 +531,124 @@
         },
 
         loadAnalytics: function () {
-            const $topParams = $('#ss-analytics-top tbody');
-            const $zeroParams = $('#ss-analytics-zero tbody');
+            const self = this;
+            const $topTable = $('#ss-analytics-top tbody');
+            const $zeroTable = $('#ss-analytics-zero tbody');
 
-            $topParams.html('<tr><td colspan="3">Loading...</td></tr>');
-            $zeroParams.html('<tr><td colspan="2">Loading...</td></tr>');
+            // Reset UI
+            $topTable.html('<tr><td colspan="3">Loading...</td></tr>');
+            $zeroTable.html('<tr><td colspan="2">Loading...</td></tr>');
 
-            this.request('GET', '/analytics').done(function (response) {
-                if (response.success) {
-                    const top = response.data.top_queries;
-                    const zero = response.data.no_results;
+            this.request('GET', '/analytics')
+                .done(function (response) {
+                    console.log('SwiftSearch Analytics Response:', response); // Debug Log
 
-                    if (top.length > 0) {
-                        let html = '';
-                        top.forEach(row => {
-                            html += `<tr>
-                                <td>${row.query}</td>
-                                <td>${row.count}</td>
-                                <td>${Math.round(row.avg_hits)}</td>
-                            </tr>`;
-                        });
-                        $topParams.html(html);
+                    if (response && response.success) {
+                        // Render Top Searches
+                        if (response.data.top_queries && response.data.top_queries.length > 0) {
+                            $topTable.empty();
+                            response.data.top_queries.forEach(function (item) {
+                                const date = item.last_hit ? new Date(item.last_hit).toLocaleDateString() : '-';
+                                $topTable.append(`
+                                    <tr>
+                                        <td>${self.escapeHtml(item.query)}</td>
+                                        <td>${item.count}</td>
+                                        <td>${date}</td>
+                                    </tr>
+                                `);
+                            });
+
+                            // Render Chart
+                            self.renderAnalyticsChart(response.data.top_queries);
+                        } else {
+                            $topTable.html('<tr><td colspan="3">No searches recorded yet.</td></tr>');
+                        }
+
+                        // Render Zero Results
+                        if (response.data.no_results && response.data.no_results.length > 0) {
+                            $zeroTable.empty();
+                            response.data.no_results.forEach(function (item) {
+                                $zeroTable.append(`
+                                    <tr>
+                                        <td>${self.escapeHtml(item.query)}</td>
+                                        <td>${item.count}</td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            $zeroTable.html('<tr><td colspan="2">No zero-result-queries found.</td></tr>');
+                        }
                     } else {
-                        $topParams.html('<tr><td colspan="3">No data yet.</td></tr>');
+                        // Handle logical failure (success: false or missing)
+                        const msg = (response && response.message) ? response.message : 'Unknown error';
+                        $topTable.html('<tr><td colspan="3">Error: ' + self.escapeHtml(msg) + '</td></tr>');
+                        $zeroTable.html('<tr><td colspan="2">Error loading data.</td></tr>');
                     }
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    console.error('SwiftSearch Analytics API Error:', textStatus, errorThrown);
+                    $topTable.html('<tr><td colspan="3">Failed to load data (API Error).</td></tr>');
+                    $zeroTable.html('<tr><td colspan="2">Failed to load data.</td></tr>');
+                });
+        },
 
-                    if (zero.length > 0) {
-                        let html = '';
-                        zero.forEach(row => {
-                            html += `<tr>
-                                <td>${row.query}</td>
-                                <td>${row.count}</td>
-                            </tr>`;
-                        });
-                        $zeroParams.html(html);
-                    } else {
-                        $zeroParams.html('<tr><td colspan="2">No zero-result searches.</td></tr>');
+        /**
+         * Render Analytics Chart (Chart.js).
+         */
+        renderAnalyticsChart: function (data) {
+            const ctx = document.getElementById('ss-analytics-chart');
+            if (!ctx) return;
+
+            // Destroy old chart if exists
+            if (this.chartInstance) {
+                this.chartInstance.destroy();
+            }
+
+            const labels = data.map(item => item.query);
+            const counts = data.map(item => parseInt(item.count));
+
+            // Check if Chart is loaded
+            if (typeof Chart === 'undefined') {
+                console.warn('Swift Search: Chart.js not loaded.');
+                return;
+            }
+
+            this.chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Search Frequency',
+                        data: counts,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Top 10 Search Terms'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: true,
+                                color: '#f3f4f6'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
                     }
                 }
             });
@@ -815,20 +912,38 @@
         },
 
         checkPlan: function () {
-            if (swiftSearchConfig.plan && swiftSearchConfig.plan.isPaying) {
+
+
+            // Check if paying (handle bool or string 'true')
+            if (swiftSearchConfig.plan && (swiftSearchConfig.plan.isPaying === true || swiftSearchConfig.plan.isPaying === 'true')) {
+
+                this.$proGates.removeClass('locked');
+                this.$proGates.removeClass('ss-feature-disabled');
+                this.$proGates.find('.ss-feature-lock-overlay').remove();
+                this.$proGates.find('input, select, textarea').prop('disabled', false);
                 return;
             }
 
+
+            const self = this;
             this.$proGates.each(function () {
                 const $el = $(this);
-                $el.addClass('ss-feature-disabled');
-                const url = swiftSearchConfig.plan.upgradeUrl || '#';
-                $el.append(`
-					<div class="ss-feature-lock-overlay">
-						<a href="${url}" target="_blank" class="ss-lock-btn">Upgrade to PRO</a>
-					</div>
-				`);
-                $el.find('input, select, textarea').prop('disabled', true);
+                // Avoid double locking
+                if (!$el.hasClass('ss-feature-disabled')) {
+                    $el.addClass('ss-feature-disabled locked');
+                    const url = swiftSearchConfig.plan && swiftSearchConfig.plan.upgradeUrl ? swiftSearchConfig.plan.upgradeUrl : '#';
+                    $el.append(`
+                        <div class="ss-feature-lock-overlay">
+                            <div class="lock-content">
+                                <span class="dashicons dashicons-lock"></span>
+                                <h3>Pro Feature</h3>
+                                <p>Upgrade to unlock this feature.</p>
+                                <a href="${url}" target="_blank" class="ss-btn ss-btn-primary">Upgrade Now</a>
+                            </div>
+                        </div>
+                    `);
+                    $el.find('input, select, textarea').prop('disabled', true);
+                }
             });
         },
 

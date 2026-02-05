@@ -429,6 +429,9 @@
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-analytics-dashboard" id="ss-analytics-dashboard">
+                            <div class="ss-form-group" style="margin-bottom: 2rem; position: relative; height: 300px;">
+                                <canvas id="ss-analytics-chart"></canvas>
+                            </div>
                             <div class="ss-form-group-row">
                                 <div class="ss-form-group" style="flex:1;">
                                     <h3>Top Searches</h3>
@@ -437,7 +440,7 @@
                                             <tr>
                                                 <th>Query</th>
                                                 <th>Count</th>
-                                                <th>Avg Hits</th>
+                                                <th>Last Searched</th>
                                             </tr>
                                         </thead>
                                         <tbody>

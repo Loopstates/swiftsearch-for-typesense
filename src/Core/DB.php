@@ -36,11 +36,13 @@ class DB
 
         $sql = "CREATE TABLE $table_name (
             id bigint(20) NOT NULL AUTO_INCREMENT,
-            query varchar(255) NOT NULL,
-            hits int(11) NOT NULL DEFAULT 0,
+            query varchar(191) NOT NULL,
+            frequency bigint(20) NOT NULL DEFAULT 1,
+            result_count int(11) NOT NULL DEFAULT 0,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
-            KEY query (query)
+            UNIQUE KEY query (query)
         ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

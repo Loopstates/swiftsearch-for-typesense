@@ -51,6 +51,15 @@ class AdminController
             return;
         }
 
+        // Chart.js for Analytics
+        wp_enqueue_script(
+            'chart-js',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            array(),
+            '4.4.1',
+            true
+        );
+
         // Main Admin CSS
         wp_enqueue_style(
             'swift-search-admin',
@@ -63,7 +72,7 @@ class AdminController
         wp_enqueue_script(
             'swift-search-admin',
             SWIFT_SEARCH_URL . 'assets/js/admin.js',
-            array('jquery'),
+            array('jquery', 'chart-js'),
             SWIFT_SEARCH_VERSION,
             true
         );
