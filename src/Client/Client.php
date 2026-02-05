@@ -165,6 +165,18 @@ class Client
     }
 
     /**
+     * Upsert a synonym.
+     * 
+     * @param string $id Synonym ID.
+     * @param array $schema Synonym definition.
+     * @return array|bool
+     */
+    public function upsert_synonym($id, $schema)
+    {
+        return $this->request('/collections/posts/synonyms/' . $id, 'PUT', $schema);
+    }
+
+    /**
      * Import documents (Bulk).
      * Uses the /import endpoint with JSONL.
      * 

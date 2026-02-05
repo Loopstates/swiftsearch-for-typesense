@@ -161,6 +161,13 @@
             facet_by: facetFields
         };
 
+        // Relevance Weights (Client-Side)
+        if (config.weights && (config.weights.post_title || config.weights.post_content)) {
+            const tWeight = config.weights.post_title || 1;
+            const cWeight = config.weights.post_content || 1;
+            postsParams.query_by_weights = `${tWeight},${cWeight}`;
+        }
+
         // Pinned Items (Client-Side)
         if (config.pinned_items && Array.isArray(config.pinned_items) && config.pinned_items.length > 0) {
             const pinnedIds = config.pinned_items.map(i => i.id).join(',');

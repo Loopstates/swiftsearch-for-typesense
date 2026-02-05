@@ -59,6 +59,7 @@ class SearchController
                 'facets_config' => isset($settings['facets_config']) ? $settings['facets_config'] : array(),
                 'custom_fields' => isset($settings['custom_fields']) ? $settings['custom_fields'] : array(),
                 'pinned_items' => get_option('swift_search_pinned_items', array()),
+                'weights' => isset($settings['weights']) ? $settings['weights'] : array(), // Pass Weights
                 'apiUrl' => rest_url('swift-search/v1'),
                 'nonce' => wp_create_nonce('wp_rest'),
             ));

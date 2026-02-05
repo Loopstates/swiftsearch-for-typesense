@@ -207,8 +207,11 @@
                             </div>
                             <div class="ss-form-group">
                                 <label>Synonyms</label>
-                                <textarea id="ss-synonyms-list" rows="4" class="ss-input"
-                                    placeholder="jacket, coat, blazer"></textarea>
+                                <textarea id="ss-synonyms-list" rows="6" class="ss-input"
+                                    placeholder="jacket, coat, blazer&#10;bag, backpack, tote&#10;trousers, pants"></textarea>
+                                <p class="description">
+                                    <?php esc_html_e('Enter each group of synonyms on a new line. Comma-separated.', 'swift-search-typesense'); ?>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -491,7 +494,8 @@
                                 <div class="ss-form-group" style="position:relative;">
                                     <label><?php esc_html_e('Select Pinned Item', 'swift-search-typesense'); ?></label>
                                     <input type="text" id="ss-pinning-search" class="ss-input"
-                                        placeholder="Type a product or an item name that you want to pin..." autocomplete="off">
+                                        placeholder="Type a product or an item name that you want to pin..."
+                                        autocomplete="off">
                                     <div id="ss-pinning-results" class="ss-autocomplete-results"></div>
                                 </div>
 

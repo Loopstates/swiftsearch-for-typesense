@@ -527,6 +527,17 @@ class RestController extends WP_REST_Controller
                     }
                 }
                 $current_settings['synonyms'] = $clean_synonyms;
+
+                // Sync to Typesense
+                if (!empty($current_settings['api_key'])) {
+                    $client = new \SwiftSearch\Client\Client($current_settings);
+                    foreach ($clean_synonyms as $index => $syn) {
+                        $client->upsert_synonym("synonym-$index", array(
+                            'root' => $syn['root'],
+                            'synonyms' => $syn['synonyms']
+                        ));
+                    }
+                }
             }
 
             update_option('swift_search_settings', $current_settings);
