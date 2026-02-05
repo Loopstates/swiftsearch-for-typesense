@@ -420,7 +420,7 @@
 
             <!-- Step 5: Analytics (Pro) -->
             <section class="ss-step-view" id="view-analytics" style="display:none;">
-                <div class="ss-card">
+                <div class="ss-card ss-pro-gate">
                     <div class="ss-card-header">
                         <h2><?php esc_html_e('Search Analytics', 'swift-search-typesense'); ?> <span
                                 class="ss-pro-badge">PRO</span></h2>
