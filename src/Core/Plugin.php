@@ -89,6 +89,9 @@ class Plugin
         // Integrations
         new IntegrationManager();
 
+        // Background Processor (Async Chain)
+        new \SwiftSearch\Engine\BackgroundProcess();
+
         // Scheduled Tasks
         (new Cron())->init();
     }

@@ -528,7 +528,7 @@
                                     <span style="font-size: 24px;">0%</span>
                                 </div>
                                 <span class="ss-status-badge"
-                                    style="background: #e5e7eb; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; color: #4b5563;">Idle</span>
+                                    style="background: #e5e7eb; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; color: #4b5563;">Progress</span>
                             </div>
                             <div class="ss-sync-details" style="flex: 1;">
                                 <h3 style="margin: 0 0 10px 0; font-size: 16px;">Index Synchronization</h3>

@@ -58,6 +58,10 @@ class Indexer
      * Start Bulk Indexing.
      * Calculates totals and triggers first batch.
      */
+    /**
+     * Start Bulk Indexing.
+     * Calculates totals and triggers first batch.
+     */
     public function start_bulk_index()
     {
         $config = $this->config_loader->get_config();
@@ -86,12 +90,13 @@ class Indexer
         );
         update_option('swift_search_index_status', $status);
 
-        // 3. Schedule First Batch
-        if (function_exists('as_enqueue_async_action')) {
-            as_enqueue_async_action('swift_search_async_batch_process', array('offset' => 0, 'limit' => 50));
-        } else {
-            wp_schedule_single_event(time(), 'swift_search_async_batch_process', array(0, 50));
-        }
+        // 3. Schedule First Batch - ASYNC
+        $bg_process = new BackgroundProcess();
+        $bg_process->dispatch(array(
+            'type' => 'batch_process',
+            'offset' => 0,
+            'limit' => 50
+        ));
 
         return $total;
     }
@@ -121,9 +126,10 @@ class Indexer
             // DONE
             update_option('swift_search_index_status', array(
                 'active' => false,
-                'total' => $query->found_posts, // Adjust in case it changed?
-                'processed' => $offset, // Or just mark complete
-                'message' => 'Complete!'
+                'total' => $query->found_posts,
+                'processed' => $offset, // Adjusted
+                'message' => 'Complete!',
+                'last_updated' => time()
             ));
             return;
         }
@@ -150,11 +156,23 @@ class Indexer
         $status['message'] = "Indexed {$new_processed} / {$status['total']}";
         update_option('swift_search_index_status', $status);
 
-        // SCHEDULE NEXT
-        if (function_exists('as_enqueue_async_action')) {
-            as_enqueue_async_action('swift_search_async_batch_process', array('offset' => $new_processed, 'limit' => $limit));
+        // SCHEDULE NEXT - ASYNC CHAIN
+        if ($new_processed < $status['total']) {
+            $bg_process = new BackgroundProcess();
+            $bg_process->dispatch(array(
+                'type' => 'batch_process',
+                'offset' => $new_processed,
+                'limit' => $limit
+            ));
         } else {
-            wp_schedule_single_event(time() + 1, 'swift_search_async_batch_process', array($new_processed, $limit));
+            // Just in case we finished perfectly on the boundary
+            update_option('swift_search_index_status', array(
+                'active' => false,
+                'total' => $status['total'],
+                'processed' => $status['total'],
+                'message' => 'Complete!',
+                'last_updated' => time()
+            ));
         }
     }
 

@@ -16,8 +16,8 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('SWIFT_SEARCH_VERSION', '1.0.14');
-define('SWIFT_SEARCH_DB_VERSION', '1.0.14');
+define('SWIFT_SEARCH_VERSION', '1.0.15');
+define('SWIFT_SEARCH_DB_VERSION', '1.0.15');
 define('SWIFT_SEARCH_FILE', __FILE__);
 define('SWIFT_SEARCH_PATH', plugin_dir_path(__FILE__));
 define('SWIFT_SEARCH_URL', plugin_dir_url(__FILE__));

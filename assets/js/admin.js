@@ -1002,12 +1002,9 @@
                         }, 2000);
                     } else {
                         // Finished?
-                        if (data.processed >= data.total && data.total > 0) {
+                        if (data.processed >= data.total) { // Removed total > 0 check to allow 0-item completion
                             self.updateProgress(100, 'Complete!');
                             self.finishSync();
-                        } else if (data.processed === 0 && data.total === 0) {
-                            // Idle state, maybe just loaded page or reset
-                            // Do nothing specific unless we thought we were running
                         }
                     }
                 }
