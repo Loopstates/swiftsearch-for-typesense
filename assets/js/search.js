@@ -161,6 +161,14 @@
             facet_by: facetFields
         };
 
+        // Pinned Items (Client-Side)
+        if (config.pinned_items && Array.isArray(config.pinned_items) && config.pinned_items.length > 0) {
+            const pinnedIds = config.pinned_items.map(i => i.id).join(',');
+            if (pinnedIds) {
+                postsParams.pinned_hits = pinnedIds;
+            }
+        }
+
         if (finalFilter) {
             postsParams.filter_by = finalFilter;
         }

@@ -58,6 +58,7 @@ class SearchController
                 'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
                 'facets_config' => isset($settings['facets_config']) ? $settings['facets_config'] : array(),
                 'custom_fields' => isset($settings['custom_fields']) ? $settings['custom_fields'] : array(),
+                'pinned_items' => get_option('swift_search_pinned_items', array()),
                 'apiUrl' => rest_url('swift-search/v1'),
                 'nonce' => wp_create_nonce('wp_rest'),
             ));
