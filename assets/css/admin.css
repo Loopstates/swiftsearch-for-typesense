@@ -544,7 +544,7 @@ input[type=range]::-ms-track {
 	line-height: 1.5;
 	max-height: 300px;
 	overflow-y: auto;
-	white-space: pre-wrap;
+	white-space: normal;
 	border: 1px solid #374151;
 }
 
@@ -560,6 +560,10 @@ input[type=range]::-ms-track {
 	border-bottom: 1px dashed #374151;
 	padding: 4px 0;
 	line-height: 1.4;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	/* Distinct columns */
 }
 
 .ss-log-entry:last-child {

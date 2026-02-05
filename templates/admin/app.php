@@ -482,7 +482,7 @@
                     <div class="ss-card-header">
                         <h2><?php esc_html_e('Pinned Results', 'swift-search-typesense'); ?> <span
                                 class="ss-pro-badge">PRO</span></h2>
-                        <p><?php esc_html_e('Manually fix specific products to the top of search results.', 'swift-search-typesense'); ?>
+                        <p><?php esc_html_e('Manually fix specific products or items to the top of search results.', 'swift-search-typesense'); ?>
                         </p>
                     </div>
                     <div class="ss-card-body">
