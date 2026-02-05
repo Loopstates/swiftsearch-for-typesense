@@ -113,7 +113,7 @@ class Plugin
         if (!SettingsIntegrity::verify_option('swift_search_settings')) {
             // Tampering Detected!
             add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p><strong>Security Warning:</strong> SwiftSearch settings appear to have been tampered with directly in the database. Security check failed.</p></div>';
+                echo '<div class="notice notice-error"><p><strong>Security Warning:</strong> SwiftSearch settings appear to have been tampered. Security check failed. Please reconnect to Typesense to restore functionality.</p></div>';
             });
         }
     }
