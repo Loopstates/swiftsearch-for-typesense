@@ -85,10 +85,11 @@ class Indexer
             'active' => true,
             'total' => $total,
             'processed' => 0,
-            'last_updated' => time(),
+            'last_sync_start' => time(),
             'message' => 'Initializing...'
         );
         update_option('swift_search_index_status', $status);
+        delete_option('swift_search_sync_errors'); // Clear old errors on new run
 
         // 3. Schedule First Batch - ASYNC
         $bg_process = new BackgroundProcess();
@@ -129,23 +130,65 @@ class Indexer
                 'total' => $query->found_posts,
                 'processed' => $offset, // Adjusted
                 'message' => 'Complete!',
-                'last_updated' => time()
+                'last_updated' => time(),
+                'last_sync_completed_at' => time()
             ));
             return;
         }
 
         // PROCESS BATCH
         $documents = array();
+        $errors = get_option('swift_search_sync_errors', array());
+
         foreach ($ids as $id) {
-            $doc = $this->index_post($id, true); // Pass true to return doc instead of sending
-            if ($doc) {
-                $documents[] = $doc;
+            try {
+                $doc = $this->index_post($id, true); // Pass true to return doc instead of sending
+                if ($doc) {
+                    $documents[] = $doc;
+                } else {
+                    // Potentially a draft or filtered out item, strictly not an 'error' but skipped.
+                    // If we want to verify real failures, we'd need index_post to throw or return error info.
+                }
+            } catch (\Exception $e) {
+                // Log failure
+                $errors[] = array('id' => $id, 'error' => $e->getMessage());
             }
+        }
+
+        // Save errors if any new ones
+        if (!empty($errors)) {
+            // Compressed Grouping Logic
+            $grouped_errors = get_option('swift_search_sync_errors', array());
+
+            foreach ($errors as $err) {
+                $msg = $err['error'];
+                $id = $err['id'];
+
+                // If this error type doesn't exist, init it
+                if (!isset($grouped_errors[$msg])) {
+                    $grouped_errors[$msg] = array();
+                }
+
+                // Append ID if not already there (avoid dupes)
+                if (!in_array($id, $grouped_errors[$msg])) {
+                    $grouped_errors[$msg][] = $id;
+                }
+            }
+
+            update_option('swift_search_sync_errors', $grouped_errors);
         }
 
         // BULK IMPORT
         if (!empty($documents)) {
-            $this->client->import('posts', $documents);
+            $result = $this->client->import('posts', $documents);
+            // Check for Bulk API level errors?
+            // Client::import returns array('success' => true, 'raw_response' => ...) or false
+            if ($result === false) {
+                // The entire batch failed at API level
+                $batch_error = array('batch_offset' => $offset, 'error' => $this->client->get_last_error());
+                $errors[] = $batch_error;
+                update_option('swift_search_sync_errors', $errors);
+            }
         }
 
         // UPDATE STATUS
@@ -165,13 +208,14 @@ class Indexer
                 'limit' => $limit
             ));
         } else {
-            // Just in case we finished perfectly on the boundary
+            // DONE
             update_option('swift_search_index_status', array(
                 'active' => false,
                 'total' => $status['total'],
                 'processed' => $status['total'],
                 'message' => 'Complete!',
-                'last_updated' => time()
+                'last_updated' => time(),
+                'last_sync_completed_at' => time()
             ));
         }
     }

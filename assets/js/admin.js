@@ -215,6 +215,9 @@
 
             // Late binding for dynamic elements or shortcode specific
             $('.sc-post-type-selector').on('change', this.updateShortcodePreview.bind(this));
+
+            // Resume Sync State / Show History
+            this.pollStatus(true);
         },
 
         restoreState: function () {
@@ -981,15 +984,18 @@
             });
         },
 
-        pollStatus: function () {
+        pollStatus: function (isInitCheck = false) {
             const self = this;
             this.request('GET', '/sync/status').done(function (response) {
                 if (response.success) {
                     const data = response.data;
 
                     if (data.active) {
+                        // Resuming or Running
+                        self.$syncBtn.prop('disabled', true);
+                        self.$resetBtn.prop('disabled', true);
+
                         // Calculate Percent
-                        // total might be 0 initially
                         const total = parseInt(data.total) || 1;
                         const processed = parseInt(data.processed) || 0;
                         const percent = Math.round((processed / total) * 100);
@@ -1001,17 +1007,43 @@
                             self.pollStatus();
                         }, 2000);
                     } else {
-                        // Finished?
-                        if (data.processed >= data.total) { // Removed total > 0 check to allow 0-item completion
+                        // Not Active (Complete or Idle)
+
+                        // Show Last Sync Stats
+                        if (data.last_sync_completed_at) {
+                            const date = new Date(data.last_sync_completed_at * 1000);
+                            let statusHtml = `Last Sync: ${date.toLocaleString()}`;
+
+                            if (data.error_count > 0) {
+                                statusHtml += ` | <span style="color: #ef4444; font-weight: bold;">${data.error_count} Failed</span>`;
+                                // Display breakdown as tooltip or subtext?
+                                // For now, keep it simple. The count is accurate.
+                            } else {
+                                statusHtml += ` (Success)`;
+                            }
+
+                            // Only update text if we are not showing "Complete!" animation
+                            if (isInitCheck) {
+                                self.$syncStatusText.html(statusHtml);
+                                self.updateProgress(data.processed > 0 ? 100 : 0); // Visuals
+                            }
+                        }
+
+                        // Finished JUST NOW?
+                        if (!isInitCheck && data.processed >= data.total && data.total > 0) {
                             self.updateProgress(100, 'Complete!');
-                            self.finishSync();
+                            self.finishSync(data);
+                        } else if (isInitCheck) {
+                            // Just restore UI state to "ready"
+                            self.$syncBtn.prop('disabled', false);
+                            self.$resetBtn.prop('disabled', false);
                         }
                     }
                 }
             });
         },
 
-        finishSync: function () {
+        finishSync: function (data) {
             this.$syncStatusText.text('Indexing Complete!');
             this.$syncBtn.prop('disabled', false);
             this.$resetBtn.prop('disabled', false);
@@ -1075,6 +1107,7 @@
                 self.$syncStatusText.text('Index Cleared.');
                 self.updateProgress(0);
                 self.checkStatus();
+                alert('Success: Index has been deleted.');
             }).fail(function () {
                 self.$syncStatusText.text('Error resetting index.');
                 self.$resetBtn.prop('disabled', false);

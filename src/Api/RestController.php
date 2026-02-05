@@ -380,18 +380,32 @@ class RestController extends WP_REST_Controller
     public function handle_sync_status($request)
     {
         $status = get_option('swift_search_index_status', array());
+        $errors = get_option('swift_search_sync_errors', array());
+
+        // Calculate Error Count from Grouped Array
+        $error_count = 0;
+        foreach ($errors as $msg => $ids) {
+            $error_count += count($ids);
+        }
 
         // Defaults
         $response = array(
             'active' => false,
             'processed' => 0,
             'total' => 0,
-            'message' => 'Idle'
+            'message' => 'Idle',
+            'last_sync_completed_at' => null,
+            'error_count' => $error_count,
+            'errors' => $errors // Now returns { "Error A": [1,2,3], "Error B": [4] }
         );
 
         if (!empty($status)) {
             $response = array_merge($response, $status);
         }
+
+        // Ensure error data is present even if merge overwrote something (unlikely)
+        $response['error_count'] = $error_count;
+        $response['errors'] = $errors;
 
         return new \WP_REST_Response(array(
             'success' => true,

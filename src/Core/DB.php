@@ -47,5 +47,10 @@ class DB
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+
+        // Initialize Options
+        add_option('swift_search_sync_errors', array());
+        add_option('swift_search_index_status', array());
+        update_option('swift_search_db_version', SWIFT_SEARCH_DB_VERSION);
     }
 }
