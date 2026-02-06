@@ -1,25 +1,39 @@
+
+
 (function ($) {
     'use strict';
 
     const SwiftSearchAdmin = {
         init: function () {
-            // Setup Ajax Nonce
-            $.ajaxSetup({
-                headers: {
-                    'X-WP-Nonce': swiftSearchConfig.nonce
-                }
-            });
+            if (typeof swiftSearchConfig === 'undefined') {
+                console.error("SwiftSearch: FATAL - swiftSearchConfig MISSING");
+                return;
+            }
 
-            this.cacheDOM();
-            this.bindEvents();
-            this.checkStatus();
-            this.checkPlan();
-            this.restoreState();
-            this.renderCustomFields();
-            this.renderFacetsConfig();
+            try {
+                // Setup Ajax Nonce
+                $.ajaxSetup({
+                    headers: {
+                        'X-WP-Nonce': swiftSearchConfig.nonce
+                    }
+                });
 
-            // Initial Status Check
-            this.pollStatus(true);
+                this.cacheDOM();
+                this.bindEvents();
+                this.checkStatus();
+                this.checkPlan();
+                this.restoreState();
+
+                this.restoreState();
+
+                this.renderFacetsConfig();
+
+                // Initial Status Check
+                this.pollStatus(true);
+            } catch (e) {
+                console.error("SwiftSearch: CRITICAL INIT ERROR", e);
+                alert("SwiftSearch Error: " + e.message);
+            }
         },
 
         cacheDOM: function () {
@@ -137,12 +151,10 @@
             });
         },
 
-        init: function () {
-            this.cacheDOM();
-            this.bindEvents();
-            this.checkStatus();
-            this.checkPlan();
 
+
+        // Set Initial State
+        restoreState: function () {
             // Set Initial State
             // Populate Credentials
             if (swiftSearchConfig.credentials && (swiftSearchConfig.credentials.host || swiftSearchConfig.credentials.api_key)) {
@@ -163,12 +175,10 @@
             this.renderCustomFields();
 
             // Set Experience State
-
-            if (swiftSearchConfig.status.overrideDefault) {
+            if (swiftSearchConfig.status && swiftSearchConfig.status.overrideDefault) {
                 this.$overrideToggle.prop('checked', true);
             }
 
-            // Set Experience State
             if (swiftSearchConfig.experience) {
                 this.$ssTypoTolerance.prop('checked', !!swiftSearchConfig.experience.typo_tolerance);
                 this.$ssSortEnabled.prop('checked', !!swiftSearchConfig.experience.sort_enabled);
@@ -204,8 +214,6 @@
 
                 // Synonyms
                 if (swiftSearchConfig.relevance.synonyms) {
-                    // Convert array to CSV string for display
-                    // Format: [{root: 'foo', synonyms: ['bar', 'baz']}] -> "foo, bar, baz\n"
                     let text = '';
                     swiftSearchConfig.relevance.synonyms.forEach(group => {
                         text += group.root + ', ' + group.synonyms.join(', ') + '\n';
@@ -222,10 +230,6 @@
 
             // Resume Sync State / Show History
             this.pollStatus(true);
-        },
-
-        restoreState: function () {
-            // Already handled in init, but kept for structure if needed
         },
 
         renderContentSettings: function () {
@@ -1251,16 +1255,24 @@
 
         renderFacetsConfig: function () {
             const container = $('#ss-facets-config-container');
+
             if (!container.length) return;
 
             try {
-                const facetsConfig = swiftSearchConfig.facets_config || [];
+                // Robust Config Retrieval
+                let facetsConfig = swiftSearchConfig.facets_config || [];
+                if (!Array.isArray(facetsConfig)) {
+                    // Handle case where PHP associative array becomes JS Object
+                    facetsConfig = Object.values(facetsConfig);
+                }
 
                 // 1. Gather Sources
                 let sources = [];
 
-                // Taxonomies safely
-                const taxes = Array.isArray(swiftSearchConfig.available_taxonomies) ? swiftSearchConfig.available_taxonomies : [];
+                // Taxonomies safely (Handle Object or Array)
+                let taxesRaw = swiftSearchConfig.available_taxonomies || [];
+                const taxes = Array.isArray(taxesRaw) ? taxesRaw : Object.values(taxesRaw);
+
                 taxes.forEach(tax => {
                     sources.push({
                         source: tax.name,
@@ -1302,7 +1314,7 @@
                         <th>Type</th>
                     </tr>
                 </thead>
-                <tbody>`;
+                <tbody id="ss-facets-tbody">`;
 
                 if (sources.length === 0) {
                     html += `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #6b7280;">No available facets found.<br>Enable indexing for Taxonomies or map Custom Fields as 'Facet'.</td></tr>`;
@@ -1310,7 +1322,7 @@
                     sources.forEach(src => {
                         // Check saved config
                         const existing = facetsConfig.find(f => f.source === src.source && f.type === src.type);
-                        const isChecked = !!existing;
+                        const isChecked = existing ? (String(existing.enabled) === 'true' || existing.enabled === true) : false;
                         const displayLabel = existing ? existing.label : src.label;
 
                         html += `<tr>
@@ -1337,7 +1349,6 @@
                 container.html(html);
 
             } catch (e) {
-                console.error("SwiftSearch: Facet Render Error", e);
                 container.html(`<div style="color:red; padding:20px;">Error loading facets: ${e.message}</div>`);
             }
         },
@@ -1372,6 +1383,7 @@
     };
 
     $(document).ready(function () {
+
         // --- Custom Fields Event Binding (Delegation) ---
         const $container = $('#ss-custom-fields-container');
 
@@ -1444,7 +1456,12 @@
                 $btn.prop('disabled', false).text(originalText);
             });
         });
+    });
 
+    // Expose for Debugging
+    window.SwiftSearchAdmin = SwiftSearchAdmin;
+
+    $(document).ready(function () {
         SwiftSearchAdmin.init();
     });
 

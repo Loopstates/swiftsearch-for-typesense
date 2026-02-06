@@ -39,7 +39,7 @@ class Schema
         // WooCommerce Fields
         if (class_exists('WooCommerce')) {
             $fields[] = array('name' => 'price', 'type' => 'float', 'facet' => true, 'optional' => true);
-            $fields[] = array('name' => 'sku', 'type' => 'string', 'optional' => true);
+            $fields[] = array('name' => 'sku', 'type' => 'string', 'facet' => true, 'optional' => true);
             $fields[] = array('name' => 'in_stock', 'type' => 'bool', 'facet' => true, 'optional' => true);
         }
 

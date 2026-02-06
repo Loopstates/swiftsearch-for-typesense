@@ -60,7 +60,7 @@ class Plugin
         add_action('plugins_loaded', array($this, 'load_textdomain'));
 
         // Security & Integrity
-        add_action('updated_option', array('\SwiftSearch\Core\SettingsIntegrity', 'sign_option'), 10, 2);
+        add_action('updated_option', array('\SwiftSearch\Core\SettingsIntegrity', 'sign_option'), 10, 3);
         add_action('added_option', array('\SwiftSearch\Core\SettingsIntegrity', 'sign_option'), 10, 2);
         add_action('admin_init', array($this, 'verify_integrity'));
     }

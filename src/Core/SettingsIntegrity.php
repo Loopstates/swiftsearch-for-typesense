@@ -45,11 +45,19 @@ class SettingsIntegrity
      * @param string $option_name
      * @param mixed $new_value
      */
-    public static function sign_option($option_name, $new_value)
+    public static function sign_option($option_name, $arg2, $arg3 = null)
     {
         // specific options we care about
         if ($option_name !== 'swift_search_settings') {
             return;
+        }
+
+        // Handle 'updated_option' hook: ($option, $old_value, $new_value)
+        if ($arg3 !== null) {
+            $new_value = $arg3;
+        } else {
+            // Handle 'added_option' hook: ($option, $value)
+            $new_value = $arg2;
         }
 
         $hash = self::calculate_hash($new_value);

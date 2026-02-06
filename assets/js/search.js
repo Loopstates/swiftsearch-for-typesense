@@ -69,11 +69,34 @@
             }
             return item.source; // Fallback
         }
+
+        // WooCommerce Special Mappings
+        if (item.source === '_sku') return 'sku';
+        if (item.source === '_stock_status') return 'in_stock';
+        if (item.source === '_price') return 'price';
+
         return item.source;
     }
 
     // Build Facet List (Fields to request)
-    const activeFacetsConfig = (config.facets_config || []).filter(f => f.enabled);
+    // Build Facet List (Fields to request)
+    const storedFacets = config.facets_config || [];
+    const activeFacetsConfig = storedFacets.filter(f => {
+        // 1. Basic Enabled Check
+        const isEnabled = f.enabled === true || f.enabled === 'true';
+        if (!isEnabled) return false;
+
+        // 2. Schema Validation (Prevent 400 Errors)
+        if (f.type === 'taxonomy') {
+            // 'category' and 'post_tag' are always in schema. Others must be indexed.
+            if (f.source === 'category' || f.source === 'post_tag') return true;
+            return config.indexed_taxonomies && config.indexed_taxonomies.includes(f.source);
+        }
+
+        // 3. Meta Validation implies it exists in schema if it's standard or mapped
+        // We trust the mapping logic in getTypesenseField will return a valid name if mapped
+        return true;
+    });
     const facetFields = activeFacetsConfig.map(f => getTypesenseField(f)).join(',');
 
     let debounceTimer;
@@ -158,8 +181,12 @@
             per_page: limit,
             num_typos: numTypos,
             sort_by: currentSort === 'relevance' ? '_text_match:desc' : currentSort,
-            facet_by: facetFields
+            sort_by: currentSort === 'relevance' ? '_text_match:desc' : currentSort
         };
+
+        if (facetFields) {
+            postsParams.facet_by = facetFields;
+        }
 
         // Relevance Weights (Client-Side)
         if (config.weights && (config.weights.post_title || config.weights.post_content)) {
@@ -206,6 +233,9 @@
 
         const url = `${config.protocol}://${config.host}:${config.port}/multi_search`;
 
+        // DEBUG: Log the payload
+        console.log('Typesense Request:', searches);
+
         fetch(url, {
             method: 'POST',
             headers: {
@@ -214,8 +244,31 @@
             },
             body: JSON.stringify({ searches: searches })
         })
-            .then(response => response.json())
+            .then(async response => {
+                // Self-Healing: If 400 Error (likely Bad Facet), Retry without facets
+                if (!response.ok && response.status === 400) {
+                    console.warn("SwiftSearch: Facet Error detected. Retrying without facets...");
+
+                    // Remove facet_by from all searches
+                    searches.forEach(s => delete s.facet_by);
+
+                    // Retry Fetch
+                    const retryResp = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-TYPESENSE-API-KEY': config.apiKey,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ searches: searches })
+                    });
+                    return retryResp.json();
+                }
+                return response.json();
+            })
             .then(data => {
+                // DEBUG: Log the Response
+                console.log('Typesense Response:', data);
+
                 loader.style.display = 'none';
                 renderHits(data, searches);
             })

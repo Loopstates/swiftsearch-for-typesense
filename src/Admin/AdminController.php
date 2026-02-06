@@ -47,7 +47,8 @@ class AdminController
      */
     public function enqueue_assets($hook)
     {
-        if ('toplevel_page_swift-search' !== $hook) {
+        // Check Hook OR Page Parameter (Robustness)
+        if ($hook !== 'toplevel_page_swift-search' && (!isset($_GET['page']) || $_GET['page'] !== 'swift-search')) {
             return;
         }
 

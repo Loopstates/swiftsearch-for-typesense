@@ -183,6 +183,10 @@
                             <span class="ss-loader"></span> Loading Fields...
                         </div>
                     </div>
+                    <div class="ss-form-actions">
+                        <button type="button" class="ss-btn ss-btn-secondary"
+                            id="ss-save-custom-fields"><?php esc_html_e('Save Custom Fields', 'swift-search-typesense'); ?></button>
+                    </div>
                 </div>
             </section>
 
