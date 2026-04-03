@@ -73,7 +73,7 @@ class Indexer
 
         // 1. Calculate Totals
         // For MVP we only count Posts. In future we can sequence Terms/Users.
-        $post_types = isset($config['indexed_post_types']) ? $config['indexed_post_types'] : array('post', 'page', 'product');
+        $post_types = isset($config['indexed_post_types']) ? (array) $config['indexed_post_types'] : array('product');
 
         $args = array(
             'post_type' => $post_types,
@@ -113,7 +113,7 @@ class Indexer
     public function process_bulk_batch($offset, $limit = 50)
     {
         $config = $this->config_loader->get_config();
-        $post_types = isset($config['indexed_post_types']) ? $config['indexed_post_types'] : array('post', 'page', 'product');
+        $post_types = isset($config['indexed_post_types']) ? (array) $config['indexed_post_types'] : array('product');
 
         $args = array(
             'post_type' => $post_types,

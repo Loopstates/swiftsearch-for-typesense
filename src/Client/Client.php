@@ -90,7 +90,6 @@ class Client
 
         if (is_wp_error($response)) {
             $this->last_error = $response->get_error_message();
-            error_log('SwiftSearch Typesense Error: ' . $this->last_error);
             return false;
         }
 
@@ -216,7 +215,6 @@ class Client
 
         if (is_wp_error($response)) {
             $this->last_error = $response->get_error_message();
-            error_log('SwiftSearch Bulk Import Error: ' . $this->last_error);
             return false;
         }
 

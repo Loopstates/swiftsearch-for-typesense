@@ -1,6 +1,6 @@
 
 
-/* Version: 1.0.47 */
+/* Version: 1.1.0 */
 (function ($) {
     'use strict';
 
@@ -364,6 +364,7 @@
             });
 
             const payload = {
+                section: 'content',
                 post_types: postTypes,
                 taxonomies: taxonomies,
                 index_users: indexUsers,
@@ -407,6 +408,7 @@
             });
 
             const payload = {
+                section: 'experience',
                 relevance_settings: {
                     weights: {
                         post_title: weight,
@@ -452,6 +454,7 @@
             });
 
             const payload = {
+                section: 'experience',
                 experience_settings: {
                     typo_tolerance: this.$ssTypoTolerance.is(':checked'),
                     sort_enabled: this.$ssSortEnabled.is(':checked'),
@@ -1381,59 +1384,6 @@
             }
         },
 
-        handleSearchUISave: function (e) {
-            e.preventDefault();
-            const $btn = this.$saveSearchUIBtn;
-            const originalText = $btn.text();
-            $btn.prop('disabled', true).text('Saving...');
-
-            // Gather Facets Config
-            const facets = [];
-            $('#ss-facets-config-container tbody tr').each(function () {
-                const $row = $(this);
-                const $cb = $row.find('.ss-facet-enable');
-                if ($cb.length) {
-                    facets.push({
-                        source: $cb.data('source'),
-                        type: $cb.data('type'),
-                        label: $row.find('.ss-facet-label').val(),
-                        enabled: $cb.is(':checked')
-                    });
-                }
-            });
-
-            const payload = {
-                experience_settings: {
-                    typo_tolerance: this.$ssTypoTolerance.is(':checked'),
-                    sort_enabled: this.$ssSortEnabled.is(':checked'),
-                    mobile_btn: this.$ssMobileBtn.is(':checked'),
-                    instant_search: $('#ss-instant-search').is(':checked'),
-                    search_scope: {
-                        posts: true, // Always true
-                        terms: $('#ss-scope-terms').is(':checked'),
-                        users: $('#ss-scope-users').is(':checked')
-                    },
-                    post_types: (function () {
-                        const pts = [];
-                        $('.ss-global-post-type-selector:checked').each(function () {
-                            pts.push($(this).val());
-                        });
-                        return pts;
-                    })()
-                },
-                facets_config: facets
-            };
-
-            this.request('POST', '/settings', payload).done(function (response) {
-                if (response.success) {
-                    alert('Search UI Settings Saved!');
-                } else {
-                    alert('Failed to save settings.');
-                }
-            }).always(function () {
-                $btn.prop('disabled', false).text(originalText);
-            });
-        }
     };
 
     $(document).ready(function () {

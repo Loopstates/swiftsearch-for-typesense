@@ -29,12 +29,10 @@ class DocumentBuilder
         }
 
         // 1. Strict Whitelist Check
-        $settings = get_option('swift_search_settings');
-        $allowed_types = isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : array('post', 'page', 'product');
+        $settings = get_option('swift_search_settings', array());
+        $allowed_types = isset($settings['indexed_post_types']) ? (array) $settings['indexed_post_types'] : array('product');
 
         if (!in_array($post->post_type, $allowed_types)) {
-            // Debugging Sync: Log why it skipped
-            error_log("SwiftSearch Debug: Skipped Post {$post_id} (Type: {$post->post_type}). Allowed: " . json_encode($allowed_types));
             return false;
         }
 
@@ -57,7 +55,7 @@ class DocumentBuilder
         }
 
         // Taxonomies
-        $allowed_taxonomies = isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array('category', 'post_tag');
+        $allowed_taxonomies = isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array('category', 'post_tag', 'product_cat');
 
         foreach ($allowed_taxonomies as $taxonomy) {
             $terms = get_the_terms($post, $taxonomy);
@@ -65,12 +63,12 @@ class DocumentBuilder
                 $term_names = wp_list_pluck($terms, 'name');
 
                 if ('category' === $taxonomy) {
-                    $document['category'] = $term_names;
+                    $document['category'] = array_values(array_unique($term_names));
                 } elseif ('post_tag' === $taxonomy) {
-                    $document['tag'] = $term_names;
+                    $document['tag'] = array_values(array_unique($term_names));
                 } else {
                     // Dynamic Taxonomy
-                    $document['tax_' . $taxonomy] = $term_names;
+                    $document['tax_' . $taxonomy] = array_values(array_unique($term_names));
                 }
             }
         }
@@ -80,8 +78,8 @@ class DocumentBuilder
             $product = wc_get_product($post_id);
             if ($product) {
                 $document['price'] = (float) $product->get_price();
-                $document['sku'] = $product->get_sku();
-                $document['in_stock'] = $product->is_in_stock();
+                $document['sku'] = (string) $product->get_sku();
+                $document['in_stock'] = (bool) $product->is_in_stock();
             }
         }
 

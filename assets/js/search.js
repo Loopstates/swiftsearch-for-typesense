@@ -1,4 +1,4 @@
-/* Version: 1.0.47 */
+/* Version: 1.1.0 */
 (function () {
     'use strict';
 
@@ -181,7 +181,7 @@
             query_by: 'post_title,post_content',
             per_page: limit,
             num_typos: numTypos,
-            sort_by: currentSort === 'relevance' ? '_text_match:desc' : currentSort,
+            prefix: 'true,true', // Standard and Prefix support (e.g. "hoo" -> "Hoodie")
             sort_by: currentSort === 'relevance' ? '_text_match:desc' : currentSort
         };
 
@@ -216,7 +216,8 @@
                 collection: 'terms',
                 q: query,
                 query_by: 'name,taxonomy',
-                per_page: Math.ceil(limit / 2),
+                prefix: 'true,true', // Standard and Prefix support
+                per_page: 5,
                 num_typos: numTypos
             });
         }
@@ -227,7 +228,8 @@
                 collection: 'users',
                 q: query,
                 query_by: 'display_name,user_login',
-                per_page: Math.ceil(limit / 2),
+                prefix: 'true,true', // Standard and Prefix support
+                per_page: 5,
                 num_typos: numTypos
             });
         }
@@ -246,46 +248,66 @@
             body: JSON.stringify({ searches: searches })
         })
             .then(async response => {
-                // Self-Healing: If 400 Error (likely Bad Facet), Retry without facets
-                if (!response.ok && response.status === 400) {
-                    console.warn("SwiftSearch: Facet Error detected. Retrying without facets...");
+                // Robust Error Catching
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({ message: 'Unknown Error' }));
+                    console.error("SwiftSearch: API Error", response.status, errData);
 
-                    // Remove facet_by from all searches
-                    searches.forEach(s => delete s.facet_by);
+                    // Self-Healing: If 400/404 (likely Bad Facet/Field), Retry without facets
+                    if (response.status === 400 || response.status === 404) {
+                        console.warn("SwiftSearch: Schema/Facet Error detected. Retrying without facets...");
+                        
+                        // Deep clone searches and strip facets
+                        const rawSearches = JSON.parse(JSON.stringify(searches));
+                        rawSearches.forEach(s => delete s.facet_by);
 
-                    // Retry Fetch
-                    const retryResp = await fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'X-TYPESENSE-API-KEY': config.apiKey,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ searches: searches })
-                    });
-                    return retryResp.json();
+                        const retryResp = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'X-TYPESENSE-API-KEY': config.apiKey,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ searches: rawSearches })
+                        });
+                        return retryResp.json();
+                    }
                 }
                 return response.json();
             })
             .then(data => {
-                // DEBUG: Log the Response
-                console.log('Typesense Response:', data);
-
                 loader.style.display = 'none';
                 renderHits(data, searches);
             })
             .catch(err => {
-                console.error(err);
+                console.error("SwiftSearch: Request Failed", err);
                 loader.style.display = 'none';
+                hitsContainer.innerHTML = '<div class="ss-no-results">Search currently unavailable. Please try again later.</div>';
             });
     }
 
     function renderHits(data, searches) {
-        resultsContainer.style.display = 'flex'; // Use flex to show sidebar
+        resultsContainer.style.display = 'flex';
         hitsContainer.innerHTML = '';
         if (facetsContainer) facetsContainer.innerHTML = '';
 
-        const results = data.results || [];
-        if (!results.length) return;
+        const results = data && data.results ? data.results : [];
+
+        // 0. Handle Sidebar Visibility (Conditional)
+        const hasFacets = results.some(r => r.facet_counts && r.facet_counts.length > 0);
+        if (!hasFacets) {
+            resultsContainer.classList.add('ss-no-sidebar');
+        } else {
+            resultsContainer.classList.remove('ss-no-sidebar');
+        }
+
+        if (results.length === 0 || !results.some(r => r.found > 0)) {
+            hitsContainer.innerHTML = `
+                <div class="ss-no-results">
+                    <span class="dashicons dashicons-search"></span>
+                    <p>No results found for "<strong>${input.value}</strong>"</p>
+                </div>`;
+            return;
+        }
 
         // Render Facets (from Posts collection)
         const postsResult = results[0]; // Always first
@@ -296,71 +318,94 @@
         let totalFound = 0;
         let hasHits = false;
 
+        // Section Containers
+        const sections = {
+            posts: document.createElement('div'),
+            terms: document.createElement('div'),
+            users: document.createElement('div')
+        };
+
+        // Initialize Section Classes
+        Object.keys(sections).forEach(k => {
+            sections[k].className = `ss-section ss-section-${k}`;
+            sections[k].style.display = 'none';
+        });
+
         results.forEach((result, index) => {
-            const searchParams = searches[index];
-            const collection = searchParams.collection;
+            const collection = searches[index].collection;
+            const section = sections[collection];
 
             if (result.found > 0) {
                 totalFound += result.found;
                 hasHits = true;
+                section.style.display = 'block';
 
                 // Section Header
-                let title = 'Posts';
-                if (collection === 'terms') title = 'Categories & Tags';
+                let title = 'Items';
+                if (collection === 'posts') title = 'Products & Posts';
+                else if (collection === 'terms') title = 'Categories';
                 else if (collection === 'users') title = 'Authors';
 
-                if (results.length > 1) {
-                    const header = document.createElement('h4');
-                    header.className = 'ss-section-header';
-                    header.innerText = title;
-                    hitsContainer.appendChild(header);
-                }
+                const header = document.createElement('div');
+                header.className = 'ss-section-header';
+                header.innerHTML = `
+                    <h3 class="ss-section-title">${title}</h3>
+                    <span class="ss-section-count">${result.found} found</span>
+                `;
+                section.appendChild(header);
 
-                result.hits.forEach(hit => {
+                const grid = document.createElement('div');
+                grid.className = 'ss-grid';
+                section.appendChild(grid);
+
+                result.hits.forEach((hit, hitIndex) => {
                     const doc = hit.document;
-                    const el = document.createElement('div');
-                    el.className = 'ss-hit';
+                    const card = document.createElement('div');
+                    card.className = 'ss-card';
+                    card.style.animationDelay = `${hitIndex * 0.05}s`;
 
                     let html = '';
                     if (collection === 'posts') {
-                        html = `<a href="${doc.permalink}" class="ss-hit-link">`;
-                        if (showThumb && doc.thumbnail_url) {
-                            html += `<img src="${doc.thumbnail_url}" alt="" class="ss-hit-thumb">`;
-                        }
-                        html += `<div class="ss-hit-content">`;
-                        html += `<h3 class="ss-hit-title">${highlight(hit, 'post_title')}</h3>`;
-                        if (showExcerpt && doc.post_excerpt) {
-                            html += `<p class="ss-hit-excerpt">${doc.post_excerpt}</p>`;
-                        }
-                        if (showPrice && doc.price) {
-                            html += `<span class="ss-hit-price">$${doc.price}</span>`;
-                        }
-                        html += `</div></a>`;
-                    } else if (collection === 'terms') {
-                        html = `<a href="${doc.url}" class="ss-hit-link ss-hit-term">`;
-                        html += `<div class="ss-hit-content">`;
-                        html += `<h3 class="ss-hit-title">${highlight(hit, 'name')}</h3>`;
-                        html += `<span class="ss-hit-meta">${doc.taxonomy}</span>`;
-                        html += `</div></a>`;
-                    } else if (collection === 'users') {
-                        html = `<a href="${doc.url}" class="ss-hit-link ss-hit-user">`;
-                        if (doc.avatar_url) {
-                            html += `<img src="${doc.avatar_url}" alt="" class="ss-hit-avatar">`;
-                        }
-                        html += `<div class="ss-hit-content">`;
-                        html += `<h3 class="ss-hit-title">${highlight(hit, 'display_name')}</h3>`;
-                        html += `</div></a>`;
+                        const isProduct = doc.post_type === 'product';
+                        card.classList.add(isProduct ? 'ss-card-product' : 'ss-card-post');
+
+                        html = `
+                            <a href="${doc.permalink}" class="ss-card-link">
+                                <div class="ss-card-image">
+                                    ${doc.thumbnail_url ? `<img src="${doc.thumbnail_url}" alt="">` : '<div class="ss-placeholder"></div>'}
+                                </div>
+                                <div class="ss-card-body">
+                                    <h4 class="ss-card-title">${highlight(hit, 'post_title')}</h4>
+                                    ${isProduct && doc.price ? `<div class="ss-card-price">$${doc.price}</div>` : ''}
+                                    ${doc.post_excerpt ? `<p class="ss-card-excerpt">${doc.post_excerpt}</p>` : ''}
+                                </div>
+                            </a>`;
+                    } else {
+                        // Generic card for Terms/Users
+                        html = `
+                            <a href="${doc.url || '#'}" class="ss-card-link ss-card-compact">
+                                <div class="ss-card-body">
+                                    <h4 class="ss-card-title">${highlight(hit, collection === 'terms' ? 'name' : 'display_name')}</h4>
+                                    ${doc.taxonomy ? `<span class="ss-card-tag">${doc.taxonomy}</span>` : ''}
+                                </div>
+                            </a>`;
                     }
-                    el.innerHTML = html;
-                    hitsContainer.appendChild(el);
+                    card.innerHTML = html;
+                    grid.appendChild(card);
                 });
+            }
+        });
+
+        // Append active sections to container
+        Object.values(sections).forEach(s => {
+            if (s.style.display !== 'none') {
+                hitsContainer.appendChild(s);
             }
         });
 
         if (!hasHits) {
             hitsContainer.innerHTML = '<div class="ss-no-results">No results found.</div>';
             loader.style.display = 'none';
-            logSearch(input.value.trim(), 0); // Log zero results
         } else {
             logSearch(input.value.trim(), totalFound);
         }

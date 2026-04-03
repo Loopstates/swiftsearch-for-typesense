@@ -129,7 +129,7 @@ class AdminController
                 'connecting' => __('Connecting to Typesense...', 'swift-search-typesense'),
                 'success' => __('Connected Successfully!', 'swift-search-typesense'),
                 'error' => __('Connection Failed.', 'swift-search-typesense'),
-                'mismatch' => __('Critical: Schema Version Mismatch. Please Re-Index immediately to restore functionality.', 'swift-search-typesense'),
+                'mismatch' => __('⚠️ Schema Out of Sync: Please perform a Full Re-Index now to enable your new fields & facets.', 'swift-search-typesense'),
                 'apiKeyWarning' => __('Security Warning: This looks like an Admin Key. For Frontend Search, please use a Search-Only API Key.', 'swift-search-typesense'),
             ),
         ));

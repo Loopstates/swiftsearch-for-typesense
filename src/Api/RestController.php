@@ -441,84 +441,66 @@ class RestController extends WP_REST_Controller
     public function handle_settings($request)
     {
         $params = $request->get_params();
+        $current_settings = get_option('swift_search_settings', array());
+        $section = sanitize_text_field($params['section'] ?? '');
 
-        // Handle Override Toggle
-        if (isset($params['override_default'])) {
-            $val = filter_var($params['override_default'], FILTER_VALIDATE_BOOLEAN);
-            update_option('swift_search_override_default', $val);
-        }
-
-        // Handle Post Types
-        if (isset($params['post_types'])) {
-            $current_settings = get_option('swift_search_settings', array());
-            $types = is_array($params['post_types']) ? array_map('sanitize_text_field', $params['post_types']) : array();
+        // 1. Content Section
+        if ($section === 'content') {
+            // Post Types (If missing, it means none checked)
+            $types = isset($params['post_types']) && is_array($params['post_types']) ? array_map('sanitize_text_field', $params['post_types']) : array();
             $current_settings['indexed_post_types'] = $types;
-            update_option('swift_search_settings', $current_settings);
-        }
 
-        // Handle Taxonomies
-        if (isset($params['taxonomies'])) {
-            $current_settings = get_option('swift_search_settings', array());
-            $taxes = is_array($params['taxonomies']) ? array_map('sanitize_text_field', $params['taxonomies']) : array();
+            // Taxonomies
+            $taxes = isset($params['taxonomies']) && is_array($params['taxonomies']) ? array_map('sanitize_text_field', $params['taxonomies']) : array();
             $current_settings['indexed_taxonomies'] = $taxes;
-            update_option('swift_search_settings', $current_settings);
-        }
 
-        // Handle Users
-        if (isset($params['index_users'])) {
-            $current_settings = get_option('swift_search_settings', array());
-            $val = filter_var($params['index_users'], FILTER_VALIDATE_BOOLEAN);
+            // Users
+            $val = isset($params['index_users']) ? filter_var($params['index_users'], FILTER_VALIDATE_BOOLEAN) : false;
             $current_settings['indexed_users'] = $val;
-            update_option('swift_search_settings', $current_settings);
-        }
 
-        // Handle Custom Fields (Pro)
-        if (isset($params['custom_fields'])) {
-            $current_settings = get_option('swift_search_settings', array());
-
-            // Deep sanitize
-            $custom_fields = $params['custom_fields'];
-            if (is_array($custom_fields)) {
-                $sanitized = array();
-                foreach ($custom_fields as $pt => $fields) {
-                    if (!is_array($fields))
-                        continue;
-                    $sanitized[$pt] = array();
-                    foreach ($fields as $field) {
-                        if (empty($field['key']) || empty($field['name']))
-                            continue;
-
-                        $sanitized[$pt][] = array(
-                            'key' => sanitize_text_field($field['key']),
-                            'name' => sanitize_text_field($field['name']),
-                            'type' => sanitize_text_field($field['type']),
-                            'facet' => isset($field['facet']) ? true : false,
-                        );
+            // Custom Fields (Pro)
+            if (isset($params['custom_fields'])) {
+                $custom_fields = $params['custom_fields'];
+                if (is_array($custom_fields)) {
+                    $sanitized = array();
+                    foreach ($custom_fields as $pt => $fields) {
+                        if (!is_array($fields)) continue;
+                        $sanitized[$pt] = array();
+                        foreach ($fields as $field) {
+                            if (empty($field['key']) || empty($field['name'])) continue;
+                            $sanitized[$pt][] = array(
+                                'key' => sanitize_text_field($field['key']),
+                                'name' => sanitize_text_field($field['name']),
+                                'type' => sanitize_text_field($field['type']),
+                                'facet' => isset($field['facet']) ? true : false,
+                            );
+                        }
                     }
+                    $current_settings['custom_fields'] = $sanitized;
                 }
-                $current_settings['custom_fields'] = $sanitized;
-                update_option('swift_search_settings', $current_settings);
+            }
+
+            // Global Override
+            if (isset($params['override_default'])) {
+                $val = filter_var($params['override_default'], FILTER_VALIDATE_BOOLEAN);
+                update_option('swift_search_override_default', $val);
             }
         }
 
-        // Handle Relevance Settings (Pro)
-        if (isset($params['relevance_settings'])) {
-            // Retrieve current settings to merge
-            $current_settings = get_option('swift_search_settings', array());
-
-            $new_relevance = $params['relevance_settings'];
-
-            // 1. Update Weights
-            if (isset($new_relevance['weights'])) {
-                foreach ($new_relevance['weights'] as $key => $weight) {
+        // 2. Experience Section (Search UI)
+        if ($section === 'experience') {
+            // Relevance Weights (Pro)
+            if (isset($params['weights'])) {
+                foreach ($params['weights'] as $key => $weight) {
                     $current_settings['weights'][sanitize_key($key)] = absint($weight);
                 }
             }
 
-            // 2. Update Synonyms
-            if (isset($new_relevance['synonyms']) && is_array($new_relevance['synonyms'])) {
+            // Synonyms (Pro)
+            if (isset($params['synonyms'])) {
+                $synonyms = is_array($params['synonyms']) ? $params['synonyms'] : array();
                 $clean_synonyms = array();
-                foreach ($new_relevance['synonyms'] as $group) {
+                foreach ($synonyms as $group) {
                     if (!empty($group['root']) && !empty($group['synonyms']) && is_array($group['synonyms'])) {
                         $clean_synonyms[] = array(
                             'root' => sanitize_text_field($group['root']),
@@ -531,8 +513,8 @@ class RestController extends WP_REST_Controller
                 // Sync to Typesense
                 if (!empty($current_settings['api_key'])) {
                     $client = new \SwiftSearch\Client\Client($current_settings);
-                    foreach ($clean_synonyms as $index => $syn) {
-                        $client->upsert_synonym("synonym-$index", array(
+                    foreach ($clean_synonyms as $idx => $syn) {
+                        $client->upsert_synonym("synonym-$idx", array(
                             'root' => $syn['root'],
                             'synonyms' => $syn['synonyms']
                         ));
@@ -540,53 +522,42 @@ class RestController extends WP_REST_Controller
                 }
             }
 
-            update_option('swift_search_settings', $current_settings);
-        }
-
-        // Handle Facets Configuration (Pro)
-        if (isset($params['facets_config'])) {
-            $current_settings = get_option('swift_search_settings', array());
-
-            $facets = $params['facets_config'];
-            if (is_array($facets)) {
+            // Facets (Pro)
+            if (isset($params['facets_config'])) {
+                $facets = is_array($params['facets_config']) ? $params['facets_config'] : array();
                 $sanitized_facets = array();
                 foreach ($facets as $facet) {
-                    if (empty($facet['source']) || empty($facet['type'])) {
-                        continue;
-                    }
+                    if (empty($facet['source'])) continue;
                     $sanitized_facets[] = array(
                         'source' => sanitize_text_field($facet['source']),
-                        'type' => sanitize_text_field($facet['type']), // 'taxonomy' or 'meta'
-                        'label' => sanitize_text_field($facet['label']),
+                        'type' => sanitize_text_field($facet['type'] ?? 'taxonomy'),
+                        'label' => sanitize_text_field($facet['label'] ?? ''),
                         'enabled' => isset($facet['enabled']) ? filter_var($facet['enabled'], FILTER_VALIDATE_BOOLEAN) : false,
                     );
                 }
                 $current_settings['facets_config'] = $sanitized_facets;
-                update_option('swift_search_settings', $current_settings);
+            }
+
+            // General Experience (Free Features)
+            if (isset($params['experience_settings'])) {
+                $new_exp = $params['experience_settings'];
+                $current_settings['experience'] = array(
+                    'typo_tolerance' => isset($new_exp['typo_tolerance']) ? filter_var($new_exp['typo_tolerance'], FILTER_VALIDATE_BOOLEAN) : true,
+                    'sort_enabled' => isset($new_exp['sort_enabled']) ? filter_var($new_exp['sort_enabled'], FILTER_VALIDATE_BOOLEAN) : false,
+                    'mobile_btn' => isset($new_exp['mobile_btn']) ? filter_var($new_exp['mobile_btn'], FILTER_VALIDATE_BOOLEAN) : false,
+                    'instant_search' => isset($new_exp['instant_search']) ? filter_var($new_exp['instant_search'], FILTER_VALIDATE_BOOLEAN) : true,
+                    'search_scope' => array(
+                        'posts' => true,
+                        'terms' => isset($new_exp['search_scope']['terms']) ? filter_var($new_exp['search_scope']['terms'], FILTER_VALIDATE_BOOLEAN) : false,
+                        'users' => isset($new_exp['search_scope']['users']) ? filter_var($new_exp['search_scope']['users'], FILTER_VALIDATE_BOOLEAN) : false,
+                    ),
+                    'post_types' => isset($new_exp['post_types']) && is_array($new_exp['post_types']) ? array_map('sanitize_text_field', $new_exp['post_types']) : array(),
+                );
             }
         }
 
-        // Handle Experience Settings (Free Features)
-        if (isset($params['experience_settings'])) {
-            $current_settings = get_option('swift_search_settings', array());
-            $new_exp = $params['experience_settings'];
-
-            $experience = array(
-                'typo_tolerance' => isset($new_exp['typo_tolerance']) ? filter_var($new_exp['typo_tolerance'], FILTER_VALIDATE_BOOLEAN) : true,
-                'sort_enabled' => isset($new_exp['sort_enabled']) ? filter_var($new_exp['sort_enabled'], FILTER_VALIDATE_BOOLEAN) : false,
-                'mobile_btn' => isset($new_exp['mobile_btn']) ? filter_var($new_exp['mobile_btn'], FILTER_VALIDATE_BOOLEAN) : false,
-                'instant_search' => isset($new_exp['instant_search']) ? filter_var($new_exp['instant_search'], FILTER_VALIDATE_BOOLEAN) : true,
-                'search_scope' => array(
-                    'posts' => true, // Always true
-                    'terms' => isset($new_exp['search_scope']['terms']) ? filter_var($new_exp['search_scope']['terms'], FILTER_VALIDATE_BOOLEAN) : false,
-                    'users' => isset($new_exp['search_scope']['users']) ? filter_var($new_exp['search_scope']['users'], FILTER_VALIDATE_BOOLEAN) : false,
-                ),
-                'post_types' => isset($new_exp['post_types']) && is_array($new_exp['post_types']) ? array_map('sanitize_text_field', $new_exp['post_types']) : array(),
-            );
-
-            $current_settings['experience'] = $experience;
-            update_option('swift_search_settings', $current_settings);
-        }
+        // Final Save
+        update_option('swift_search_settings', $current_settings);
 
         return new \WP_REST_Response(array('success' => true), 200);
     }
