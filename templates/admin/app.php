@@ -113,13 +113,13 @@
                                     <?php esc_html_e('Public key for the frontend search.', 'swift-search-typesense'); ?>
                                 </p>
                             </div>
-
-                            <div class="ss-form-actions">
-                                <button type="submit"
-                                    class="ss-btn ss-btn-primary"><?php esc_html_e('Save & Test Connection', 'swift-search-typesense'); ?></button>
-                            </div>
                         </form>
                     </div>
+                </div>
+
+                <div class="ss-form-actions" style="margin-top: 20px;">
+                    <button type="button" id="ss-connect-btn"
+                        class="ss-btn ss-btn-primary"><?php esc_html_e('Save & Test Connection', 'swift-search-typesense'); ?></button>
                 </div>
             </section>
 
@@ -160,12 +160,6 @@
                         <div class="ss-option-list" id="ss-content-settings-container">
                             <!-- Dynamic Checkboxes -->
                         </div>
-                        <div class="ss-form-actions">
-                            <button type="button" class="ss-btn ss-btn-secondary"
-                                id="ss-save-content"><?php esc_html_e('Save Settings', 'swift-search-typesense'); ?></button>
-                            <button type="button" class="ss-btn ss-btn-primary next-step"
-                                data-target="relevance"><?php esc_html_e('Next: Relevance', 'swift-search-typesense'); ?></button>
-                        </div>
                     </div>
                 </div>
 
@@ -183,10 +177,11 @@
                             <span class="ss-loader"></span> Loading Fields...
                         </div>
                     </div>
-                    <div class="ss-form-actions">
-                        <button type="button" class="ss-btn ss-btn-secondary"
-                            id="ss-save-custom-fields"><?php esc_html_e('Save Custom Fields', 'swift-search-typesense'); ?></button>
-                    </div>
+                </div>
+
+                <div class="ss-form-actions" style="margin-top: 20px;">
+                    <button type="button" class="ss-btn ss-btn-primary"
+                        id="ss-save-content"><?php esc_html_e('Save Content Settings', 'swift-search-typesense'); ?></button>
                 </div>
             </section>
 
@@ -218,14 +213,12 @@
                                 </p>
                             </div>
                         </div>
-                    </div>
-                    <div class="ss-form-actions">
-                        <button type="button" class="ss-btn ss-btn-secondary"
-                            id="ss-save-relevance"><?php esc_html_e('Save Settings', 'swift-search-typesense'); ?></button>
-                        <button type="button" class="ss-btn ss-btn-primary next-step"
-                            data-target="search-ui"><?php esc_html_e('Next: Search UI', 'swift-search-typesense'); ?></button>
-                    </div>
                 </div>
+            </div>
+            <div class="ss-form-actions" style="margin-top: 20px;">
+                <button type="button" class="ss-btn ss-btn-primary"
+                    id="ss-save-relevance"><?php esc_html_e('Save Relevance Settings', 'swift-search-typesense'); ?></button>
+            </div>
             </section>
 
             <!-- Step 4: Search UI -->
@@ -392,16 +385,10 @@
                                         <?php echo esc_html($pt['label']); ?>
                                     </label>
                                 <?php endforeach; ?>
-                            </div>
                         </div>
                     </div>
-                    <div class="ss-form-actions">
-                        <button type="button" class="ss-btn ss-btn-secondary"
-                            id="ss-save-experience"><?php esc_html_e('Save Settings', 'swift-search-typesense'); ?></button>
-                        <button type="button" class="ss-btn ss-btn-primary next-step"
-                            data-target="analytics"><?php esc_html_e('Next: Analytics', 'swift-search-typesense'); ?></button>
-                    </div>
                 </div>
+            </div>
 
                 <!-- Faceted Navigation (Pro) -->
                 <div class="ss-card ss-pro-gate">
@@ -418,10 +405,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="ss-form-actions">
-                        <button type="button" class="ss-btn ss-btn-secondary"
-                            id="ss-save-facets"><?php esc_html_e('Save Facets', 'swift-search-typesense'); ?></button>
-                    </div>
+                </div>
+
+                <div class="ss-form-actions" style="margin-top: 20px;">
+                    <button type="button" class="ss-btn ss-btn-primary"
+                        id="ss-save-search-ui"><?php esc_html_e('Save Search UI Settings', 'swift-search-typesense'); ?></button>
                 </div>
             </section>
 
@@ -476,10 +464,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="ss-form-actions">
-                        <button type="button" class="ss-btn ss-btn-primary next-step"
-                            data-target="pinning"><?php esc_html_e('Next: Results Pinning', 'swift-search-typesense'); ?></button>
-                    </div>
                 </div>
             </section>
 
@@ -515,12 +499,12 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="ss-form-actions">
-                        <button type="button" class="ss-btn ss-btn-primary next-step"
-                            data-target="sync"><?php esc_html_e('Next: Sync', 'swift-search-typesense'); ?></button>
-                    </div>
                 </div>
+            </div>
+            <div class="ss-form-actions" style="margin-top: 20px;">
+                <button type="button" class="ss-btn ss-btn-primary"
+                    id="ss-save-pinning"><?php esc_html_e('Save Pinned Items', 'swift-search-typesense'); ?></button>
+            </div>
             </section>
 
             <!-- Step 7: Sync & Usage -->

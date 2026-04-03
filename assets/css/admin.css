@@ -1,3 +1,4 @@
+/* Version: 1.0.47 */
 :root {
 	--ss-primary: #ff0055;
 	/* Typesense Pink/Redish Brand Color or Custom */
@@ -214,7 +215,6 @@
 .ss-form-group input[type="text"],
 .ss-form-group input[type="password"],
 .ss-form-group input[type="number"],
-.ss-form-group input[type="range"],
 .ss-form-group select,
 .ss-form-group textarea {
 	width: 100%;
@@ -280,10 +280,29 @@
 	background: #dc2626;
 }
 
-/* Option List */
+/* Option List & Grid Utilities */
 .ss-option-list {
 	display: grid;
 	gap: 15px;
+}
+
+.ss-card-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 15px;
+	margin-bottom: 25px;
+}
+
+@media (max-width: 1400px) {
+	.ss-card-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 900px) {
+	.ss-card-grid {
+		grid-template-columns: 1fr;
+	}
 }
 
 /* Fix specificity issue with .ss-form-group label */
@@ -343,6 +362,7 @@
 /* Range Input Styling */
 input[type=range] {
 	-webkit-appearance: none;
+	appearance: none;
 	/* Hides the slider so that custom slider can be made */
 	width: 100%;
 	/* Specific width is required for Firefox. */
@@ -352,6 +372,7 @@ input[type=range] {
 
 input[type=range]::-webkit-slider-thumb {
 	-webkit-appearance: none;
+	appearance: none;
 	height: 20px;
 	width: 20px;
 	border-radius: 50%;
@@ -370,6 +391,24 @@ input[type=range]::-webkit-slider-runnable-track {
 	border-radius: 2px;
 }
 
+input[type=range]::-moz-range-track {
+	width: 100%;
+	height: 4px;
+	cursor: pointer;
+	background: #e5e7eb;
+	border-radius: 2px;
+}
+
+input[type=range]::-moz-range-thumb {
+	height: 20px;
+	width: 20px;
+	border-radius: 50%;
+	background: var(--ss-primary);
+	cursor: pointer;
+	border: none;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 input[type=range]:focus {
 	outline: none;
 }
@@ -382,24 +421,29 @@ input[type=range]::-ms-track {
 	color: transparent;
 }
 
-/* Pro Features */
+/* Pro Features & Gating */
 .ss-pro-badge {
 	background: #7c3aed;
 	color: white;
 	font-size: 10px;
-	padding: 2px 6px;
+	padding: 2px 7px;
 	border-radius: 4px;
 	vertical-align: middle;
 	margin-left: 8px;
 	text-transform: uppercase;
 	font-weight: 700;
+	box-shadow: 0 2px 4px rgba(124, 58, 237, 0.2);
 }
 
 .ss-feature-disabled {
-	opacity: 0.6;
-	pointer-events: none;
 	position: relative;
-	filter: grayscale(1);
+	min-height: 200px; /* Ensure space for overlay */
+}
+
+.ss-feature-disabled > *:not(.ss-feature-lock-overlay) {
+	filter: blur(2px) grayscale(0.2);
+	opacity: 0.5;
+	pointer-events: none;
 }
 
 .ss-feature-lock-overlay {
@@ -411,23 +455,80 @@ input[type=range]::-ms-track {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: rgba(255, 255, 255, 0.4);
-	z-index: 10;
-	pointer-events: auto;
+	background: rgba(255, 255, 255, 0.3);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	z-index: 100;
+	border-radius: var(--ss-radius);
+	transition: all 0.3s ease;
+}
+
+.lock-content {
+	background: #ffffff;
+	padding: 40px;
+	border-radius: 12px;
+	box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+	text-align: center;
+	max-width: 380px;
+	margin: 20px;
+	border: 1px solid rgba(255, 255, 255, 0.8);
+	animation: ssFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ssFadeUp {
+	from {
+		opacity: 0;
+		transform: translateY(25px) scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+.lock-content .dashicons {
+	font-size: 48px;
+	width: 48px;
+	height: 48px;
+	color: var(--ss-primary);
+	margin-bottom: 20px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.lock-content h3 {
+	margin: 0 0 12px 0 !important;
+	font-size: 22px;
+	font-weight: 700;
+	color: #111827;
+}
+
+.lock-content p {
+	margin: 0 0 30px 0 !important;
+	color: #4b5563;
+	font-size: 15px;
+	line-height: 1.5;
 }
 
 .ss-lock-btn {
-	background: #7c3aed;
+	background: var(--ss-primary);
 	color: white;
 	text-decoration: none;
-	padding: 6px 16px;
-	border-radius: 4px;
-	font-size: 12px;
+	padding: 12px 28px;
+	border-radius: 8px;
+	font-size: 14px;
 	font-weight: 600;
 	cursor: pointer;
-	box-shadow: 0 4px 6px rgba(124, 58, 237, 0.3);
-	pointer-events: auto;
-	/* Enable clicking the upgrade button */
+	box-shadow: 0 8px 16px rgba(255, 0, 85, 0.2);
+	display: inline-block;
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ss-lock-btn:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 20px rgba(255, 0, 85, 0.3);
+	color: white;
 }
 
 /* Pinning UI */

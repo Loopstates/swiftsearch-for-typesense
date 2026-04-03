@@ -1,5 +1,6 @@
 
 
+/* Version: 1.0.47 */
 (function ($) {
     'use strict';
 
@@ -40,6 +41,7 @@
             this.$navItems = $('.ss-nav-item');
             this.$views = $('.ss-step-view');
             this.$connectForm = $('#ss-connect-form');
+            this.$connectBtn = $('#ss-connect-btn');
             this.$statusEl = $('#ss-connection-status');
             this.$docCountEl = $('#ss-doc-count');
 
@@ -53,7 +55,8 @@
             // Save Btns
             this.$saveContentBtn = $('#ss-save-content');
             this.$saveRelevanceBtn = $('#ss-save-relevance');
-            this.$saveExperienceBtn = $('#ss-save-experience');
+            this.$saveSearchUIBtn = $('#ss-save-search-ui');
+            this.$savePinningBtn = $('#ss-save-pinning');
 
             // Pro Gates
             this.$proGates = $('.ss-pro-gate');
@@ -100,18 +103,15 @@
             // Tab Navigation
             this.$navItems.on('click', this.handleNavClick.bind(this));
 
-            // Forms
-            this.$connectForm.on('submit', this.handleConnect.bind(this));
-
-            // Next buttons
-            $(document).on('click', '.next-step', this.handleNextStep.bind(this));
+            // Connect Action
+            this.$connectBtn.on('click', this.handleConnect.bind(this));
 
             // Sync Actions
             this.$syncBtn.on('click', this.startSync.bind(this));
             this.$resetBtn.on('click', this.resetIndex.bind(this));
 
-            // Override Toggle
-            this.$overrideToggle.on('change', this.handleOverrideChange.bind(this));
+            // Override Toggle (Remove auto-save)
+            // this.$overrideToggle.on('change', this.handleOverrideChange.bind(this));
 
             // Shortcode Actions
             this.$scPlaceholder.on('input', this.updateShortcodePreview.bind(this));
@@ -124,20 +124,16 @@
             this.$scScopeUsers.on('change', this.updateShortcodePreview.bind(this));
             this.$scCopyBtn.on('click', this.copyShortcode.bind(this));
 
-            // Experience Options
-            this.$ssTypoTolerance.on('change', this.handleExperienceChange.bind(this));
-            this.$ssSortEnabled.on('change', this.handleExperienceChange.bind(this));
-            this.$ssMobileBtn.on('change', this.handleExperienceChange.bind(this));
-
-            // Relevance
-            this.$relevanceRange.on('change', this.handleRelevanceChange.bind(this));
-            this.$synonymsInput.on('change', this.handleRelevanceChange.bind(this));
+            // Experience Options (Remove auto-save)
+            // this.$ssTypoTolerance.on('change', this.handleExperienceChange.bind(this));
+            // this.$ssSortEnabled.on('change', this.handleExperienceChange.bind(this));
+            // this.$ssMobileBtn.on('change', this.handleExperienceChange.bind(this));
 
             // Save Actions
             this.$saveContentBtn.on('click', this.saveContentSettings.bind(this));
-            this.$saveRelevanceBtn.on('click', this.handleRelevanceChange.bind(this));
-            this.$saveExperienceBtn.on('click', this.handleExperienceChange.bind(this));
-            $('#ss-save-facets').on('click', this.saveFacetsConfig.bind(this));
+            this.$saveRelevanceBtn.on('click', this.handleRelevanceSave.bind(this));
+            this.$saveSearchUIBtn.on('click', this.handleSearchUISave.bind(this));
+            this.$savePinningBtn.on('click', this.savePinnedItems.bind(this));
 
             // Pinning
             this.$pinningSearch.on('input', this.handlePinningSearch.bind(this));
@@ -249,7 +245,7 @@
 
             // Section: Post Types
             html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Post Types</h4>';
-            html += '<div class="ss-grid-2" style="margin-bottom: 20px;">';
+            html += '<div class="ss-card-grid">';
             if (postTypes.length > 0) {
                 postTypes.forEach(type => {
                     const isChecked = savedPostTypes.includes(type.name) ? 'checked' : '';
@@ -268,7 +264,7 @@
 
             // Section: Taxonomies
             html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Taxonomies</h4>';
-            html += '<div class="ss-grid-2" style="margin-bottom: 20px;">';
+            html += '<div class="ss-card-grid">';
             if (taxonomies.length > 0) {
                 taxonomies.forEach(tax => {
                     const isChecked = savedTaxonomies.includes(tax.name) ? 'checked' : '';
@@ -287,7 +283,7 @@
 
             // Section: Users
             html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Users</h4>';
-            html += '<div class="ss-grid-2" style="margin-bottom: 20px;">';
+            html += '<div class="ss-card-grid">';
             const userChecked = savedUsers ? 'checked' : '';
             html += `<label class="ss-checkbox-card">
                 <input type="checkbox" id="ss-index-users" name="index_users" ${userChecked}>
@@ -371,12 +367,13 @@
                 post_types: postTypes,
                 taxonomies: taxonomies,
                 index_users: indexUsers,
-                custom_fields: customFields
+                custom_fields: customFields,
+                override_default: this.$overrideToggle.is(':checked')
             };
 
             this.request('POST', '/settings', payload).done(function (response) {
                 if (response.success) {
-                    alert('Settings Saved!');
+                    alert('Content Settings Saved!');
                 } else {
                     alert('Failed to save settings.');
                 }
@@ -385,7 +382,12 @@
             });
         },
 
-        handleRelevanceChange: function () {
+        handleRelevanceSave: function (e) {
+            e.preventDefault();
+            const $btn = this.$saveRelevanceBtn;
+            const originalText = $btn.text();
+            $btn.prop('disabled', true).text('Saving...');
+
             const weightVal = this.$relevanceRange.val();
             const weight = Math.max(1, Math.round(weightVal / 10)); // Scale 100 -> 10
 
@@ -417,22 +419,38 @@
                 }
             };
 
-            this.request('POST', '/settings', payload);
-        },
-
-        handleOverrideChange: function (e) {
-            const isChecked = $(e.currentTarget).is(':checked');
-
-            this.request('POST', '/settings', {
-                override_default: isChecked
-            }).done(function (response) {
-                if (!response.success) {
-                    alert('Failed to save setting.');
+            this.request('POST', '/settings', payload).done(function (response) {
+                if (response.success) {
+                    alert('Relevance Settings Saved!');
+                } else {
+                    alert('Failed to save settings.');
                 }
+            }).always(function () {
+                $btn.prop('disabled', false).text(originalText);
             });
         },
 
-        handleExperienceChange: function () {
+        handleSearchUISave: function (e) {
+            e.preventDefault();
+            const $btn = this.$saveSearchUIBtn;
+            const originalText = $btn.text();
+            $btn.prop('disabled', true).text('Saving...');
+
+            // Gather Facets Config
+            const facets = [];
+            $('#ss-facets-config-container tbody tr').each(function () {
+                const $row = $(this);
+                const $cb = $row.find('.ss-facet-enable');
+                if ($cb.length) {
+                    facets.push({
+                        source: $cb.data('source'),
+                        type: $cb.data('type'),
+                        label: $row.find('.ss-facet-label').val(),
+                        enabled: $cb.is(':checked')
+                    });
+                }
+            });
+
             const payload = {
                 experience_settings: {
                     typo_tolerance: this.$ssTypoTolerance.is(':checked'),
@@ -451,13 +469,18 @@
                         });
                         return pts;
                     })()
-                }
+                },
+                facets_config: facets
             };
 
             this.request('POST', '/settings', payload).done(function (response) {
-                if (!response.success) {
+                if (response.success) {
+                    alert('Search UI Settings Saved!');
+                } else {
                     alert('Failed to save settings.');
                 }
+            }).always(function () {
+                $btn.prop('disabled', false).text(originalText);
             });
         },
 
@@ -518,13 +541,6 @@
             const $item = $(e.currentTarget);
             const step = $item.data('step');
             this.switchView(step);
-        },
-
-        handleNextStep: function (e) {
-            const target = $(e.currentTarget).data('target');
-            if (target) {
-                this.switchView(target);
-            }
         },
 
         switchView: function (stepName) {
@@ -727,7 +743,6 @@
             }
 
             this.pinnedItems.push(item);
-            this.savePinnedItems();
             this.$pinningSearch.val('');
             this.$pinningResults.hide();
             this.renderPinnedList();
@@ -736,7 +751,6 @@
         removePinnedItem: function (e) {
             const id = $(e.currentTarget).data('id');
             this.pinnedItems = this.pinnedItems.filter(i => i.id != id);
-            this.savePinnedItems();
             this.renderPinnedList();
         },
 
@@ -763,20 +777,34 @@
             this.$pinnedListContainer.html(html).show();
         },
 
-        savePinnedItems: function () {
+        savePinnedItems: function (e) {
+            if (e) e.preventDefault();
+            const $btn = this.$savePinningBtn;
+            const originalText = $btn.text();
+            $btn.prop('disabled', true).text('Saving...');
+
             const payload = { items: this.pinnedItems };
-            this.request('POST', '/pinning/items', payload);
+            const self = this;
+            this.request('POST', '/pinning/items', payload).done(function (resp) {
+                if (resp.success) {
+                    alert('Pinned items saved!');
+                } else {
+                    alert('Failed to save pinned items.');
+                }
+            }).always(function () {
+                $btn.prop('disabled', false).text(originalText);
+            });
         },
 
 
         renderConnectionState: function (isConnected) {
-            const $btn = this.$connectForm.find('button[type="submit"]');
+            const $btn = this.$connectBtn;
             const $inputs = this.$connectForm.find('input, select');
-
+            
             // Elements to lock if disconnected
             const $tabs = this.$navItems.not('[data-step="connect"]');
             const $syncBtn = this.$syncBtn;
-            const $saveBtns = $('.button-primary').not($btn); // All other save buttons
+            const $saveBtns = $('.ss-btn-primary').not($btn); // All other save buttons
 
             if (isConnected) {
                 // Connected State
@@ -816,8 +844,8 @@
         },
 
         handleConnect: function (e) {
-            e.preventDefault();
-            const $btn = this.$connectForm.find('button[type="submit"]');
+            if (e) e.preventDefault();
+            const $btn = this.$connectBtn;
 
             // Check if Disconnect Action
             if ($btn.attr('data-action') === 'disconnect') {
@@ -949,7 +977,7 @@
                                 <span class="dashicons dashicons-lock"></span>
                                 <h3>Pro Feature</h3>
                                 <p>Upgrade to unlock this feature.</p>
-                                <a href="${url}" target="_blank" class="ss-btn ss-btn-primary">Upgrade Now</a>
+                                <a href="${url}" target="_blank" class="ss-lock-btn">Upgrade Now</a>
                             </div>
                         </div>
                     `);
@@ -1353,7 +1381,13 @@
             }
         },
 
-        saveFacetsConfig: function () {
+        handleSearchUISave: function (e) {
+            e.preventDefault();
+            const $btn = this.$saveSearchUIBtn;
+            const originalText = $btn.text();
+            $btn.prop('disabled', true).text('Saving...');
+
+            // Gather Facets Config
             const facets = [];
             $('#ss-facets-config-container tbody tr').each(function () {
                 const $row = $(this);
@@ -1368,16 +1402,36 @@
                 }
             });
 
-            const self = this;
-            const $btn = $('#ss-save-facets');
-            $btn.prop('disabled', true).text('Saving...');
+            const payload = {
+                experience_settings: {
+                    typo_tolerance: this.$ssTypoTolerance.is(':checked'),
+                    sort_enabled: this.$ssSortEnabled.is(':checked'),
+                    mobile_btn: this.$ssMobileBtn.is(':checked'),
+                    instant_search: $('#ss-instant-search').is(':checked'),
+                    search_scope: {
+                        posts: true, // Always true
+                        terms: $('#ss-scope-terms').is(':checked'),
+                        users: $('#ss-scope-users').is(':checked')
+                    },
+                    post_types: (function () {
+                        const pts = [];
+                        $('.ss-global-post-type-selector:checked').each(function () {
+                            pts.push($(this).val());
+                        });
+                        return pts;
+                    })()
+                },
+                facets_config: facets
+            };
 
-            this.request('POST', '/settings', { facets_config: facets }).done(function (resp) {
-                $btn.prop('disabled', false).text('Save Facets');
-                alert('Facets Configuration Saved!');
-            }).fail(function () {
-                $btn.prop('disabled', false).text('Save Facets');
-                alert('Error saving facets.');
+            this.request('POST', '/settings', payload).done(function (response) {
+                if (response.success) {
+                    alert('Search UI Settings Saved!');
+                } else {
+                    alert('Failed to save settings.');
+                }
+            }).always(function () {
+                $btn.prop('disabled', false).text(originalText);
             });
         }
     };
@@ -1404,57 +1458,6 @@
         $container.on('click', '.ss-remove-field-btn', function (e) {
             e.preventDefault();
             $(this).closest('tr').remove();
-        });
-
-        // Save Button for Custom Fields
-        $('#ss-save-custom-fields').on('click', function (e) {
-            e.preventDefault();
-            const $btn = $(this);
-            const originalText = $btn.text();
-            $btn.prop('disabled', true).text('Saving...');
-
-            // Serialize Form Data
-            // We need to parse name="custom_fields[pt][idx][key]" manually or use serializeArray
-            // But we can just use jQuery serializeArray on the container inputs
-            const raw = $container.find('input, select').serializeArray();
-            const customFields = {};
-
-            // Helper to build deep object from name
-            raw.forEach(item => {
-                // name format: custom_fields[post_type][index][prop]
-                // Regex to pull parts
-                const match = item.name.match(/custom_fields\[(.*?)\]\[(.*?)\]\[(.*?)\]/);
-                if (match) {
-                    const pt = match[1];
-                    const idx = match[2]; // Use as key temporarily
-                    const prop = match[3];
-
-                    if (!customFields[pt]) customFields[pt] = {};
-                    if (!customFields[pt][idx]) customFields[pt][idx] = {};
-
-                    if (prop === 'facet') {
-                        customFields[pt][idx][prop] = true;
-                    } else {
-                        customFields[pt][idx][prop] = item.value;
-                    }
-                }
-            });
-
-            // Convert object of objects to array of objects
-            const finalPayload = {};
-            Object.keys(customFields).forEach(pt => {
-                finalPayload[pt] = Object.values(customFields[pt]).filter(f => f.key && f.name); // basic validation
-            });
-
-            SwiftSearchAdmin.request('POST', '/settings', { custom_fields: finalPayload }).done(function (response) {
-                if (response.success) {
-                    alert('Custom Fields Saved!');
-                } else {
-                    alert('Failed to save.');
-                }
-            }).always(function () {
-                $btn.prop('disabled', false).text(originalText);
-            });
         });
     });
 
