@@ -36,16 +36,20 @@
                         <span class="step-num">4</span>
                         <span class="step-label"><?php esc_html_e('Search UI', 'swift-search-typesense'); ?></span>
                     </li>
-                    <li class="ss-nav-item" data-step="analytics">
+                    <li class="ss-nav-item" data-step="styling">
                         <span class="step-num">5</span>
+                        <span class="step-label"><?php esc_html_e('Styling & UI', 'swift-search-typesense'); ?></span>
+                    </li>
+                    <li class="ss-nav-item" data-step="analytics">
+                        <span class="step-num">6</span>
                         <span class="step-label"><?php esc_html_e('Analytics', 'swift-search-typesense'); ?></span>
                     </li>
                     <li class="ss-nav-item" data-step="pinning">
-                        <span class="step-num">6</span>
+                        <span class="step-num">7</span>
                         <span class="step-label"><?php esc_html_e('Pinning', 'swift-search-typesense'); ?></span>
                     </li>
                     <li class="ss-nav-item" data-step="sync">
-                        <span class="step-num">7</span>
+                        <span class="step-num">8</span>
                         <span class="step-label"><?php esc_html_e('Sync', 'swift-search-typesense'); ?></span>
                     </li>
                 </ul>
@@ -412,8 +416,53 @@
                         id="ss-save-search-ui"><?php esc_html_e('Save Search UI Settings', 'swift-search-typesense'); ?></button>
                 </div>
             </section>
+            
+            <!-- Step 5: Styling & UI -->
+            <section class="ss-step-view" id="view-styling" style="display:none;">
+                <div class="ss-card">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Styling & Customization', 'swift-search-typesense'); ?></h2>
+                        <p><?php esc_html_e('Customize the appearance of your search results. Changes apply to the frontend search interface.', 'swift-search-typesense'); ?></p>
+                    </div>
+                    <div class="ss-card-body">
+                         <div class="ss-form-group-row" style="gap: 20px;">
+                            <div class="ss-form-group" style="flex:1;">
+                                <label for="ss-primary-color"><?php esc_html_e('Primary Accent Color', 'swift-search-typesense'); ?></label>
+                                <input type="color" id="ss-primary-color" class="ss-input-color" value="#ff0055">
+                                <p class="description"><?php esc_html_e('Used for buttons, icons, and highlights.', 'swift-search-typesense'); ?></p>
+                            </div>
+                            <div class="ss-form-group" style="flex:1;">
+                                <label for="ss-text-color"><?php esc_html_e('Main Text Color', 'swift-search-typesense'); ?></label>
+                                <input type="color" id="ss-text-color" class="ss-input-color" value="#1f2937">
+                                <p class="description"><?php esc_html_e('Color for titles and body text.', 'swift-search-typesense'); ?></p>
+                            </div>
+                            <div class="ss-form-group" style="flex:1;">
+                                <label for="ss-card-bg"><?php esc_html_e('Card Background', 'swift-search-typesense'); ?></label>
+                                <input type="color" id="ss-card-bg" class="ss-input-color" value="#ffffff">
+                                <p class="description"><?php esc_html_e('Background color for result cards.', 'swift-search-typesense'); ?></p>
+                            </div>
+                        </div>
 
-            <!-- Step 5: Analytics (Pro) -->
+                        <div class="ss-form-group" style="margin-top: 20px;">
+                            <label for="ss-border-radius"><?php esc_html_e('Border Radius (px)', 'swift-search-typesense'); ?></label>
+                            <input type="number" id="ss-border-radius" class="ss-input" value="16" min="0" max="100">
+                            <p class="description"><?php esc_html_e('Global roundness for cards, inputs, and buttons.', 'swift-search-typesense'); ?></p>
+                        </div>
+
+                        <div class="ss-form-group" style="margin-top: 30px;">
+                            <label for="ss-custom-css"><?php esc_html_e('Custom CSS', 'swift-search-typesense'); ?></label>
+                            <p class="description" style="margin-bottom: 10px;"><?php esc_html_e('Add raw CSS to override any part of the search UI. Scope your rules to .ss-wrapper for best results.', 'swift-search-typesense'); ?></p>
+                            <textarea id="ss-custom-css" rows="10" class="ss-input" style="font-family: monospace; font-size: 13px;" placeholder=".ss-card { border: 1px solid #eee; }"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ss-form-actions" style="margin-top: 20px;">
+                    <button type="button" class="ss-btn ss-btn-primary" id="ss-save-styling"><?php esc_html_e('Save Styling Settings', 'swift-search-typesense'); ?></button>
+                </div>
+            </section>
+
+            <!-- Step 6: Analytics (Pro) -->
             <section class="ss-step-view" id="view-analytics" style="display:none;">
                 <div class="ss-card ss-pro-gate">
                     <div class="ss-card-header">

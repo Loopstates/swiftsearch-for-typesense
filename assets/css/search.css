@@ -1,7 +1,6 @@
-/* Version: 1.1.0 */
+/* Version: 1.1.1 */
 :root {
-    --ss-primary-rgb: 255, 0, 85;
-    --ss-primary: rgb(var(--ss-primary-rgb));
+    --ss-primary: #ff0055;
     --ss-bg: #ffffff;
     --ss-card-bg: #ffffff;
     --ss-text-main: #1f2937;
@@ -18,6 +17,7 @@
     max-width: 900px;
     margin: 20px auto;
     font-family: 'Outfit', -apple-system, sans-serif;
+    color: var(--ss-text-main);
 }
 
 /* Search Box Overhaul */

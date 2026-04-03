@@ -556,6 +556,17 @@ class RestController extends WP_REST_Controller
             }
         }
 
+        // 3. Styling Section (New)
+        if ($section === 'styling') {
+            $current_settings['styling'] = array(
+                'primary_color' => sanitize_text_field($params['primary_color'] ?? '#ff0055'),
+                'card_bg' => sanitize_text_field($params['card_bg'] ?? '#ffffff'),
+                'text_color' => sanitize_text_field($params['text_color'] ?? '#1f2937'),
+                'border_radius' => absint($params['border_radius'] ?? 16),
+                'custom_css' => wp_strip_all_tags($params['custom_css'] ?? ''),
+            );
+        }
+
         // Final Save
         update_option('swift_search_settings', $current_settings);
 

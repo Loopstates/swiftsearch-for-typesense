@@ -1,6 +1,6 @@
 
 
-/* Version: 1.1.0 */
+/* Version: 1.1.1 */
 (function ($) {
     'use strict';
 
@@ -57,6 +57,14 @@
             this.$saveRelevanceBtn = $('#ss-save-relevance');
             this.$saveSearchUIBtn = $('#ss-save-search-ui');
             this.$savePinningBtn = $('#ss-save-pinning');
+            this.$saveStylingBtn = $('#ss-save-styling');
+
+            // Styling Inputs
+            this.$ssPrimaryColor = $('#ss-primary-color');
+            this.$ssTextColor = $('#ss-text-color');
+            this.$ssCardBg = $('#ss-card-bg');
+            this.$ssBorderRadius = $('#ss-border-radius');
+            this.$ssCustomCss = $('#ss-custom-css');
 
             // Pro Gates
             this.$proGates = $('.ss-pro-gate');
@@ -134,6 +142,7 @@
             this.$saveRelevanceBtn.on('click', this.handleRelevanceSave.bind(this));
             this.$saveSearchUIBtn.on('click', this.handleSearchUISave.bind(this));
             this.$savePinningBtn.on('click', this.savePinnedItems.bind(this));
+            this.$saveStylingBtn.on('click', this.saveStylingSettings.bind(this));
 
             // Pinning
             this.$pinningSearch.on('input', this.handlePinningSearch.bind(this));
@@ -223,6 +232,15 @@
 
             // Late binding for dynamic elements or shortcode specific
             $('.sc-post-type-selector').on('change', this.updateShortcodePreview.bind(this));
+
+            // Set Styling State
+            if (swiftSearchConfig.styling) {
+                this.$ssPrimaryColor.val(swiftSearchConfig.styling.primary_color || '#ff0055');
+                this.$ssTextColor.val(swiftSearchConfig.styling.text_color || '#1f2937');
+                this.$ssCardBg.val(swiftSearchConfig.styling.card_bg || '#ffffff');
+                this.$ssBorderRadius.val(swiftSearchConfig.styling.border_radius || 16);
+                this.$ssCustomCss.val(swiftSearchConfig.styling.custom_css || '');
+            }
 
             // Resume Sync State / Show History
             this.pollStatus(true);
@@ -424,6 +442,32 @@
             this.request('POST', '/settings', payload).done(function (response) {
                 if (response.success) {
                     alert('Relevance Settings Saved!');
+                } else {
+                    alert('Failed to save settings.');
+                }
+            }).always(function () {
+                $btn.prop('disabled', false).text(originalText);
+            });
+        },
+
+        saveStylingSettings: function (e) {
+            if (e) e.preventDefault();
+            const $btn = this.$saveStylingBtn;
+            const originalText = $btn.text();
+            $btn.prop('disabled', true).text('Saving...');
+
+            const payload = {
+                section: 'styling',
+                primary_color: this.$ssPrimaryColor.val(),
+                text_color: this.$ssTextColor.val(),
+                card_bg: this.$ssCardBg.val(),
+                border_radius: this.$ssBorderRadius.val(),
+                custom_css: this.$ssCustomCss.val()
+            };
+
+            this.request('POST', '/settings', payload).done(function (response) {
+                if (response.success) {
+                    alert('Styling Settings Saved!');
                 } else {
                     alert('Failed to save settings.');
                 }
@@ -1365,6 +1409,7 @@
                         </td>
                         <td>
                             <code>${src.source}</code>
+                            ${src.type === 'taxonomy' ? `<br><small style="color:#9ca3af;">( ${src.label} )</small>` : ''}
                         </td>
                         <td>
                             <input type="text" class="ss-facet-label" value="${displayLabel}" style="width: 100%;">
