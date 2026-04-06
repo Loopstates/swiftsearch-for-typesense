@@ -459,26 +459,27 @@ class RestController extends WP_REST_Controller
             $current_settings['indexed_users'] = $val;
 
             // Custom Fields (Pro)
-            if (isset($params['custom_fields'])) {
-                $custom_fields = $params['custom_fields'];
-                if (is_array($custom_fields)) {
-                    $sanitized = array();
-                    foreach ($custom_fields as $pt => $fields) {
-                        if (!is_array($fields)) continue;
-                        $sanitized[$pt] = array();
-                        foreach ($fields as $field) {
-                            if (empty($field['key']) || empty($field['name'])) continue;
-                            $sanitized[$pt][] = array(
-                                'key' => sanitize_text_field($field['key']),
-                                'name' => sanitize_text_field($field['name']),
-                                'type' => sanitize_text_field($field['type']),
-                                'facet' => isset($field['facet']) ? true : false,
-                            );
-                        }
+            $custom_fields = isset($params['custom_fields']) ? $params['custom_fields'] : array();
+            $sanitized_fields = array();
+            if (is_array($custom_fields)) {
+                foreach ($custom_fields as $pt => $fields) {
+                    if (!is_array($fields)) continue;
+                    $sanitized_fields[$pt] = array();
+                    foreach ($fields as $field) {
+                        if (empty($field['key']) || empty($field['name'])) continue;
+                        $sanitized_fields[$pt][] = array(
+                            'key' => sanitize_text_field($field['key']),
+                            'name' => sanitize_text_field($field['name']),
+                            'type' => sanitize_text_field($field['type'] ?? 'string'),
+                            'facet' => !empty($field['facet']) ? true : false,
+                        );
                     }
-                    $current_settings['custom_fields'] = $sanitized;
+                    if (empty($sanitized_fields[$pt])) {
+                        unset($sanitized_fields[$pt]);
+                    }
                 }
             }
+            $current_settings['custom_fields'] = $sanitized_fields;
 
             // Global Override
             if (isset($params['override_default'])) {

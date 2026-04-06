@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
  */
 class Schema
 {
-    const VERSION = '1.2.3';
+    const VERSION = '1.2.4';
 
     /**
      * Get the schema definition for the main collection.

@@ -146,16 +146,20 @@
         const numTypos = useTypo ? 2 : 0;
         const baseFilter = buildFilterString();
 
-        // Resolve Post Type Filter
+        // Resolve Post Type Filter (Strict)
         let ptFilter = '';
+        let activePTs = [];
         if (wrapper.dataset.postTypes) {
-            const pts = wrapper.dataset.postTypes.split(',').map(s => s.trim()).filter(s => s);
-            if (pts.length > 0) {
-                ptFilter = `post_type:=[${pts.map(v => '`' + v + '`').join(',')}]`;
-            }
+            activePTs = wrapper.dataset.postTypes.split(',').map(s => s.trim()).filter(s => s);
         } else if (config.experience && config.experience.post_types && Array.isArray(config.experience.post_types) && config.experience.post_types.length > 0) {
-            const pts = config.experience.post_types;
-            ptFilter = `post_type:=[${pts.map(v => '`' + v + '`').join(',')}]`;
+            activePTs = config.experience.post_types;
+        } else if (config.indexed_post_types && Array.isArray(config.indexed_post_types)) {
+            // Fallback to indexed types if experience scope is not set
+            activePTs = config.indexed_post_types;
+        }
+
+        if (activePTs.length > 0) {
+            ptFilter = `post_type:=[${activePTs.map(v => '`' + v + '`').join(',')}]`;
         }
 
         let finalFilter = baseFilter;
@@ -316,7 +320,32 @@
 
                 // Section Header
                 let title = 'Items';
-                if (collection === 'posts') title = 'Products & Posts';
+                if (collection === 'posts') {
+                    // Dynamic Heading Logic
+                    let activePTs = [];
+                    if (wrapper.dataset.postTypes) {
+                        activePTs = wrapper.dataset.postTypes.split(',').map(s => s.trim()).filter(s => s);
+                    } else if (config.experience && config.experience.post_types && Array.isArray(config.experience.post_types) && config.experience.post_types.length > 0) {
+                        activePTs = config.experience.post_types;
+                    } else if (config.indexed_post_types && Array.isArray(config.indexed_post_types)) {
+                        activePTs = config.indexed_post_types;
+                    }
+
+                    if (activePTs.length === 1) {
+                        // Singular/Specific title
+                        const pt = activePTs[0];
+                        if (pt === 'product') title = 'Products';
+                        else if (pt === 'post') title = 'Posts';
+                        else if (pt === 'page') title = 'Pages';
+                        else title = pt.charAt(0).toUpperCase() + pt.slice(1) + 's';
+                    } else if (activePTs.length > 1) {
+                        if (activePTs.includes('product') && activePTs.length === 1) title = 'Products'; // Wait, redundant
+                        else if (activePTs.includes('product')) title = 'Products & Items';
+                        else title = 'Search Results';
+                    } else {
+                        title = 'Results';
+                    }
+                }
                 else if (collection === 'terms') title = 'Categories';
                 else if (collection === 'users') title = 'Authors';
 

@@ -263,12 +263,15 @@
 
             // Section: Post Types
             html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Post Types</h4>';
+            html += '<div id="ss-reindex-warning" style="display:none; margin-bottom: 15px; padding: 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; color: #92400e; font-size: 13px;">';
+            html += '<strong>Note:</strong> You changed the searchable post types. A <a href="#" onclick="jQuery(\'#ss-nav-connect\').click(); return false;" style="color: #92400e; text-decoration: underline; font-weight: 600;">Full Re-index</a> is required to update the Typesense database.';
+            html += '</div>';
             html += '<div class="ss-card-grid">';
             if (postTypes.length > 0) {
                 postTypes.forEach(type => {
                     const isChecked = savedPostTypes.includes(type.name) ? 'checked' : '';
                     html += `<label class="ss-checkbox-card">
-                        <input type="checkbox" name="post_types[]" value="${type.name}" ${isChecked}>
+                        <input type="checkbox" name="post_types[]" value="${type.name}" ${isChecked} class="ss-pt-toggle">
                         <div class="info">
                             <span class="title">${type.label || type.name}</span>
                             <span class="meta">${type.description || type.name}</span>
@@ -279,6 +282,11 @@
                 html += '<p>No public post types found.</p>';
             }
             html += '</div>';
+
+            // Add Event Listener
+            container.off('change', '.ss-pt-toggle').on('change', '.ss-pt-toggle', function() {
+                $('#ss-reindex-warning').fadeIn();
+            });
 
             // Section: Taxonomies
             html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Taxonomies</h4>';

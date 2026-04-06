@@ -80,6 +80,17 @@ Yes, the core features are free forever.
  
 == Changelog ==
  
+= 1.2.4 =
+*   Fix: 'Advanced Data' custom fields now correctly persist deletions in the database.
+*   New: Dynamic Search Results heading based on active post types (e.g. 'Products' vs 'Products & Posts').
+*   New: Strict Post-Type filtering in search queries to prevent old content from appearing.
+*   UX: Added 'Re-index Required' warning when searchable content types are changed.
+
+= 1.2.3 =
+*   Fix: Critical configuration bottleneck in ConfigLoader.php resolved.
+*   Improvement: Enhanced Typesense Response logging for diagnostic transparency.
+*   Version: Synced core logic with Universal Facet Registration Bridge.
+
 = 1.2.2 =
 *   Removed: Self-healing retry logic to ensure facet/schema errors are not hidden.
 *   Improved: Concrete console logging for Typesense API errors.

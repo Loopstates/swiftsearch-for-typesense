@@ -2,6 +2,18 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.2.4] - 2026-04-06
+
+### Added
+- UX: 'Re-index Required' warning in Searchable Content settings when post types are changed.
+- Logic: Automatic fallback to `indexed_post_types` in search frontend if no explicit scope is defined.
+
+### Fixed
+- Bug: 'Advanced Data' custom fields not persisting when removed in the UI (RestController logic fix).
+- Bug: Hardcoded 'Products & Posts' heading in search results; now dynamically updates based on active post types.
+- Bug: 'Sample Page' appearing when only Products were selected; implemented strict `post_type` filtering in Typesense queries.
+- Bug: Corrected sanitization for boolean `facet` values in custom field settings.
+
 ## [1.2.3] - 2026-04-06
 
 ### Fixed
