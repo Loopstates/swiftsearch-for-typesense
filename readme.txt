@@ -3,7 +3,7 @@ Contributors: Loopstates
 Tags: search, typesense, woocommerce, fast search, instant search
 Requires at least: 5.8
 Tested up to: 6.7
-Stable tag: 1.3.13
+Stable tag: 1.3.19
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -80,79 +80,85 @@ Yes, the core features are free forever.
  
 == Changelog ==
  
-= 1.3.8 =
-*   New: Added "Apply to Collections" checkboxes for synonyms. Admins can now select exactly which indices (Posts, Terms, Users) should have synonym expansion enabled.
-*   Improvement: Automatic collection discovery from Typesense server for more reliable linking.
-
-= 1.3.7 =
-*   Fix: Resolved "Not linked" status in Typesense Cloud Dashboard. Implemented explicit collection-level synonym linking for full v0.30+ compatibility.
-*   New: Implemented Global Synonym Sets architecture.
-
-= 1.3.0 =
-*   New: Full support for Typesense v0.30.1+ Global Synonym Sets.
-*   Fix: Resolved 404 errors during synonym synchronization on modern Cloud clusters.
-*   Improvement: Enhanced error reporting in Admin UI.
+= 1.3.19 =
+* Fix: Corrected accidental "faded" disabled style from the "Show Excerpts" setting.
  
-= 1.2.8 =
-*   Improvement: Multi-way synonym support for better search expansion.
-*   Improvement: Explicit error reporting for synonym synchronization.
+= 1.3.18 =
+* Fix: Resolved critical "undefined" JavaScript error when loading the admin dashboard.
+* Maintenance: Removed orphaned references to legacy shortcode overrides.
+ 
+= 1.3.17 =
+* UX: Reordered Search UI tab to place Experience Options at the top.
+* Feature: Fully implemented Frontend visibility toggles for Thumbnails, Prices, and Excerpts.
+* Roadmap: Added "Coming Soon" placeholders for Sort Results and Floating Mobile Button.
+* Fix: Cleaned up redundant Instant Search override from Shortcode Generator.
+ 
+= 1.3.16 =
+* Refactor: Reorganized Experience settings to prioritize Global defaults over overrides.
+* Feature: Moved Thumbnail, Price, and Excerpt toggles to Global Experience Options.
+* Fix: Consolidate Shortcode Generator to only output attributes for explicit overrides.
+* Fix: Resolved a structural JavaScript error in `admin.js` that was breaking state restoration.
+ 
+= 1.3.15 =
+* UI Optimization: Consolidated redundant "Instant Search" setting in the admin dashboard.
+* Roadmap: Labeled Sort and Mobile experience options as "Coming Soon" to accurately reflect current implementation status.
+* Improved UX: Corrected feature descriptions and added visual states for disabled roadmap settings.
+ 
+= 1.3.14 =
+* Fix: Resolved a critical JavaScript ReferenceError in search results processing.
+* Improved: Stabilized organic match counting for analytics.
+ 
+= 1.3.12 =
+* Fix: Improved search analytics accuracy by excluding pinned items from organic match counts.
+* Improvement: Added CSS hooks for identifying pinned items in search results.
+ 
+= 1.3.11 =
+* Fix: Search tracking for zero-result queries (previously skipped, now correctly populates analytics dashboard).
+* UI: Removed redundant synonym path debug buttons to clean up settings dashboard.
+ 
+= 1.3.10 =
+* Fix: Modernized Typesense v0.30+ Global Synonym linking via collection schema patching.
+* Improvement: Dynamic admin UI for collection management (cached for performance).
+* UI: Fixed layout breakage in Relevance settings tab.
+ 
+= 1.3.0 =
+* New: Full support for Typesense v0.30.1+ Global Synonym Sets.
+* Fix: Resolved 404 errors during synonym synchronization on modern Cloud clusters.
+* Improvement: Enhanced error reporting in Admin UI.
+* Improvement: Multi-way synonym support for better search expansion.
  
 = 1.2.7 =
-*   Fix: Resolved synonym saving and Typesense synchronization logic mismatch.
-*   Fix: Prevented 'undefined' string rendering in the admin synonyms list.
+* Fix: Resolved synonym saving and Typesense synchronization logic mismatch.
+* Fix: Prevented 'undefined' string rendering in the admin synonyms list.
  
 = 1.2.4 =
-*   Fix: 'Advanced Data' custom fields now correctly persist deletions in the database.
-*   New: Dynamic Search Results heading based on active post types (e.g. 'Products' vs 'Products & Posts').
-*   New: Strict Post-Type filtering in search queries to prevent old content from appearing.
-*   UX: Added 'Re-index Required' warning when searchable content types are changed.
-
-= 1.2.3 =
-*   Fix: Critical configuration bottleneck in ConfigLoader.php resolved.
-*   Improvement: Enhanced Typesense Response logging for diagnostic transparency.
-*   Version: Synced core logic with Universal Facet Registration Bridge.
-
-= 1.2.2 =
-*   Removed: Self-healing retry logic to ensure facet/schema errors are not hidden.
-*   Improved: Concrete console logging for Typesense API errors.
-*   Improved: JS array handling for facet configurations.
+* Fix: 'Advanced Data' custom fields now correctly persist deletions in the database.
+* New: Dynamic Search Results heading based on active post types (e.g. 'Products' vs 'Products & Posts').
+* New: Strict Post-Type filtering in search queries to prevent old content from appearing.
+* UX: Added 'Re-index Required' warning when searchable content types are changed.
  
-== Changelog ==
-
-= 1.3.13 =
-*   Fix: Resolved a critical JavaScript ReferenceError in search results processing.
-*   Improved: Stabilized organic match counting for analytics.
-
-= 1.3.12 =
-*   Fix: Improved search analytics accuracy by excluding pinned items from organic match counts.
-*   Improvement: Added CSS hooks for identifying pinned items in search results.
-
-= 1.3.11 =
-*   Fix: Search tracking for zero-result queries (previously skipped, now correctly populates analytics dashboard).
-*   UI: Removed redundant synonym path debug buttons to clean up settings dashboard.
-
-= 1.3.10 =
-*   Fix: Modernized Typesense v0.30+ Global Synonym linking via collection schema patching.
-*   Improvement: Dynamic admin UI for collection management (cached for performance).
-*   UI: Fixed layout breakage in Relevance settings tab.
-
+= 1.2.3 =
+* Fix: Critical configuration bottleneck in ConfigLoader.php resolved.
+* Improvement: Enhanced Typesense Response logging for diagnostic transparency.
+* Version: Synced core logic with Universal Facet Registration Bridge.
+ 
 = 1.2.1 =
-*   Fix: Resolved an issue where some enabled facets were hidden in the frontend sidebar due to redundant validation logic.
+* Fix: Resolved an issue where some enabled facets were hidden in the frontend sidebar due to redundant validation logic.
  
 = 1.2.0 =
-*   New: Universal Facet Registration Bridge.
-*   New: Advanced Facet Settings (Target Mapping & Data Types).
-*   Fix: Zero-results for numeric/boolean facets by implementing type-safe filtering.
-*   Improvement: Unified schema and indexing logic for all WordPress plugins.
+* New: Universal Facet Registration Bridge.
+* New: Advanced Facet Settings (Target Mapping & Data Types).
+* Fix: Zero-results for numeric/boolean facets by implementing type-safe filtering.
+* Improvement: Unified schema and indexing logic for all WordPress plugins.
  
 = 1.0.22 =
-*   Fix: Facet configuration freezing on load due to data type mismatch.
-*   Fix: Security warning persistence after saving settings.
-*   Fix: Improved error handling for PHP-to-JS data serialization.
-
+* Fix: Facet configuration freezing on load due to data type mismatch.
+* Fix: Security warning persistence after saving settings.
+* Fix: Improved error handling for PHP-to-JS data serialization.
+ 
 = 1.0.21 =
-*   Fix: Saved Custom Fields button visibility.
-*   Improvement: Connection workflow.
-
+* Fix: Saved Custom Fields button visibility.
+* Improvement: Connection workflow.
+ 
 = 1.0.0 =
-*   Initial release.
+* Initial release.

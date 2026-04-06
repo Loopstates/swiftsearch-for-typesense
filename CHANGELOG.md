@@ -2,6 +2,38 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
  
+## [1.3.19] - 2026-04-06
+- **Fix**: Corrected accidental "faded" style on the "Show Excerpts" global setting.
+
+## [1.3.18] - 2026-04-06
+- **Fix**: Resolved critical "undefined" JavaScript error on admin dashboard load.
+- **Maintenance**: Completely excised orphaned shortcode override references from `admin.js`.
+
+## [1.3.17] - 2026-04-06
+- **UX**: Prioritized Experience Options panel at the top of the Search UI tab.
+- **Frontend**: Fully implemented visibility toggles (Thumbnails, Prices, Excerpts) in `search.js`.
+- **UI**: Added Roadmap markers ("Coming Soon") for Sort Results and Mobile Button features.
+- **Maintenance**: Removed redundant Instant Search override from Shortcode Builder and synchronized JS logic.
+
+## [1.3.16] - 2026-04-06
+- **Settings Reorganization**: Consolidated global search preferences (Thumbnail, Price, Excerpt, Limit) to the Experience Options tab.
+- **Shortcode Optimization**: Refined the Shortcode Builder to only generate attributes that override global defaults.
+- **Stability Fixes**: Resolved a structural JavaScript error in `admin.js` that was breaking state restoration.
+- **Improved UX**: Hidden non-functional placeholders for Sort and Mobile Button.
+
+## [1.3.15] - 2026-04-06
+- **UI Optimization**: Consolidated redundant "Instant Search" setting in the admin dashboard.
+- **Clarification**: Labeled Sort and Mobile experience options as "Coming Soon" to accurately reflect current implementation status.
+- **Improved UX**: Corrected feature descriptions and added visual states for disabled roadmap settings.
+
+## [1.3.14] - 2026-04-06
+
+### Fixed
+- **Search Analytics**: Improved precision by excluding pinned items from organic match counts. If a search query only returns pinned products, it is now correctly logged as a "Zero Result Query" in the analytics dashboard.
+
+### UI
+- **CSS Hooks**: Added the `ss-card-pinned` class to search result cards for pinned/curated items, enabling custom styling for promoted content.
+
 ## [1.3.13] - 2026-04-06
 
 ### Fixed

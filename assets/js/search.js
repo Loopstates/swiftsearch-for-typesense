@@ -401,13 +401,14 @@
 
                         html = `
                             <a href="${doc.permalink}" class="ss-card-link">
+                                ${showThumb ? `
                                 <div class="ss-card-image">
                                     ${doc.thumbnail_url ? `<img src="${doc.thumbnail_url}" alt="">` : '<div class="ss-placeholder"></div>'}
-                                </div>
+                                </div>` : ''}
                                 <div class="ss-card-body">
                                     <h4 class="ss-card-title">${highlight(hit, 'post_title')}</h4>
-                                    ${isProduct && doc.price ? `<div class="ss-card-price">$${doc.price}</div>` : ''}
-                                    ${doc.post_excerpt ? `<p class="ss-card-excerpt">${doc.post_excerpt}</p>` : ''}
+                                    ${(showPrice && isProduct && doc.price) ? `<div class="ss-card-price">$${doc.price}</div>` : ''}
+                                    ${(showExcerpt && doc.post_excerpt) ? `<p class="ss-card-excerpt">${doc.post_excerpt}</p>` : ''}
                                 </div>
                             </a>`;
                     } else {

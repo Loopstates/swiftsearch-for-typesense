@@ -233,88 +233,7 @@
 
             <!-- Step 4: Search UI -->
             <section class="ss-step-view" id="view-search-ui" style="display:none;">
-                <!-- Shortcode Builder -->
-                <div class="ss-card">
-                    <div class="ss-card-header">
-                        <h2><?php esc_html_e('Shortcode Builder', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Customize and generate your search shortcode.', 'swift-search-typesense'); ?>
-                        </p>
-                    </div>
-                    <div class="ss-card-body">
-                        <div class="ss-form-group-row">
-                            <div class="ss-form-group">
-                                <label>Placeholder Text</label>
-                                <input type="text" id="sc-placeholder" class="ss-input" value="Search...">
-                            </div>
-                            <div class="ss-form-group">
-                                <label>Results Limit</label>
-                                <input type="number" id="sc-limit" class="ss-input" value="10" min="1" max="50">
-                            </div>
-                        </div>
-                        <div class="ss-form-group-row">
-                            <div class="ss-form-group">
-                                <label class="ss-checkbox-card">
-                                    <input type="checkbox" id="sc-show-thumbnail" checked>
-                                    <div class="info"><span class="title">Show Thumbnail</span></div>
-                                </label>
-                            </div>
-                            <div class="ss-form-group">
-                                <label class="ss-checkbox-card">
-                                    <input type="checkbox" id="sc-show-price" checked>
-                                    <div class="info"><span class="title">Show Price</span></div>
-                                </label>
-                            </div>
-                            <div class="ss-form-group">
-                                <label class="ss-checkbox-card">
-                                    <input type="checkbox" id="sc-show-excerpt">
-                                    <div class="info"><span class="title">Show Excerpt</span></div>
-                                </label>
-                            </div>
-                        </div>
-                        <!-- Experience Overrides -->
-                        <div class="ss-form-group-row"
-                            style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                            <div class="ss-form-group">
-                                <label class="ss-checkbox-card">
-                                    <input type="checkbox" id="sc-instant-search" checked>
-                                    <div class="info"><span class="title">Instant Search</span></div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="ss-form-group" style="margin-top: 10px;">
-                            <label style="display:block; margin-bottom: 8px; font-weight: 500;">Search Scope
-                                Override</label>
-                            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                                <label><input type="checkbox" id="sc-scope-posts" checked disabled> Posts</label>
-                                <label><input type="checkbox" id="sc-scope-terms" checked> Taxonomies</label>
-                                <label><input type="checkbox" id="sc-scope-users"> Users</label>
-                            </div>
-
-                            <label style="display:block; margin-bottom: 8px; font-weight: 500;">Limit Post Types
-                                (Optional)</label>
-                            <div class="ss-checkbox-list"
-                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
-                                <?php foreach ($data['available_post_types'] as $pt): ?>
-                                    <label class="ss-checkbox-inline">
-                                        <input type="checkbox" class="sc-post-type-selector"
-                                            value="<?php echo esc_attr($pt['name']); ?>">
-                                        <?php echo esc_html($pt['label']); ?>
-                                    </label>
-                                <?php endforeach; ?>
-                            </div>
-                            <p class="ss-hint">
-                                <?php esc_html_e('Leave all unchecked to search all indexed post types.', 'swift-search-typesense'); ?>
-                            </p>
-                        </div>
-                        <div class="ss-code-preview">
-                            <code id="sc-preview">[swift_search placeholder="Search..." limit="10"]</code>
-                            <button type="button" class="ss-btn ss-btn-sm ss-btn-secondary"
-                                id="ss-copy-sc">Copy</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Features (Toggles) -->
+                <!-- Experience Options -->
                 <div class="ss-card">
                     <div class="ss-card-header">
                         <h2><?php esc_html_e('Experience Options', 'swift-search-typesense'); ?></h2>
@@ -322,47 +241,148 @@
                     <div class="ss-card-body">
                         <div class="ss-form-group-row">
                             <div class="ss-form-group">
+                                <label class="ss-checkbox-card" id="ss-instant-search-card">
+                                    <input type="checkbox" id="ss-instant-search" checked>
+                                    <div class="info">
+                                        <span class="title"><?php esc_html_e('Instant Search', 'swift-search-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Search as you type. Shows results as the user enters characters.', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="ss-form-group">
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="ss-typo-tolerance" checked>
                                     <div class="info">
-                                        <span class="title">Typo Tolerance</span>
-                                        <span class="meta">Show "Did you mean?" suggestions.</span>
-                                    </div>
-                                </label>
-                            </div>
-                            <div class="ss-form-group">
-                                <label class="ss-checkbox-card">
-                                    <input type="checkbox" id="ss-sort-enabled">
-                                    <div class="info">
-                                        <span class="title">Sort Dropdown</span>
-                                        <span class="meta">Allow users to sort by Date/Relevance.</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="ss-form-group-row">
-                            <div class="ss-form-group">
-                                <label class="ss-checkbox-card">
-                                    <input type="checkbox" id="ss-mobile-btn">
-                                    <div class="info">
-                                        <span class="title">Floating Mobile Button</span>
-                                        <span class="meta">Sticky search icon on mobile devices.</span>
-                                    </div>
-                                </label>
-                            </div>
-                            <div class="ss-form-group">
-                                <label class="ss-checkbox-card">
-                                    <input type="checkbox" id="ss-instant-search" checked>
-                                    <div class="info">
-                                        <span class="title">Instant Search</span>
-                                        <span class="meta">Search as you type (Autocomplete).</span>
+                                        <span class="title"><?php esc_html_e('Typo Tolerance', 'swift-search-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Enable fuzzy matching for spelling errors.', 'swift-search-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
                         </div>
 
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="ss-global-show-thumb" checked>
+                                    <div class="info">
+                                        <span class="title"><?php esc_html_e('Show Thumbnails', 'swift-search-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Display product or post images in results.', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="ss-global-show-price" checked>
+                                    <div class="info">
+                                        <span class="title"><?php esc_html_e('Show Prices', 'swift-search-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Display WooCommerce product prices.', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="ss-global-show-excerpt">
+                                    <div class="info">
+                                        <span class="title"><?php esc_html_e('Show Excerpts', 'swift-search-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Display a short description below titles.', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="ss-form-group">
+                                <label><?php esc_html_e('Global Results Limit', 'swift-search-typesense'); ?></label>
+                                <input type="number" id="ss-global-limit" value="10" min="1" max="50">
+                                <p class="description"><?php esc_html_e('Default number of items to show per search.', 'swift-search-typesense'); ?></p>
+                            </div>
+                        </div>
+
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card ss-disabled" style="opacity: 0.5; border-style: dashed;">
+                                    <input type="checkbox" disabled>
+                                    <div class="info">
+                                        <span class="title"><?php esc_html_e('Sort Results', 'swift-search-typesense'); ?> <span class="ss-badge" style="background:#e5e7eb; color:#4b5563; font-size:10px; padding:2px 6px;">COMING SOON</span></span>
+                                        <span class="meta"><?php esc_html_e('Allow users to sort by Price, Date, or Relevance.', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card ss-disabled" style="opacity: 0.5; border-style: dashed;">
+                                    <input type="checkbox" disabled>
+                                    <div class="info">
+                                        <span class="title"><?php esc_html_e('Floating Mobile Button', 'swift-search-typesense'); ?> <span class="ss-badge" style="background:#e5e7eb; color:#4b5563; font-size:10px; padding:2px 6px;">COMING SOON</span></span>
+                                        <span class="meta"><?php esc_html_e('Add a dedicated search trigger for mobile devices.', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <!-- Shortcode Builder -->
+                <div class="ss-card" style="margin-top: 30px;">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('Shortcode Generator (Overrides)', 'swift-search-typesense'); ?></h2>
+                        <p><?php esc_html_e('Customize individual search bars. Unchecked items will use global defaults.', 'swift-search-typesense'); ?></p>
+                    </div>
+                    <div class="ss-card-body">
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label><?php esc_html_e('Placeholder Text', 'swift-search-typesense'); ?></label>
+                                <input type="text" id="sc-placeholder" value="Search...">
+                            </div>
+                            <div class="ss-form-group">
+                                <label><?php esc_html_e('Override Results Limit', 'swift-search-typesense'); ?></label>
+                                <input type="number" id="sc-limit" placeholder="Inherit Global">
+                            </div>
+                        </div>
+
+                        <div class="ss-card-grid">
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="sc-show-thumb" checked>
+                                    <div class="info">
+                                        <span class="title"><?php esc_html_e('Show Thumbnail', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="sc-show-price" checked>
+                                    <div class="info">
+                                        <span class="title"><?php esc_html_e('Show Price', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="ss-form-group">
+                                <label class="ss-checkbox-card">
+                                    <input type="checkbox" id="sc-show-excerpt">
+                                    <div class="info">
+                                        <span class="title"><?php esc_html_e('Show Excerpt', 'swift-search-typesense'); ?></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="ss-form-group" style="margin-top: 15px;">
+                            <label style="display:block; margin-bottom: 8px; font-weight: 500;">Limit Post Types (Optional)</label>
+                            <div class="ss-checkbox-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
+                                <?php foreach ($data['available_post_types'] as $pt): ?>
+                                    <label class="ss-checkbox-inline">
+                                        <input type="checkbox" class="sc-post-type-selector" value="<?php echo esc_attr($pt['name']); ?>">
+                                        <?php echo esc_html($pt['label']); ?>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <div class="ss-code-preview">
+                            <code id="sc-preview">[swift_search]</code>
+                            <button type="button" class="ss-btn ss-btn-sm ss-btn-secondary" id="ss-copy-sc">Copy</button>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Faceted Navigation (Pro) -->
                 <div class="ss-card ss-pro-gate">

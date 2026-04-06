@@ -102,13 +102,23 @@ class SearchController
      */
     public function render_shortcode($atts)
     {
+        $settings = get_option('swift_search_settings', array());
+        $exp = isset($settings['experience']) ? $settings['experience'] : array();
+
+        // Dynamic defaults from Global Experience
+        $default_limit = isset($exp['limit']) ? intval($exp['limit']) : 10;
+        $default_thumb = (isset($exp['show_thumbnail']) && $exp['show_thumbnail'] === false) ? 'false' : 'true';
+        $default_price = (isset($exp['show_price']) && $exp['show_price'] === false) ? 'false' : 'true';
+        $default_excerpt = (isset($exp['show_excerpt']) && $exp['show_excerpt'] === true) ? 'true' : 'false';
+        $default_instant = (isset($exp['instant_search']) && $exp['instant_search'] === false) ? 'false' : 'true';
+
         $a = shortcode_atts(array(
             'placeholder' => __('Search...', 'swift-search-typesense'),
-            'limit' => 10,
-            'show_thumbnail' => 'true',
-            'show_price' => 'true',
-            'show_excerpt' => 'false',
-            'instant_search' => 'default', // 'true', 'false', or 'default' (fallback to global)
+            'limit' => $default_limit,
+            'show_thumbnail' => $default_thumb,
+            'show_price' => $default_price,
+            'show_excerpt' => $default_excerpt,
+            'instant_search' => $default_instant,
             'scope' => 'default', // 'posts,terms,users' or 'default'
             'post_types' => '', // comma separated 'product,post'
         ), $atts);

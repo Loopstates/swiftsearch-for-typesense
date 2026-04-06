@@ -70,23 +70,23 @@
             // Override
             this.$overrideToggle = $('#ss-override-default');
 
-            // Shortcode Builder
+            // Shortcode Builder (Overrides)
             this.$scPlaceholder = $('#sc-placeholder');
             this.$scLimit = $('#sc-limit');
-            this.$scShowThumbnail = $('#sc-show-thumbnail');
+            this.$scShowThumb = $('#sc-show-thumb');
             this.$scShowPrice = $('#sc-show-price');
             this.$scShowExcerpt = $('#sc-show-excerpt');
-            this.$scInstantSearch = $('#sc-instant-search');
-            this.$scScopePosts = $('#sc-scope-posts');
-            this.$scScopeTerms = $('#sc-scope-terms');
-            this.$scScopeUsers = $('#sc-scope-users');
             this.$scPreview = $('#sc-preview');
             this.$scCopyBtn = $('#ss-copy-sc');
+            this.$scPostTypeSelector = $('.sc-post-type-selector');
 
-            // Experience Options
+            // Experience Options (Global Defaults)
+            this.$ssInstantSearch = $('#ss-instant-search');
             this.$ssTypoTolerance = $('#ss-typo-tolerance');
-            this.$ssSortEnabled = $('#ss-sort-enabled');
-            this.$ssMobileBtn = $('#ss-mobile-btn');
+            this.$ssGlobalShowThumb = $('#ss-global-show-thumb');
+            this.$ssGlobalShowPrice = $('#ss-global-show-price');
+            this.$ssGlobalShowExcerpt = $('#ss-global-show-excerpt');
+            this.$ssGlobalLimit = $('#ss-global-limit');
 
             // Relevance
             this.$relevanceRange = $('#ss-relevance-range');
@@ -123,12 +123,9 @@
             // Shortcode Actions
             this.$scPlaceholder.on('input', this.updateShortcodePreview.bind(this));
             this.$scLimit.on('input', this.updateShortcodePreview.bind(this));
-            this.$scShowThumbnail.on('change', this.updateShortcodePreview.bind(this));
+            this.$scShowThumb.on('change', this.updateShortcodePreview.bind(this));
             this.$scShowPrice.on('change', this.updateShortcodePreview.bind(this));
             this.$scShowExcerpt.on('change', this.updateShortcodePreview.bind(this));
-            this.$scInstantSearch.on('change', this.updateShortcodePreview.bind(this));
-            this.$scScopeTerms.on('change', this.updateShortcodePreview.bind(this));
-            this.$scScopeUsers.on('change', this.updateShortcodePreview.bind(this));
             this.$scCopyBtn.on('click', this.copyShortcode.bind(this));
 
             // Experience Options (Remove auto-save)
@@ -185,24 +182,28 @@
             }
 
             if (swiftSearchConfig.experience) {
-                this.$ssTypoTolerance.prop('checked', !!swiftSearchConfig.experience.typo_tolerance);
-                this.$ssSortEnabled.prop('checked', !!swiftSearchConfig.experience.sort_enabled);
-                this.$ssMobileBtn.prop('checked', !!swiftSearchConfig.experience.mobile_btn);
+                const exp = swiftSearchConfig.experience;
+                this.$ssTypoTolerance.prop('checked', !!exp.typo_tolerance);
+                this.$ssInstantSearch.prop('checked', typeof exp.instant_search !== 'undefined' ? !!exp.instant_search : true);
+                
+                // UI Globals
+                this.$ssGlobalShowThumb.prop('checked', typeof exp.show_thumbnail !== 'undefined' ? !!exp.show_thumbnail : true);
+                this.$ssGlobalShowPrice.prop('checked', typeof exp.show_price !== 'undefined' ? !!exp.show_price : true);
+                this.$ssGlobalShowExcerpt.prop('checked', !!exp.show_excerpt);
+                this.$ssGlobalLimit.val(exp.limit || 10);
 
-                // New Fields Phase 7
-                if (typeof swiftSearchConfig.experience.instant_search !== 'undefined') {
-                    $('#ss-instant-search').prop('checked', !!swiftSearchConfig.experience.instant_search);
-                } else {
-                    $('#ss-instant-search').prop('checked', true); // Default true
+                // Set Shortcode Defaults to match Global initially for better UX
+                this.$scShowThumb.prop('checked', this.$ssGlobalShowThumb.is(':checked'));
+                this.$scShowPrice.prop('checked', this.$ssGlobalShowPrice.is(':checked'));
+                this.$scShowExcerpt.prop('checked', this.$ssGlobalShowExcerpt.is(':checked'));
+
+                if (exp.search_scope) {
+                    $('#ss-scope-terms').prop('checked', !!exp.search_scope.terms);
+                    $('#ss-scope-users').prop('checked', !!exp.search_scope.users);
                 }
 
-                if (swiftSearchConfig.experience.search_scope) {
-                    $('#ss-scope-terms').prop('checked', !!swiftSearchConfig.experience.search_scope.terms);
-                    $('#ss-scope-users').prop('checked', !!swiftSearchConfig.experience.search_scope.users);
-                }
-
-                if (swiftSearchConfig.experience.post_types && Array.isArray(swiftSearchConfig.experience.post_types)) {
-                    swiftSearchConfig.experience.post_types.forEach(pt => {
+                if (exp.post_types && Array.isArray(exp.post_types)) {
+                    exp.post_types.forEach(pt => {
                         $(`.ss-global-post-type-selector[value="${pt}"]`).prop('checked', true);
                     });
                 }
@@ -577,8 +578,7 @@
             }).always(() => {
                 $btn.prop('disabled', false).text(originalText);
             });
-        }
-,
+        },
 
         handleSearchUISave: function (e) {
             e.preventDefault();
@@ -607,9 +607,16 @@
                 section: 'experience',
                 experience_settings: {
                     typo_tolerance: this.$ssTypoTolerance.is(':checked'),
-                    sort_enabled: this.$ssSortEnabled.is(':checked'),
-                    mobile_btn: this.$ssMobileBtn.is(':checked'),
-                    instant_search: $('#ss-instant-search').is(':checked')
+                    instant_search: this.$ssInstantSearch.is(':checked'),
+                    show_thumbnail: this.$ssGlobalShowThumb.is(':checked'),
+                    show_price: this.$ssGlobalShowPrice.is(':checked'),
+                    show_excerpt: this.$ssGlobalShowExcerpt.is(':checked'),
+                    limit: parseInt(this.$ssGlobalLimit.val()) || 10,
+                    search_scope: {
+                        posts: true,
+                        terms: $('#ss-scope-terms').is(':checked'),
+                        users: $('#ss-scope-users').is(':checked')
+                    }
                 },
                 facets_config: facets
             };
@@ -625,45 +632,50 @@
             });
         },
 
-        // ... Shortcode functions omitted (unchanged) ...
         updateShortcodePreview: function () {
+            let sc = '[swift_search';
             const placeholder = this.$scPlaceholder.val() || 'Search...';
-            const limit = this.$scLimit.val() || 10;
-            const thumb = this.$scShowThumbnail.is(':checked') ? 'true' : 'false';
-            const price = this.$scShowPrice.is(':checked') ? 'true' : 'false';
-            const excerpt = this.$scShowExcerpt.is(':checked') ? 'true' : 'false';
+            const limit = this.$scLimit.val();
+            
+            // Attributes only added if they OVERRIDE the global experience setting
+            const globalLimit = parseInt(this.$ssGlobalLimit.val()) || 10;
+            const globalInstant = this.$ssInstantSearch.is(':checked');
+            const globalThumb = this.$ssGlobalShowThumb.is(':checked');
+            const globalPrice = this.$ssGlobalShowPrice.is(':checked');
+            const globalExcerpt = this.$ssGlobalShowExcerpt.is(':checked');
 
-            // Experience Overrides
-            const instant = this.$scInstantSearch.is(':checked') ? 'true' : 'false';
+            if (placeholder !== 'Search...') {
+                sc += ` placeholder="${placeholder}"`;
+            }
 
-            const scopes = [];
-            if (this.$scScopePosts.is(':checked')) scopes.push('posts');
-            if (this.$scScopeTerms.is(':checked')) scopes.push('terms');
-            if (this.$scScopeUsers.is(':checked')) scopes.push('users');
-            const scopeStr = scopes.join(',');
+            if (limit && parseInt(limit) !== globalLimit) {
+                sc += ` limit="${limit}"`;
+            }
 
-            // Post Types
-            const postTypes = [];
+            if (this.$scShowThumb.is(':checked') !== globalThumb) {
+                sc += ` show_thumbnail="${this.$scShowThumb.is(':checked')}"`;
+            }
+
+            if (this.$scShowPrice.is(':checked') !== globalPrice) {
+                sc += ` show_price="${this.$scShowPrice.is(':checked')}"`;
+            }
+
+            if (this.$scShowExcerpt.is(':checked') !== globalExcerpt) {
+                sc += ` show_excerpt="${this.$scShowExcerpt.is(':checked')}"`;
+            }
+
+            // Post Types Override
+            const selectedTypes = [];
             $('.sc-post-type-selector:checked').each(function () {
-                postTypes.push($(this).val());
+                selectedTypes.push($(this).val());
             });
-            const ptStr = postTypes.join(',');
 
-            let shortcode = `[swift_search placeholder="${placeholder}" limit="${limit}"`;
+            if (selectedTypes.length > 0) {
+                sc += ` post_types="${selectedTypes.join(',')}"`;
+            }
 
-            if (thumb === 'false') shortcode += ` show_thumbnail="false"`;
-            if (price === 'false') shortcode += ` show_price="false"`;
-            if (excerpt === 'true') shortcode += ` show_excerpt="true"`;
-
-            // Always output experience overrides for clarity in builder
-            shortcode += ` instant_search="${instant}"`;
-            shortcode += ` scope="${scopeStr}"`;
-
-            if (ptStr) shortcode += ` post_types="${ptStr}"`;
-
-            shortcode += `]`;
-
-            this.$scPreview.text(shortcode);
+            sc += ']';
+            this.$scPreview.text(sc);
         },
 
         copyShortcode: function () {
