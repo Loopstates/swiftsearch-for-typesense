@@ -71,6 +71,8 @@
 
         <!-- Main Content Area -->
         <main class="ss-content">
+            <!-- Global Warning Container -->
+            <div id="ss-global-notice-container" style="margin-bottom: 20px;"></div>
 
             <!-- Step 1: Connect -->
             <section class="ss-step-view active" id="view-connect">
@@ -355,42 +357,6 @@
                             </div>
                         </div>
 
-                        <!-- Search Scope -->
-                        <div class="ss-form-group" style="margin-top: 20px;">
-                            <label style="display:block; margin-bottom:10px; font-weight:600;">Search Scope
-                                (Frontend)</label>
-                            <p class="description" style="margin-bottom:10px;">Select which collections are queried by
-                                the search bar.</p>
-                            <div class="ss-form-group-row">
-                                <label class="ss-checkbox-inline">
-                                    <input type="checkbox" id="ss-scope-posts" checked disabled>
-                                    Posts (Always Enabled)
-                                </label>
-                                <label class="ss-checkbox-inline">
-                                    <input type="checkbox" id="ss-scope-terms">
-                                    Taxonomies (Categories, Tags)
-                                </label>
-                                <label class="ss-checkbox-inline">
-                                    <input type="checkbox" id="ss-scope-users">
-                                    Authors
-                                </label>
-                            </div>
-
-                            <label style="display:block; margin-top: 15px; margin-bottom: 8px; font-weight: 500;">Global
-                                Post Type Filter</label>
-                            <p class="description" style="margin-bottom:10px;">Limit search to specific post types
-                                globally (unless overridden by shortcode).</p>
-                            <div class="ss-checkbox-list"
-                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
-                                <?php foreach ($data['available_post_types'] as $pt): ?>
-                                    <label class="ss-checkbox-inline">
-                                        <input type="checkbox" class="ss-global-post-type-selector"
-                                            value="<?php echo esc_attr($pt['name']); ?>">
-                                        <?php echo esc_html($pt['label']); ?>
-                                    </label>
-                                <?php endforeach; ?>
-                        </div>
-                    </div>
                 </div>
             </div>
 

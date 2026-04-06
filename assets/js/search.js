@@ -1,4 +1,4 @@
-/* Version: 1.2.3 */
+/* Version: 1.2.6 */
 (function () {
     'use strict';
 
@@ -266,7 +266,10 @@
     function renderHits(data, searches) {
         resultsContainer.style.display = 'flex';
         hitsContainer.innerHTML = '';
-        if (facetsContainer) facetsContainer.innerHTML = '';
+        if (facetsContainer) {
+            facetsContainer.innerHTML = '';
+            facetsContainer.style.display = 'none';
+        }
 
         const results = data && data.results ? data.results : [];
 
@@ -332,16 +335,24 @@
                     }
 
                     if (activePTs.length === 1) {
-                        // Singular/Specific title
                         const pt = activePTs[0];
                         if (pt === 'product') title = 'Products';
                         else if (pt === 'post') title = 'Posts';
                         else if (pt === 'page') title = 'Pages';
                         else title = pt.charAt(0).toUpperCase() + pt.slice(1) + 's';
                     } else if (activePTs.length > 1) {
-                        if (activePTs.includes('product') && activePTs.length === 1) title = 'Products'; // Wait, redundant
-                        else if (activePTs.includes('product')) title = 'Products & Items';
-                        else title = 'Search Results';
+                        const labels = activePTs.map(pt => {
+                            if (pt === 'product') return 'Products';
+                            if (pt === 'post') return 'Posts';
+                            if (pt === 'page') return 'Pages';
+                            return pt.charAt(0).toUpperCase() + pt.slice(1) + 's';
+                        });
+                        
+                        if (labels.length === 2) {
+                            title = labels.join(' & ');
+                        } else {
+                            title = labels.slice(0, -1).join(', ') + ' & ' + labels.slice(-1);
+                        }
                     } else {
                         title = 'Results';
                     }
@@ -416,7 +427,9 @@
 
     function renderFacets(facetCounts) {
         if (!facetsContainer) return;
-        facetsContainer.style.display = 'block';
+        
+        let hasVisibleFacets = false;
+        facetsContainer.innerHTML = ''; // Reset
 
         activeFacetsConfig.forEach(conf => {
             const fieldName = getTypesenseField(conf);
@@ -457,8 +470,26 @@
 
                 group.appendChild(list);
                 facetsContainer.appendChild(group);
+                hasVisibleFacets = true;
             }
         });
+
+        if (hasVisibleFacets) {
+            facetsContainer.style.display = 'block';
+            
+            // Add Clear All button if filters active
+            const hasFilters = Object.values(activeFilters).some(v => v.length > 0);
+            if (hasFilters) {
+                const clearBtn = document.createElement('button');
+                clearBtn.className = 'ss-facet-clear-all';
+                clearBtn.innerText = 'Clear All Filters';
+                clearBtn.onclick = () => {
+                    for (const k in activeFilters) activeFilters[k] = [];
+                    performSearch(input.value.trim());
+                };
+                facetsContainer.prepend(clearBtn);
+            }
+        }
     }
 
     function toggleFilter(field, value, checked) {

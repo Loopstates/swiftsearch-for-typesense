@@ -502,11 +502,17 @@ class RestController extends WP_REST_Controller
                 $synonyms = is_array($params['synonyms']) ? $params['synonyms'] : array();
                 $clean_synonyms = array();
                 foreach ($synonyms as $group) {
-                    if (!empty($group['root']) && !empty($group['synonyms']) && is_array($group['synonyms'])) {
-                        $clean_synonyms[] = array(
-                            'root' => sanitize_text_field($group['root']),
-                            'synonyms' => array_map('sanitize_text_field', $group['synonyms'])
+                    $syn_list = is_array($group['synonyms']) ? $group['synonyms'] : array();
+                    if (!empty($syn_list)) {
+                        $syn_item = array(
+                            'synonyms' => array_map('sanitize_text_field', $syn_list)
                         );
+                        
+                        if (!empty($group['root'])) {
+                            $syn_item['root'] = sanitize_text_field($group['root']);
+                        }
+                        
+                        $clean_synonyms[] = $syn_item;
                     }
                 }
                 $current_settings['synonyms'] = $clean_synonyms;
@@ -515,10 +521,8 @@ class RestController extends WP_REST_Controller
                 if (!empty($current_settings['api_key'])) {
                     $client = new \SwiftSearch\Client\Client($current_settings);
                     foreach ($clean_synonyms as $idx => $syn) {
-                        $client->upsert_synonym("synonym-$idx", array(
-                            'root' => $syn['root'],
-                            'synonyms' => $syn['synonyms']
-                        ));
+                        // Typesense accepts either (root + synonyms) OR (synonyms only)
+                        $client->upsert_synonym("synonym-$idx", $syn);
                     }
                 }
             }

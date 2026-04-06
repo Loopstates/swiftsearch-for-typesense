@@ -66,13 +66,6 @@
 
 /* Results Panel */
 .ss-results-container {
-    position: absolute;
-    top: calc(100% + 16px);
-    left: 0;
-    right: 0;
-    background: var(--ss-bg);
-    border-radius: var(--ss-radius);
-    box-shadow: var(--ss-shadow-md);
     border: 1px solid var(--ss-border);
     display: none;
     overflow: hidden;
@@ -103,7 +96,51 @@
 }
 
 /* Facet Styling */
-.ss-facet-group { margin-bottom: 28px; }
+.ss-facets {
+    position: sticky;
+    top: 20px;
+    padding-bottom: 40px;
+    flex-shrink: 0;
+    min-height: 500px; /* Base height to keep background visible */
+}
+
+.ss-facet-clear-all {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    background: transparent;
+    border: 1px solid rgba(var(--ss-primary-rgb), 0.3);
+    color: var(--ss-primary);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.ss-facet-clear-all:before {
+    content: "✕";
+    font-size: 10px;
+}
+
+.ss-facet-clear-all:hover {
+    background: rgba(var(--ss-primary-rgb), 0.05);
+    border-color: var(--ss-primary);
+}
+
+.ss-facet-group {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.ss-facet-group:last-child {
+    border-bottom: none;
+}
 .ss-facet-title {
     font-size: 11px;
     font-weight: 800;

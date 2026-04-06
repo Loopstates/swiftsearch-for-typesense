@@ -22,7 +22,6 @@ class AdminController
     {
         add_action('admin_menu', array($this, 'register_menu'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
-        add_action('wp_head', array($this, 'render_frontend_styles'), 100);
     }
 
     /**
@@ -190,6 +189,13 @@ class AdminController
             if (in_array($tax->name, $exclude)) {
                 continue;
             }
+
+            // Realistic filtering: only show taxonomies that have actual terms in the DB
+            $term_count = wp_count_terms($tax->name, array('hide_empty' => false));
+            if (!$term_count || (int)$term_count === 0) {
+                continue;
+            }
+
             $data[] = array(
                 'name' => (string) $tax->name,
                 'label' => (string) $tax->label,
@@ -222,35 +228,4 @@ class AdminController
         require_once SWIFT_SEARCH_PATH . 'templates/admin/app.php';
     }
 
-    /**
-     * Render dynamic CSS in frontend head based on plugin settings.
-     */
-    public function render_frontend_styles() {
-        $settings = get_option('swift_search_settings', array());
-        $styling = isset($settings['styling']) ? $settings['styling'] : array();
-
-        if (empty($styling)) {
-            return;
-        }
-
-        $primary = !empty($styling['primary_color']) ? $styling['primary_color'] : '#ff0055';
-        $text = !empty($styling['text_color']) ? $styling['text_color'] : '#1f2937';
-        $bg = !empty($styling['card_bg']) ? $styling['card_bg'] : '#ffffff';
-        $radius = isset($styling['border_radius']) ? (int)$styling['border_radius'] : 16;
-        $custom_css = !empty($styling['custom_css']) ? $styling['custom_css'] : '';
-        
-        echo "\n<!-- SwiftSearch Custom Styles -->\n";
-        echo "<style id='swift-search-dynamic-css'>\n";
-        echo "  :root {\n";
-        echo "    --ss-primary: {$primary};\n";
-        echo "    --ss-text-main: {$text};\n";
-        echo "    --ss-card-bg: {$bg};\n";
-        echo "    --ss-radius: {$radius}px;\n";
-        echo "  }\n";
-        if (!empty($custom_css)) {
-            echo "  /* User Custom CSS Overrides */\n";
-            echo "  " . wp_strip_all_tags($custom_css) . "\n";
-        }
-        echo "</style>\n";
-    }
 }

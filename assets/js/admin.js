@@ -25,8 +25,6 @@
                 this.checkPlan();
                 this.restoreState();
 
-                this.restoreState();
-
                 this.renderFacetsConfig();
 
                 // Initial Status Check
@@ -263,15 +261,12 @@
 
             // Section: Post Types
             html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Post Types</h4>';
-            html += '<div id="ss-reindex-warning" style="display:none; margin-bottom: 15px; padding: 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; color: #92400e; font-size: 13px;">';
-            html += '<strong>Note:</strong> You changed the searchable post types. A <a href="#" onclick="jQuery(\'#ss-nav-connect\').click(); return false;" style="color: #92400e; text-decoration: underline; font-weight: 600;">Full Re-index</a> is required to update the Typesense database.';
-            html += '</div>';
             html += '<div class="ss-card-grid">';
             if (postTypes.length > 0) {
                 postTypes.forEach(type => {
                     const isChecked = savedPostTypes.includes(type.name) ? 'checked' : '';
                     html += `<label class="ss-checkbox-card">
-                        <input type="checkbox" name="post_types[]" value="${type.name}" ${isChecked} class="ss-pt-toggle">
+                        <input type="checkbox" name="post_types[]" value="${type.name}" ${isChecked} class="ss-reindex-trigger">
                         <div class="info">
                             <span class="title">${type.label || type.name}</span>
                             <span class="meta">${type.description || type.name}</span>
@@ -283,9 +278,9 @@
             }
             html += '</div>';
 
-            // Add Event Listener
-            container.off('change', '.ss-pt-toggle').on('change', '.ss-pt-toggle', function() {
-                $('#ss-reindex-warning').fadeIn();
+            // Add Event Listener for re-index trigger
+            container.off('change', '.ss-reindex-trigger').on('change', '.ss-reindex-trigger', () => {
+                this.showReindexNotice();
             });
 
             // Section: Taxonomies
@@ -295,7 +290,7 @@
                 taxonomies.forEach(tax => {
                     const isChecked = savedTaxonomies.includes(tax.name) ? 'checked' : '';
                     html += `<label class="ss-checkbox-card">
-                        <input type="checkbox" name="taxonomies[]" value="${tax.name}" ${isChecked}>
+                        <input type="checkbox" name="taxonomies[]" value="${tax.name}" ${isChecked} class="ss-reindex-trigger">
                         <div class="info">
                             <span class="title">${tax.label || tax.name}</span>
                             <span class="meta">${tax.description || tax.name}</span>
@@ -312,7 +307,7 @@
             html += '<div class="ss-card-grid">';
             const userChecked = savedUsers ? 'checked' : '';
             html += `<label class="ss-checkbox-card">
-                <input type="checkbox" id="ss-index-users" name="index_users" ${userChecked}>
+                <input type="checkbox" id="ss-index-users" name="index_users" ${userChecked} class="ss-reindex-trigger">
                 <div class="info">
                     <span class="title">Authors & Users</span>
                     <span class="meta">Index public authors for "By Author" searches.</span>
@@ -513,19 +508,7 @@
                     typo_tolerance: this.$ssTypoTolerance.is(':checked'),
                     sort_enabled: this.$ssSortEnabled.is(':checked'),
                     mobile_btn: this.$ssMobileBtn.is(':checked'),
-                    instant_search: $('#ss-instant-search').is(':checked'),
-                    search_scope: {
-                        posts: true, // Always true
-                        terms: $('#ss-scope-terms').is(':checked'),
-                        users: $('#ss-scope-users').is(':checked')
-                    },
-                    post_types: (function () {
-                        const pts = [];
-                        $('.ss-global-post-type-selector:checked').each(function () {
-                            pts.push($(this).val());
-                        });
-                        return pts;
-                    })()
+                    instant_search: $('#ss-instant-search').is(':checked')
                 },
                 facets_config: facets
             };
@@ -1484,38 +1467,57 @@
             }
         },
 
+        showReindexNotice: function() {
+            const container = $('#ss-global-notice-container');
+            if (!container.length || container.find('.ss-reindex-banner').length) return;
+
+            const html = `
+                <div class="ss-reindex-banner" style="padding: 15px 20px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; color: #92400e; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05); animation: ssFadeIn 0.3s ease; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 20px;">⚠️</span>
+                        <div>
+                            <strong style="display: block; font-size: 14px;">Re-index Required</strong>
+                            <span style="font-size: 13px; opacity: 0.9;">You have modified searchable fields or facets. Please run a full re-index to update your search database.</span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="jQuery('.ss-nav-item[data-step=\\'sync\\']').click();" class="ss-btn ss-btn-sm" style="background: #92400e; color: #fff; border: none; cursor: pointer; border-radius: 4px; padding: 6px 12px; font-weight: 600;">Go to Sync</button>
+                </div>
+                <style>
+                    @keyframes ssFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+                </style>
+            `;
+            container.html(html);
+        }
     };
-
-    $(document).ready(function () {
-
-        // --- Custom Fields Event Binding (Delegation) ---
-        const $container = $('#ss-custom-fields-container');
-
-        // Add
-        $container.on('click', '.ss-add-field-btn', function (e) {
-            e.preventDefault();
-            const pt = $(this).data('pt');
-            const $tbody = $container.find(`.ss-cf-body[data-pt="${pt}"]`);
-            const index = $tbody.children('tr').not('.ss-cf-empty').length + Date.now(); // Ensure unique index for new items (basic timestamp)
-
-            // Remove empty row if exists
-            $tbody.find('.ss-cf-empty').remove();
-
-            $tbody.append(SwiftSearchAdmin.getCustomFieldRowHtml(pt, index));
-        });
-
-        // Remove
-        $container.on('click', '.ss-remove-field-btn', function (e) {
-            e.preventDefault();
-            $(this).closest('tr').remove();
-        });
-    });
 
     // Expose for Debugging
     window.SwiftSearchAdmin = SwiftSearchAdmin;
 
     $(document).ready(function () {
         SwiftSearchAdmin.init();
+
+        // --- Custom Fields Event Binding (Delegation) ---
+        const $container = $('#ss-custom-fields-container');
+        if ($container.length) {
+            // Add
+            $container.on('click', '.ss-add-field-btn', function (e) {
+                e.preventDefault();
+                const pt = $(this).data('pt');
+                const $tbody = $container.find(`.ss-cf-body[data-pt="${pt}"]`);
+                const index = $tbody.children('tr').not('.ss-cf-empty').length + Date.now();
+
+                $tbody.find('.ss-cf-empty').remove();
+                $tbody.append(SwiftSearchAdmin.getCustomFieldRowHtml(pt, index));
+                SwiftSearchAdmin.showReindexNotice();
+            });
+
+            // Remove
+            $container.on('click', '.ss-remove-field-btn', function (e) {
+                e.preventDefault();
+                $(this).closest('tr').remove();
+                SwiftSearchAdmin.showReindexNotice();
+            });
+        }
     });
 
 })(jQuery);
