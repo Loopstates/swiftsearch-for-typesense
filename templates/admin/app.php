@@ -581,11 +581,8 @@
     <div class="ss-footer"
         style="text-align: center; margin-top: 30px; padding: 20px; color: #6b7280; font-size: 13px;">
         <p>A <a href="https://loopstates.com" target="_blank"
-                style="color: inherit; text-decoration: none; font-weight: 500;">Loopstates</a> Product. SwiftSearch
+                style="color: inherit; text-decoration: none; font-weight: 500; color: #632489;">Loopstates</a> Product. SwiftSearch
             Typesense
-            v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?>.</p>
-        <p style="margin-top: 5px; opacity: 0.8; font-style: italic;">
-            <?php esc_html_e('Optimized for Typesense v0.30.1+. Ensure your cluster supports Global Synonym Sets.', 'swift-search-typesense'); ?>
-        </p>
+            v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?>. <?php esc_html_e('Optimized for Typesense v0.30.1+.', 'swift-search-typesense'); ?></p>
     </div>
 </div>

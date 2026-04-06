@@ -3,7 +3,7 @@ Contributors: Loopstates
 Tags: search, typesense, woocommerce, fast search, instant search
 Requires at least: 5.8
 Tested up to: 6.7
-Stable tag: 1.3.0
+Stable tag: 1.3.13
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -117,6 +117,25 @@ Yes, the core features are free forever.
 *   Improved: Concrete console logging for Typesense API errors.
 *   Improved: JS array handling for facet configurations.
  
+== Changelog ==
+
+= 1.3.13 =
+*   Fix: Resolved a critical JavaScript ReferenceError in search results processing.
+*   Improved: Stabilized organic match counting for analytics.
+
+= 1.3.12 =
+*   Fix: Improved search analytics accuracy by excluding pinned items from organic match counts.
+*   Improvement: Added CSS hooks for identifying pinned items in search results.
+
+= 1.3.11 =
+*   Fix: Search tracking for zero-result queries (previously skipped, now correctly populates analytics dashboard).
+*   UI: Removed redundant synonym path debug buttons to clean up settings dashboard.
+
+= 1.3.10 =
+*   Fix: Modernized Typesense v0.30+ Global Synonym linking via collection schema patching.
+*   Improvement: Dynamic admin UI for collection management (cached for performance).
+*   UI: Fixed layout breakage in Relevance settings tab.
+
 = 1.2.1 =
 *   Fix: Resolved an issue where some enabled facets were hidden in the frontend sidebar due to redundant validation logic.
  

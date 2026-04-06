@@ -300,7 +300,7 @@
             renderFacets(postsResult.facet_counts);
         }
 
-        let totalFound = 0;
+        let organicFoundTotal = 0;
         let hasHits = false;
 
         // Section Containers
@@ -321,9 +321,18 @@
             const section = sections[collection];
 
             if (result.found > 0) {
-                totalFound += result.found;
-                hasHits = true;
-                section.style.display = 'block';
+                // Determine organic matches (ignore hits that only appeared because they were pinned/curated)
+                // A hit is 'curated' if it was specifically injected by pinned_hits or an override.
+                const curatedInPage = result.hits ? result.hits.filter(h => h.curated).length : 0;
+                
+                // If found is 2 and we have 2 curated hits, organic matches for this collection is 0.
+                const organicFound = Math.max(0, result.found - curatedInPage);
+                organicFoundTotal += organicFound;
+
+                if (result.found > 0) {
+                    hasHits = true;
+                    section.style.display = 'block';
+                }
 
                 // Section Header
                 let title = 'Items';
@@ -380,6 +389,9 @@
                     const doc = hit.document;
                     const card = document.createElement('div');
                     card.className = 'ss-card';
+                    if (hit.curated) {
+                        card.classList.add('ss-card-pinned');
+                    }
                     card.style.animationDelay = `${hitIndex * 0.05}s`;
 
                     let html = '';
@@ -423,10 +435,12 @@
 
         if (!hasHits) {
             hitsContainer.innerHTML = '<div class="ss-no-results">No results found.</div>';
-            loader.style.display = 'none';
-        } else {
-            logSearch(input.value.trim(), totalFound);
         }
+        
+        // Log based on ORGANIC results (ignore hits that were only forced by pinning)
+        logSearch(input.value.trim(), organicFoundTotal);
+        
+        loader.style.display = 'none';
     }
 
     function renderFacets(facetCounts) {

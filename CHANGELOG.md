@@ -2,17 +2,38 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
  
-## [1.3.8] - 2026-04-06
-
-### Added
-- **Selective Synonym Linking**: Added "Apply to Collections" checkboxes to Relevance settings. Admins can now manually select which indices (Posts, Terms, Users) should have synonym expansion active.
-- **Auto-Discovery**: Implemented automatic collection discovery to ensure synonym links are only attempted on valid, existing Typesense collections.
-
-## [1.3.7] - 2026-04-06
+## [1.3.13] - 2026-04-06
 
 ### Fixed
-- **Dashboard Synchronization**: Resolved the "Not linked" status in Typesense Cloud by implementing explicit collection-level synonym linking (PUT /collections/{name}/synonyms/{id}).
-- **Architecture**: Completed migration to the Global Synonym Sets architecture for full v0.30+ compatibility.
+- **Critical Fix**: Resolved a JavaScript ReferenceError in `search.js` that caused search failures when processing results.
+- **Improved**: Finalized the organic result counting logic to ensure analytics precision without affecting UI performance.
+
+## [1.3.12] - 2026-04-06
+
+### Fixed
+- **Search Analytics**: Improved precision by excluding pinned items from organic match counts. If a search query only returns pinned products, it is now correctly logged as a "Zero Result Query" in the analytics dashboard.
+
+### UI
+- **CSS Hooks**: Added the `ss-card-pinned` class to search result cards for pinned/curated items, enabling custom styling for promoted content.
+
+## [1.3.11] - 2026-04-06
+
+### Fixed
+- **Search Analytics**: Resolved a logic bug in `search.js` where zero-result queries were not being logged. The "Zero Result Queries" table in the analytics dashboard now populates correctly.
+
+### UI
+- **Relevance Cleanup**: Removed the "Test Synonym Path Connectivity" debug button as v0.30+ global synonym synchronization is now fully stable and verified.
+
+## [1.3.10] - 2026-04-06
+
+### Added
+- **Official v0.30+ Linking**: Implemented the official `PATCH /collections/{name}` schema update method for linking global synonym sets, ensuring they appear as "Linked" in the Typesense Cloud Dashboard.
+- **Dynamic Collection Discovery**: Added server-side discovery of active Typesense collections to allow selective synonym linking via the admin UI.
+- **Performance**: Integrated WordPress transients (10-minute TTL) for collection metadata to reduce API overhead.
+
+### Fixed
+- **UI Layout**: Corrected broken HTML nesting in the Relevance settings tab that was causing layout breakage.
+- **Settings Persistence**: Fixed an issue where the "Apply to Collections" checkbox states were not correctly captured during save.
 
 ## [1.3.0] - 2026-04-06
  
