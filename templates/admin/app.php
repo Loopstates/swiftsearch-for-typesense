@@ -223,14 +223,6 @@
                                     <?php esc_html_e('Select which indices search results should expand with these synonyms.', 'swift-search-typesense'); ?>
                                 </p>
                             </div>
-                            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e5e7eb;">
-                                <button type="button" id="ss-test-synonyms" class="ss-btn ss-btn-sm ss-btn-secondary">
-                                    <?php esc_html_e('Test Synonym Path Connectivity', 'swift-search-typesense'); ?>
-                                </button>
-                                <p class="ss-hint" style="margin-top: 8px;">
-                                    <?php esc_html_e('Use this if synonyms fail to sync. It will check if your server recognizes the /synonyms endpoint.', 'swift-search-typesense'); ?>
-                                </p>
-                            </div>
                         </div>
                     </div>
                 </div>
