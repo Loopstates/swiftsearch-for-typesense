@@ -16,6 +16,8 @@ use SwiftSearch\Client\Client;
  */
 class Gatekeeper
 {
+    private static $can_use_pro_cache = null;
+
     /**
      * Check if Typesense is properly connected.
      * 
@@ -82,12 +84,16 @@ class Gatekeeper
      */
     public static function can_use_features($feature = 'pro')
     {
-        // Use Freemius SDK to validate license/plan
-        if (function_exists('swift_search_fs')) {
-            return swift_search_fs()->can_use_premium_code();
+        if (null !== self::$can_use_pro_cache) {
+            return self::$can_use_pro_cache;
         }
 
-        // Fallback: If Freemius not loaded (shouldn't happen), assume false for Pro features
+        // Use Freemius SDK to validate license/plan
+        if (function_exists('swift_search_fs')) {
+            self::$can_use_pro_cache = (bool) swift_search_fs()->can_use_premium_code();
+            return self::$can_use_pro_cache;
+        }
+
         return false;
     }
 

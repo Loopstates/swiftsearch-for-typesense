@@ -465,7 +465,7 @@ class RestController extends WP_REST_Controller
             $current_settings['indexed_users'] = $val;
 
             // Custom Fields (Pro)
-            $custom_fields = isset($params['custom_fields']) ? $params['custom_fields'] : array();
+            $custom_fields = (isset($params['custom_fields']) && Gatekeeper::can_use_features()) ? $params['custom_fields'] : array();
             $sanitized_fields = array();
             if (is_array($custom_fields)) {
                 foreach ($custom_fields as $pt => $fields) {
@@ -498,7 +498,7 @@ class RestController extends WP_REST_Controller
         if ($section === 'experience') {
             // Relevance Weights (Pro) - Handle both flat and nested for compatibility
             $relevance = isset($params['relevance_settings']) ? $params['relevance_settings'] : array();
-            $weights = isset($relevance['weights']) ? $relevance['weights'] : ($params['weights'] ?? array());
+            $weights = (isset($relevance['weights']) && Gatekeeper::can_use_features()) ? $relevance['weights'] : ($params['weights'] ?? array());
 
             if (!empty($weights)) {
                 foreach ($weights as $key => $weight) {
@@ -507,7 +507,7 @@ class RestController extends WP_REST_Controller
             }
 
             // Synonyms (Pro) - Handle both flat and nested
-            $synonyms = isset($relevance['synonyms']) ? $relevance['synonyms'] : ($params['synonyms'] ?? array());
+            $synonyms = (isset($relevance['synonyms']) && Gatekeeper::can_use_features()) ? $relevance['synonyms'] : ($params['synonyms'] ?? array());
             
             if (!empty($synonyms) && is_array($synonyms)) {
                 $clean_synonyms = array();
@@ -590,7 +590,7 @@ class RestController extends WP_REST_Controller
                 }
 
             // Facets (Pro)
-            if (isset($params['facets_config'])) {
+            if (isset($params['facets_config']) && Gatekeeper::can_use_features()) {
                 $facets = is_array($params['facets_config']) ? $params['facets_config'] : array();
                 $sanitized_facets = array();
                 foreach ($facets as $facet) {

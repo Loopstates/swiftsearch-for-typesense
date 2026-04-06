@@ -3,7 +3,7 @@ Contributors: Loopstates
 Tags: search, typesense, woocommerce, fast search, instant search
 Requires at least: 5.8
 Tested up to: 6.7
-Stable tag: 1.3.19
+Stable tag: 1.3.20
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -79,6 +79,12 @@ Yes, the core features are free forever.
 2.  **Instant Search**: Beautiful, fast search results on your frontend.
  
 == Changelog ==
+ 
+= 1.3.20 =
+* Security: Hardened Pro feature enforcement with server-side validation for Synonyms, Weights, and Facets.
+* Security: Implemented final frontend data masking to prevent Pro configuration leakage on Free versions.
+* Security: Added Indexer protection to block premium metadata extraction for non-licensed users.
+* Performance: Optimized license checking with static caching in Gatekeeper.
  
 = 1.3.19 =
 * Fix: Corrected accidental "faded" disabled style from the "Show Excerpts" setting.

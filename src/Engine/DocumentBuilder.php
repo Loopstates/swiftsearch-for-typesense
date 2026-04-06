@@ -2,6 +2,8 @@
 
 namespace SwiftSearch\Engine;
 
+use SwiftSearch\Core\Gatekeeper;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -56,7 +58,7 @@ class DocumentBuilder
 
         // 2. Taxonomies & Universal Facets
         // This unified block replaces the old hardcoded taxonomy and WooCommerce blocks.
-        if (isset($settings['facets_config']) && is_array($settings['facets_config'])) {
+        if (isset($settings['facets_config']) && is_array($settings['facets_config']) && Gatekeeper::can_use_features()) {
             foreach ($settings['facets_config'] as $f) {
                 if (empty($f['enabled'])) continue;
 
@@ -126,7 +128,7 @@ class DocumentBuilder
         }
 
         // 3. Additional Custom Fields (Legacy/Pro Non-Facet fields)
-        if (isset($settings['custom_fields']) && is_array($settings['custom_fields'])) {
+        if (isset($settings['custom_fields']) && is_array($settings['custom_fields']) && Gatekeeper::can_use_features()) {
             $pt = $post->post_type;
             if (isset($settings['custom_fields'][$pt])) {
                 foreach ($settings['custom_fields'][$pt] as $field) {

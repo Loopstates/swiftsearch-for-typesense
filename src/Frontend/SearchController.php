@@ -2,6 +2,8 @@
 
 namespace SwiftSearch\Frontend;
 
+use SwiftSearch\Core\Gatekeeper;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -56,6 +58,9 @@ class SearchController
                 }
             }
 
+            // Gating Pro features at the source (Frontend Configuration)
+            $is_pro = Gatekeeper::can_use_features();
+            
             wp_localize_script('swift-search-frontend', 'swiftSearchVars', array(
                 'host' => $settings['host'],
                 'port' => $settings['port'],
@@ -65,11 +70,11 @@ class SearchController
                 'indexed_taxonomies' => isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array(),
                 'indexed_users' => isset($settings['indexed_users']) ? (bool) $settings['indexed_users'] : false,
                 'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
-                'facets_config' => isset($settings['facets_config']) ? $settings['facets_config'] : array(),
-                'custom_fields' => isset($settings['custom_fields']) ? $settings['custom_fields'] : array(),
-                'pinned_items' => get_option('swift_search_pinned_items', array()),
-                'weights' => isset($settings['weights']) ? $settings['weights'] : array(), // Pass Weights
-                'synonym_sets' => $synonym_sets, // Pass Synonyms
+                'facets_config' => ($is_pro && isset($settings['facets_config'])) ? $settings['facets_config'] : array(),
+                'custom_fields' => ($is_pro && isset($settings['custom_fields'])) ? $settings['custom_fields'] : array(),
+                'pinned_items' => ($is_pro) ? get_option('swift_search_pinned_items', array()) : array(),
+                'weights' => ($is_pro && isset($settings['weights'])) ? $settings['weights'] : array(),
+                'synonym_sets' => ($is_pro) ? $synonym_sets : array(),
                 'apiUrl' => rest_url('swift-search/v1'),
                 'nonce' => wp_create_nonce('wp_rest'),
             ));

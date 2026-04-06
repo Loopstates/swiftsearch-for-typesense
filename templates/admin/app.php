@@ -8,9 +8,9 @@
                     class="ss-version">v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?></span></h1>
         </div>
         <div class="ss-actions">
-            <a href="https://loopstates.com/docs/swift-search" target="_blank"
+            <a href="https://docs.loopstates.com/swift-search-typesense/" target="_blank"
                 class="ss-link"><?php esc_html_e('Documentation', 'swift-search-typesense'); ?></a>
-            <a href="mailto:hello@loopstates.com" target="_blank"
+            <a href="https://docs.loopstates.com/swift-search-typesense/" target="_blank"
                 class="ss-link"><?php esc_html_e('Support', 'swift-search-typesense'); ?></a>
         </div>
     </header>
