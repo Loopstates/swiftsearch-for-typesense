@@ -54,42 +54,86 @@ class DocumentBuilder
             $document['thumbnail_url'] = get_the_post_thumbnail_url($post, 'medium');
         }
 
-        // Taxonomies
-        $allowed_taxonomies = isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array('category', 'post_tag', 'product_cat');
+        // 2. Taxonomies & Universal Facets
+        // This unified block replaces the old hardcoded taxonomy and WooCommerce blocks.
+        if (isset($settings['facets_config']) && is_array($settings['facets_config'])) {
+            foreach ($settings['facets_config'] as $f) {
+                if (empty($f['enabled'])) continue;
 
-        foreach ($allowed_taxonomies as $taxonomy) {
-            $terms = get_the_terms($post, $taxonomy);
-            if (!empty($terms) && !is_wp_error($terms)) {
-                $term_names = wp_list_pluck($terms, 'name');
+                $source = !empty($f['source']) ? $f['source'] : '';
+                $type = !empty($f['type']) ? $f['type'] : 'taxonomy'; // taxonomy or meta
+                
+                // Resolve Target Name
+                $target = !empty($f['target']) ? $f['target'] : null;
+                if (!$target) {
+                    if ($type === 'taxonomy') {
+                        if ($source === 'category') $target = 'category';
+                        elseif ($source === 'post_tag') $target = 'tag';
+                        else $target = 'tax_' . $source;
+                    } elseif ($source === '_sku') {
+                        $target = 'sku';
+                    } elseif ($source === '_price') {
+                        $target = 'price';
+                    } elseif ($source === '_stock_status') {
+                        $target = 'in_stock';
+                    } else {
+                        $target = $source;
+                    }
+                }
 
-                if ('category' === $taxonomy) {
-                    $document['category'] = array_values(array_unique($term_names));
-                } elseif ('post_tag' === $taxonomy) {
-                    $document['tag'] = array_values(array_unique($term_names));
+                if (isset($document[$target])) continue; // Skip if already set by core
+
+                if ($type === 'taxonomy') {
+                    $terms = get_the_terms($post_id, $source);
+                    if (!empty($terms) && !is_wp_error($terms)) {
+                        $term_names = wp_list_pluck($terms, 'name');
+                        $document[$target] = array_values(array_unique($term_names));
+                    }
                 } else {
-                    // Dynamic Taxonomy
-                    $document['tax_' . $taxonomy] = array_values(array_unique($term_names));
+                    // Meta / Custom Field
+                    $meta_val = get_post_meta($post_id, $source, true);
+                    
+                    // Handle WooCommerce Special Methods for better data accuracy
+                    if (function_exists('wc_get_product') && ('_sku' === $source || '_price' === $source || '_stock_status' === $source)) {
+                        $product = wc_get_product($post_id);
+                        if ($product) {
+                            if ($source === '_sku') $meta_val = $product->get_sku();
+                            elseif ($source === '_price') $meta_val = $product->get_price();
+                            elseif ($source === '_stock_status') $meta_val = $product->is_in_stock();
+                        }
+                    }
+
+                    // Cast Types based on config
+                    $data_type = !empty($f['data_type']) ? $f['data_type'] : 'string';
+                    
+                    if ($data_type === 'int32' || $data_type === 'int64') {
+                        $document[$target] = (int) $meta_val;
+                    } elseif ($data_type === 'float') {
+                        $document[$target] = (float) $meta_val;
+                    } elseif ($data_type === 'bool') {
+                        $document[$target] = filter_var($meta_val, FILTER_VALIDATE_BOOLEAN);
+                    } elseif ($data_type === 'string[]') {
+                        if (is_array($meta_val)) {
+                            $document[$target] = array_values($meta_val);
+                        } else {
+                            $document[$target] = array_map('trim', explode(',', (string) $meta_val));
+                        }
+                    } else {
+                        $document[$target] = (string) $meta_val;
+                    }
                 }
             }
         }
 
-        // WooCommerce
-        if ('product' === $post->post_type && function_exists('wc_get_product')) {
-            $product = wc_get_product($post_id);
-            if ($product) {
-                $document['price'] = (float) $product->get_price();
-                $document['sku'] = (string) $product->get_sku();
-                $document['in_stock'] = (bool) $product->is_in_stock();
-            }
-        }
-
-        // Custom Fields Retrieval
+        // 3. Additional Custom Fields (Legacy/Pro Non-Facet fields)
         if (isset($settings['custom_fields']) && is_array($settings['custom_fields'])) {
             $pt = $post->post_type;
             if (isset($settings['custom_fields'][$pt])) {
                 foreach ($settings['custom_fields'][$pt] as $field) {
                     if (empty($field['key']) || empty($field['name']))
                         continue;
+
+                    if (isset($document[$field['name']])) continue; // Already handled by facets
 
                     $meta_val = get_post_meta($post_id, $field['key'], true);
 
@@ -101,15 +145,12 @@ class DocumentBuilder
                     } elseif ($field['type'] === 'bool') {
                         $document[$field['name']] = (bool) $meta_val;
                     } elseif ($field['type'] === 'string[]') {
-                        // Handle array or comma-separated string
                         if (is_array($meta_val)) {
                             $document[$field['name']] = array_values($meta_val);
                         } else {
-                            // Assume comma separated if string
                             $document[$field['name']] = array_map('trim', explode(',', (string) $meta_val));
                         }
                     } else {
-                        // Default String
                         $document[$field['name']] = (string) $meta_val;
                     }
                 }

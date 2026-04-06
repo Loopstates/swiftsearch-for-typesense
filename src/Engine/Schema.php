@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
  */
 class Schema
 {
-    const VERSION = '1.0.1';
+    const VERSION = '1.2.3';
 
     /**
      * Get the schema definition for the main collection.
@@ -36,28 +36,46 @@ class Schema
             array('name' => 'author_name', 'type' => 'string', 'facet' => true, 'optional' => true),
         );
 
-        // WooCommerce Fields
-        if (class_exists('WooCommerce')) {
-            $fields[] = array('name' => 'price', 'type' => 'float', 'facet' => true, 'optional' => true);
-            $fields[] = array('name' => 'sku', 'type' => 'string', 'facet' => true, 'optional' => true);
-            $fields[] = array('name' => 'in_stock', 'type' => 'bool', 'facet' => true, 'optional' => true);
-        }
+        // 1. Facets from Config (Universal Bridge)
+        // This replaces the old hardcoded WooCommerce and tax_ prefix logic.
+        if (isset($config['facets_config']) && is_array($config['facets_config'])) {
+            $existing_names = array_column($fields, 'name');
+            foreach ($config['facets_config'] as $f) {
+                // Basic validation
+                if (empty($f['enabled'])) continue;
+                
+                // Resolve target name. In new system, we expect 'target'. 
+                // For backward compatibility, we fallback to logic.
+                $target = !empty($f['target']) ? $f['target'] : null;
+                if (!$target) {
+                    if ($f['type'] === 'taxonomy') {
+                        if ($f['source'] === 'category') $target = 'category';
+                        elseif ($f['source'] === 'post_tag') $target = 'tag';
+                        else $target = 'tax_' . $f['source'];
+                    } elseif ($f['source'] === '_sku') {
+                        $target = 'sku';
+                    } else {
+                        $target = $f['source'];
+                    }
+                }
 
-        // Dynamic Taxonomies
-        if (isset($config['indexed_taxonomies']) && is_array($config['indexed_taxonomies'])) {
-            foreach ($config['indexed_taxonomies'] as $tax) {
-                if ($tax === 'category' || $tax === 'post_tag')
-                    continue; // Handled above
+                if (in_array($target, $existing_names)) continue;
+
+                // Resolve Type (Facets are usually string[] for taxonomies, but flexible for meta)
+                $type = !empty($f['data_type']) ? $f['data_type'] : 'string';
+                if ($f['type'] === 'taxonomy') $type = 'string[]';
+
                 $fields[] = array(
-                    'name' => 'tax_' . $tax,
-                    'type' => 'string[]',
+                    'name' => $target,
+                    'type' => $type,
                     'facet' => true,
                     'optional' => true
                 );
+                $existing_names[] = $target;
             }
         }
 
-        // Custom Fields (Pro)
+        // 2. Custom Fields (Pro)
         if (isset($config['custom_fields']) && is_array($config['custom_fields'])) {
             $existing_names = array_column($fields, 'name');
             foreach ($config['custom_fields'] as $pt => $cf_list) {

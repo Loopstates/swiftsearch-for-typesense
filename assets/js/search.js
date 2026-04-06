@@ -1,4 +1,4 @@
-/* Version: 1.1.1 */
+/* Version: 1.2.3 */
 (function () {
     'use strict';
 
@@ -54,24 +54,17 @@
 
     // Helpers
     function getTypesenseField(item) {
+        // 1. Explicit Target Mapping (New System)
+        if (item.target) return item.target;
+
+        // 2. Legacy Fallback
         if (item.type === 'taxonomy') {
             if (item.source === 'category') return 'category';
             if (item.source === 'post_tag') return 'tag';
             return 'tax_' + item.source;
-        } else if (item.type === 'meta') {
-            // Find mapped name
-            if (config.custom_fields) {
-                // custom_fields is { post: [], product: [] }
-                // We search all types
-                for (const pt in config.custom_fields) {
-                    const found = config.custom_fields[pt].find(f => f.key === item.source);
-                    if (found) return found.name;
-                }
-            }
-            return item.source; // Fallback
         }
 
-        // WooCommerce Special Mappings
+        // WooCommerce Special Mappings (Legacy)
         if (item.source === '_sku') return 'sku';
         if (item.source === '_stock_status') return 'in_stock';
         if (item.source === '_price') return 'price';
@@ -81,24 +74,15 @@
 
     // Build Facet List (Fields to request)
     // Build Facet List (Fields to request)
-    const storedFacets = config.facets_config || [];
+    let storedFacets = config.facets_config || [];
+    if (!Array.isArray(storedFacets)) {
+        storedFacets = Object.values(storedFacets);
+    }
     const activeFacetsConfig = storedFacets.filter(f => {
         // 1. Basic Enabled Check
-        const isEnabled = f.enabled === true || f.enabled === 'true';
-        if (!isEnabled) return false;
-
-        // 2. Schema Validation (Prevent 400 Errors)
-        if (f.type === 'taxonomy') {
-            // 'category' and 'post_tag' are always in schema. Others must be indexed.
-            if (f.source === 'category' || f.source === 'post_tag') return true;
-            return config.indexed_taxonomies && config.indexed_taxonomies.includes(f.source);
-        }
-
-        // 3. Meta Validation implies it exists in schema if it's standard or mapped
-        // We trust the mapping logic in getTypesenseField will return a valid name if mapped
-        return true;
+        return f && (f.enabled === true || f.enabled === 'true');
     });
-    const facetFields = activeFacetsConfig.map(f => getTypesenseField(f)).join(',');
+    const facetFields = activeFacetsConfig.map(f => getTypesenseField(f)).filter(f => f).join(',');
 
     let debounceTimer;
     let logTimer;
@@ -132,14 +116,22 @@
 
     function buildFilterString() {
         const parts = [];
-        for (const field in activeFilters) {
-            const values = activeFilters[field];
+        for (const fieldName in activeFilters) {
+            const values = activeFilters[fieldName];
             if (values.length > 0) {
-                // Escape values? Typesense handles mostly, but exact match := is safe for encoded strings
-                // value string format: [v1, v2]
-                // We need to map values to string
-                const safeValues = values.map(v => '`' + v + '`').join(',');
-                parts.push(`${field}:=[${safeValues}]`);
+                // Find config for this field to determine type
+                const facetConf = activeFacetsConfig.find(f => getTypesenseField(f) === fieldName);
+                const dataType = facetConf && facetConf.data_type ? facetConf.data_type : 'string';
+
+                // Type-Safe Quoting: Only wrap strings/string arrays in backticks
+                let safeValues;
+                if (['int32', 'int64', 'float', 'bool'].includes(dataType)) {
+                    safeValues = values.join(',');
+                } else {
+                    safeValues = values.map(v => '`' + v + '`').join(',');
+                }
+                
+                parts.push(`${fieldName}:=[${safeValues}]`);
             }
         }
         return parts.join(' && ');
@@ -248,33 +240,15 @@
             body: JSON.stringify({ searches: searches })
         })
             .then(async response => {
-                // Robust Error Catching
+                const data = await response.json().catch(() => ({ message: 'JSON Parsing Error' }));
                 if (!response.ok) {
-                    const errData = await response.json().catch(() => ({ message: 'Unknown Error' }));
-                    console.error("SwiftSearch: API Error", response.status, errData);
-
-                    // Self-Healing: If 400/404 (likely Bad Facet/Field), Retry without facets
-                    if (response.status === 400 || response.status === 404) {
-                        console.warn("SwiftSearch: Schema/Facet Error detected. Retrying without facets...");
-                        
-                        // Deep clone searches and strip facets
-                        const rawSearches = JSON.parse(JSON.stringify(searches));
-                        rawSearches.forEach(s => delete s.facet_by);
-
-                        const retryResp = await fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'X-TYPESENSE-API-KEY': config.apiKey,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ searches: rawSearches })
-                        });
-                        return retryResp.json();
-                    }
+                    console.error("SwiftSearch: API Error", response.status, data);
+                    throw new Error(data.message || 'API Error');
                 }
-                return response.json();
+                return data;
             })
             .then(data => {
+                console.log('Typesense Response:', data);
                 loader.style.display = 'none';
                 renderHits(data, searches);
             })

@@ -529,10 +529,12 @@ class RestController extends WP_REST_Controller
                 foreach ($facets as $facet) {
                     if (empty($facet['source'])) continue;
                     $sanitized_facets[] = array(
-                        'source' => sanitize_text_field($facet['source']),
-                        'type' => sanitize_text_field($facet['type'] ?? 'taxonomy'),
-                        'label' => sanitize_text_field($facet['label'] ?? ''),
-                        'enabled' => isset($facet['enabled']) ? filter_var($facet['enabled'], FILTER_VALIDATE_BOOLEAN) : false,
+                        'source'    => sanitize_text_field($facet['source']),
+                        'type'      => sanitize_text_field($facet['type'] ?? 'taxonomy'),
+                        'label'     => sanitize_text_field($facet['label'] ?? ''),
+                        'target'    => sanitize_text_field($facet['target'] ?? ''),
+                        'data_type' => sanitize_text_field($facet['data_type'] ?? 'string'),
+                        'enabled'   => isset($facet['enabled']) ? filter_var($facet['enabled'], FILTER_VALIDATE_BOOLEAN) : false,
                     );
                 }
                 $current_settings['facets_config'] = $sanitized_facets;

@@ -2,6 +2,43 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.2.3] - 2026-04-06
+
+### Fixed
+- **ConfigLoader Bottleneck**: Resolved a critical issue where `facets_config` and other user settings were being filtered out before reaching the Typesense schema engine.
+- **Dynamic Schema Support**: Universal facets now correctly register in the Typesense collection schema during indexing.
+
+### Improved
+- **Diagnostic Logging**: Added explicit `Typesense Response:` log to the frontend for easier troubleshooting.
+
+## [1.2.2] - 2026-04-06
+
+### Removed
+- **Self-Healing Retry Logic**: Removed the automatic retry-without-facets mechanism to prevent silent failures and ensure that schema/facet issues are reported clearly in the console.
+
+### Improved
+- **Error Reporting**: Added explicit console logging for Typesense API errors, including the full error message from the server.
+- **JS Robustness**: Added extra validation to ensure `facets_config` is always processed as an array.
+
+## [1.2.1] - 2026-04-06
+
+### Fixed
+- **Facet Sidebar Visibility**: Resolved an issue where enabled taxonomies (like Product Categories) were hidden in the frontend if they weren't also selected in the general "Content" synchronization settings.
+
+## [1.2.0] - 2026-04-06
+
+### Added
+- **Universal Facet Registration Bridge**: Completely refactored the facet system to support any WordPress plugin (WooCommerce, Events, etc.) and custom meta fields.
+- **Advanced Facet Configuration**: New UI in the Admin dashboard to explicitly map WordPress fields to Typesense "Target Fields" and define "Data Types" (String, Integer, Float, Boolean, Array).
+- **Type-Aware Indexing**: The backend now dynamically casts meta and taxonomy values to ensure Typesense receives correctly typed data (int, float, bool).
+
+### Fixed
+- **Facet 'No Results' Issue**: Resolved a critical bug where numeric (Price, SKU) and boolean (In Stock) facets returned zero products due to incorrect backtick wrapping in Typesense queries.
+- **Schema Mismatches**: Unified the schema generation and document indexing logic to prevent 404/400 errors during search.
+
+### Improved
+- **Clean Backend Architecture**: Removed hardcoded overrides for WooCommerce and taxonomies, moving to a fully config-driven engine.
+
 ## [1.1.0] - 2026-04-03
 
 ### Added

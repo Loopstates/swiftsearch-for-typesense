@@ -62,6 +62,23 @@ class ConfigLoader
             $defaults['synonyms'] = $saved['synonyms'];
         }
 
+        // --- NEW: Merge Facets & Content Config ---
+        if (isset($saved['facets_config']) && is_array($saved['facets_config'])) {
+            $defaults['facets_config'] = $saved['facets_config'];
+        }
+
+        if (isset($saved['indexed_post_types'])) {
+            $defaults['indexed_post_types'] = (array)$saved['indexed_post_types'];
+        }
+
+        if (isset($saved['indexed_taxonomies'])) {
+            $defaults['indexed_taxonomies'] = (array)$saved['indexed_taxonomies'];
+        }
+
+        if (isset($saved['experience'])) {
+            $defaults['experience'] = (array)$saved['experience'];
+        }
+
         // Future: Ranking Rules could also be merged here
 
         return $defaults;

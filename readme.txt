@@ -3,7 +3,7 @@ Contributors: Loopstates
 Tags: search, typesense, woocommerce, fast search, instant search
 Requires at least: 5.8
 Tested up to: 6.7
-Stable tag: 1.1.1
+Stable tag: 1.2.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -79,6 +79,20 @@ Yes, the core features are free forever.
 2.  **Instant Search**: Beautiful, fast search results on your frontend.
  
 == Changelog ==
+ 
+= 1.2.2 =
+*   Removed: Self-healing retry logic to ensure facet/schema errors are not hidden.
+*   Improved: Concrete console logging for Typesense API errors.
+*   Improved: JS array handling for facet configurations.
+ 
+= 1.2.1 =
+*   Fix: Resolved an issue where some enabled facets were hidden in the frontend sidebar due to redundant validation logic.
+ 
+= 1.2.0 =
+*   New: Universal Facet Registration Bridge.
+*   New: Advanced Facet Settings (Target Mapping & Data Types).
+*   Fix: Zero-results for numeric/boolean facets by implementing type-safe filtering.
+*   Improvement: Unified schema and indexing logic for all WordPress plugins.
  
 = 1.0.22 =
 *   Fix: Facet configuration freezing on load due to data type mismatch.

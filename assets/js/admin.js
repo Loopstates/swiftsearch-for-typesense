@@ -1,6 +1,6 @@
 
 
-/* Version: 1.1.1 */
+/* Version: 1.2.2 */
 (function ($) {
     'use strict';
 
@@ -492,6 +492,8 @@
                         source: $cb.data('source'),
                         type: $cb.data('type'),
                         label: $row.find('.ss-facet-label').val(),
+                        target: $row.find('.ss-facet-target').val(),
+                        data_type: $row.find('.ss-facet-datatype').val(),
                         enabled: $cb.is(':checked')
                     });
                 }
@@ -1384,21 +1386,55 @@
                 <thead>
                     <tr>
                         <th style="width: 50px; text-align:center;">Enable</th>
-                        <th>Source</th>
-                        <th>Display Label</th>
-                        <th>Type</th>
+                        <th style="width: 20%;">Source</th>
+                        <th style="width: 25%;">Display Label</th>
+                        <th style="width: 25%;">Target Field</th>
+                        <th style="width: 15%;">Data Type</th>
+                        <th style="width: 60px;">Type</th>
                     </tr>
                 </thead>
                 <tbody id="ss-facets-tbody">`;
 
                 if (sources.length === 0) {
-                    html += `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #6b7280;">No available facets found.<br>Enable indexing for Taxonomies or map Custom Fields as 'Facet'.</td></tr>`;
+                    html += `<tr><td colspan="6" style="text-align:center; padding: 20px; color: #6b7280;">No available facets found.<br>Enable indexing for Taxonomies or map Custom Fields as 'Facet'.</td></tr>`;
                 } else {
                     sources.forEach(src => {
                         // Check saved config
                         const existing = facetsConfig.find(f => f.source === src.source && f.type === src.type);
                         const isChecked = existing ? (String(existing.enabled) === 'true' || existing.enabled === true) : false;
                         const displayLabel = existing ? existing.label : src.label;
+                        
+                        // Smart Defaults for Target Name
+                        let targetName = existing ? existing.target : '';
+                        if (!targetName) {
+                            if (src.type === 'taxonomy') {
+                                if (src.source === 'category') targetName = 'category';
+                                else if (src.source === 'post_tag') targetName = 'tag';
+                                else targetName = 'tax_' + src.source;
+                            } else if (src.source === '_sku') {
+                                targetName = 'sku';
+                            } else if (src.source === '_price') {
+                                targetName = 'price';
+                            } else if (src.source === '_stock_status') {
+                                targetName = 'in_stock';
+                            } else {
+                                targetName = src.source.replace(/^_/, ''); // basic cleaning
+                            }
+                        }
+
+                        // Smart Defaults for Data Type
+                        let dataType = existing ? existing.data_type : '';
+                        if (!dataType) {
+                            if (src.type === 'taxonomy') {
+                                dataType = 'string[]';
+                            } else if (src.source === '_price') {
+                                dataType = 'float';
+                            } else if (src.source === '_stock_status') {
+                                dataType = 'bool';
+                            } else {
+                                dataType = 'string';
+                            }
+                        }
 
                         html += `<tr>
                         <td style="text-align:center;">
@@ -1409,10 +1445,21 @@
                         </td>
                         <td>
                             <code>${src.source}</code>
-                            ${src.type === 'taxonomy' ? `<br><small style="color:#9ca3af;">( ${src.label} )</small>` : ''}
                         </td>
                         <td>
                             <input type="text" class="ss-facet-label" value="${displayLabel}" style="width: 100%;">
+                        </td>
+                        <td>
+                            <input type="text" class="ss-facet-target" value="${targetName}" style="width: 100%; font-family: monospace; font-size: 12px;" placeholder="Typesense field name">
+                        </td>
+                        <td>
+                            <select class="ss-facet-datatype" style="width: 100%;">
+                                <option value="string" ${dataType === 'string' ? 'selected' : ''}>String</option>
+                                <option value="int32" ${dataType === 'int32' ? 'selected' : ''}>Integer</option>
+                                <option value="float" ${dataType === 'float' ? 'selected' : ''}>Float</option>
+                                <option value="bool" ${dataType === 'bool' ? 'selected' : ''}>Boolean</option>
+                                <option value="string[]" ${dataType === 'string[]' ? 'selected' : ''}>Array (String)</option>
+                            </select>
                         </td>
                         <td>
                             <span class="ss-badge ${src.type}">${src.type === 'meta' ? 'Field' : 'Tax'}</span>
