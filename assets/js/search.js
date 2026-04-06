@@ -204,6 +204,10 @@
             postsParams.filter_by = finalFilter;
         }
 
+        if (config.synonym_sets && config.synonym_sets.length > 0) {
+            postsParams.synonym_sets = config.synonym_sets.join(',');
+        }
+
         searches.push(postsParams);
 
         // 2. Taxonomies (If enabled in Scope)

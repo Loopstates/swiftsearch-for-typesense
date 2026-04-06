@@ -195,36 +195,48 @@
             <section class="ss-step-view" id="view-relevance" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Relevance Settings', 'swift-search-typesense'); ?> <span
-                                class="ss-pro-badge">PRO</span></h2>
+                        <h2><?php esc_html_e('Relevance Settings', 'swift-search-typesense'); ?> <span class="ss-pro-badge">PRO</span></h2>
                         <p><?php esc_html_e('Fine-tune search results ranking.', 'swift-search-typesense'); ?></p>
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-pro-gate" data-feature="relevance">
                             <div class="ss-form-group">
-                                <label>Global Relevance Score: <span id="ss-relevance-val"
-                                        style="font-weight:700;">50</span></label>
-                                <input type="range" id="ss-relevance-range" min="1" max="100" value="50"
-                                    oninput="document.getElementById('ss-relevance-val').innerText = this.value">
+                                <label>Global Relevance Score: <span id="ss-relevance-val" style="font-weight:700;">50</span></label>
+                                <input type="range" id="ss-relevance-range" min="1" max="100" value="50" oninput="document.getElementById('ss-relevance-val').innerText = this.value">
                                 <p class="description">
                                     <?php esc_html_e('Adjust the base ranking weight for searches. Higher values favor exact matches.', 'swift-search-typesense'); ?>
                                 </p>
                             </div>
                             <div class="ss-form-group">
                                 <label>Synonyms</label>
-                                <textarea id="ss-synonyms-list" rows="6" class="ss-input"
-                                    placeholder="jacket, coat, blazer&#10;bag, backpack, tote&#10;trousers, pants"></textarea>
+                                <textarea id="ss-synonyms-list" rows="6" class="ss-input" placeholder="jacket, coat, blazer&#10;bag, backpack, tote&#10;trousers, pants"></textarea>
                                 <p class="description">
                                     <?php esc_html_e('Enter each group of synonyms on a new line. Comma-separated.', 'swift-search-typesense'); ?>
                                 </p>
                             </div>
+                            <div class="ss-form-group" style="margin-top: 15px;">
+                                <label><?php esc_html_e('Apply to Collections:', 'swift-search-typesense'); ?></label>
+                                <div id="ss-synonym-collections-container" style="margin-top: 10px;">
+                                    <p class="ss-hint" style="font-style: italic; opacity: 0.7;"><?php esc_html_e('Loading active collections...', 'swift-search-typesense'); ?></p>
+                                </div>
+                                <p class="ss-hint" style="margin-top: 8px;">
+                                    <?php esc_html_e('Select which indices search results should expand with these synonyms.', 'swift-search-typesense'); ?>
+                                </p>
+                            </div>
+                            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e5e7eb;">
+                                <button type="button" id="ss-test-synonyms" class="ss-btn ss-btn-sm ss-btn-secondary">
+                                    <?php esc_html_e('Test Synonym Path Connectivity', 'swift-search-typesense'); ?>
+                                </button>
+                                <p class="ss-hint" style="margin-top: 8px;">
+                                    <?php esc_html_e('Use this if synonyms fail to sync. It will check if your server recognizes the /synonyms endpoint.', 'swift-search-typesense'); ?>
+                                </p>
+                            </div>
                         </div>
+                    </div>
                 </div>
-            </div>
-            <div class="ss-form-actions" style="margin-top: 20px;">
-                <button type="button" class="ss-btn ss-btn-primary"
-                    id="ss-save-relevance"><?php esc_html_e('Save Relevance Settings', 'swift-search-typesense'); ?></button>
-            </div>
+                <div class="ss-form-actions" style="margin-top: 20px;">
+                    <button type="button" class="ss-btn ss-btn-primary" id="ss-save-relevance"><?php esc_html_e('Save Relevance Settings', 'swift-search-typesense'); ?></button>
+                </div>
             </section>
 
             <!-- Step 4: Search UI -->
@@ -580,5 +592,8 @@
                 style="color: inherit; text-decoration: none; font-weight: 500;">Loopstates</a> Product. SwiftSearch
             Typesense
             v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?>.</p>
+        <p style="margin-top: 5px; opacity: 0.8; font-style: italic;">
+            <?php esc_html_e('Optimized for Typesense v0.30.1+. Ensure your cluster supports Global Synonym Sets.', 'swift-search-typesense'); ?>
+        </p>
     </div>
 </div>

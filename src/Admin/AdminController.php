@@ -109,6 +109,7 @@ class AdminController
             'relevance' => array(
                 'weights' => isset($settings['weights']) ? $settings['weights'] : array(),
                 'synonyms' => isset($settings['synonyms']) ? $settings['synonyms'] : array(),
+                'synonym_collections' => isset($settings['synonym_collections']) ? $settings['synonym_collections'] : array('posts'),
             ),
             'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
             'credentials' => array(
@@ -126,6 +127,7 @@ class AdminController
             'styling' => isset($settings['styling']) ? $settings['styling'] : array(),
             'available_post_types' => $this->get_public_post_types(),
             'available_taxonomies' => $this->get_public_taxonomies(),
+            'available_collections' => $this->get_active_collections(), 
             'texts' => array(
                 'connecting' => __('Connecting to Typesense...', 'swift-search-typesense'),
                 'success' => __('Connected Successfully!', 'swift-search-typesense'),
@@ -204,6 +206,43 @@ class AdminController
         }
 
         return $data;
+    }
+
+    /**
+     * Get active collections from Typesense (with caching).
+     *
+     * @return array List of collection names.
+     */
+    private function get_active_collections()
+    {
+        $cache_key = 'swift_search_ts_collections';
+        $collections = get_transient($cache_key);
+
+        if ($collections !== false) {
+            return (array) $collections;
+        }
+
+        $settings = get_option('swift_search_settings');
+        if (empty($settings['api_key'])) {
+            return array();
+        }
+
+        $client = new \SwiftSearch\Client\Client($settings);
+        $data = $client->request('/collections', 'GET');
+
+        $active = array();
+        if (is_array($data)) {
+            foreach ($data as $col) {
+                if (isset($col['name'])) {
+                    $active[] = $col['name'];
+                }
+            }
+        }
+
+        // Cache for 10 mins
+        set_transient($cache_key, $active, 10 * MINUTE_IN_SECONDS);
+
+        return $active;
     }
 
     /**

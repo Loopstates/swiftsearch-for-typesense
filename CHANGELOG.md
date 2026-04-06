@@ -1,6 +1,43 @@
 # Changelog
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
+ 
+## [1.3.8] - 2026-04-06
+
+### Added
+- **Selective Synonym Linking**: Added "Apply to Collections" checkboxes to Relevance settings. Admins can now manually select which indices (Posts, Terms, Users) should have synonym expansion active.
+- **Auto-Discovery**: Implemented automatic collection discovery to ensure synonym links are only attempted on valid, existing Typesense collections.
+
+## [1.3.7] - 2026-04-06
+
+### Fixed
+- **Dashboard Synchronization**: Resolved the "Not linked" status in Typesense Cloud by implementing explicit collection-level synonym linking (PUT /collections/{name}/synonyms/{id}).
+- **Architecture**: Completed migration to the Global Synonym Sets architecture for full v0.30+ compatibility.
+
+## [1.3.0] - 2026-04-06
+ 
+### Added
+- **Typesense v0.30.1+ Compatibility**: Implemented support for **Global Synonym Sets**. This resolves the 404 errors encountered on modern Typesense Cloud clusters by using the new global `/synonyms` endpoint.
+- **Dynamic Synonym IDs**: Added a unique prefix (`ss-synonym-`) to synonym set IDs to ensure no collisions in shared or multi-site environments.
+ 
+### Fixed
+- **Sync Failure**: Resolved the 404 "Not Found" error during synonym synchronization by switching from legacy collection-level endpoints to the modern global API.
+- **Admin Feedback**: Added detailed alert messages for synonym synchronization failures.
+ 
+## [1.2.8] - 2026-04-06
+ 
+### Improved
+- **Synonym Logic**: Switched to multi-way (equivalent) synonyms by default for better search expansion (e.g., searching "tote" will now correctly find "bag").
+- **Sync Reliability**: Added explicit error reporting for synonym synchronization with Typesense.
+ 
+### Fixed
+- **Search Expansion**: Fixed an issue where synonyms were being sent as one-way rules, preventing complete results for related terms.
+ 
+## [1.2.7] - 2026-04-06
+ 
+### Fixed
+- **Synonym Saving**: Resolved a structural mismatch between the Admin UI and the REST API that prevented synonyms from saving and syncing to Typesense.
+- **UI Rendering**: Fixed a bug where "undefined" was prepended to synonym groups in the Admin textarea when groups lacked a root word.
 
 ## [1.2.4] - 2026-04-06
 

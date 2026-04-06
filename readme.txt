@@ -3,7 +3,7 @@ Contributors: Loopstates
 Tags: search, typesense, woocommerce, fast search, instant search
 Requires at least: 5.8
 Tested up to: 6.7
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -79,6 +79,27 @@ Yes, the core features are free forever.
 2.  **Instant Search**: Beautiful, fast search results on your frontend.
  
 == Changelog ==
+ 
+= 1.3.8 =
+*   New: Added "Apply to Collections" checkboxes for synonyms. Admins can now select exactly which indices (Posts, Terms, Users) should have synonym expansion enabled.
+*   Improvement: Automatic collection discovery from Typesense server for more reliable linking.
+
+= 1.3.7 =
+*   Fix: Resolved "Not linked" status in Typesense Cloud Dashboard. Implemented explicit collection-level synonym linking for full v0.30+ compatibility.
+*   New: Implemented Global Synonym Sets architecture.
+
+= 1.3.0 =
+*   New: Full support for Typesense v0.30.1+ Global Synonym Sets.
+*   Fix: Resolved 404 errors during synonym synchronization on modern Cloud clusters.
+*   Improvement: Enhanced error reporting in Admin UI.
+ 
+= 1.2.8 =
+*   Improvement: Multi-way synonym support for better search expansion.
+*   Improvement: Explicit error reporting for synonym synchronization.
+ 
+= 1.2.7 =
+*   Fix: Resolved synonym saving and Typesense synchronization logic mismatch.
+*   Fix: Prevented 'undefined' string rendering in the admin synonyms list.
  
 = 1.2.4 =
 *   Fix: 'Advanced Data' custom fields now correctly persist deletions in the database.

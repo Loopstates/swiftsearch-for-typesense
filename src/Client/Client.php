@@ -47,6 +47,11 @@ class Client
      */
     protected function get_base_url()
     {
+        // Omit port if standard for better proxy compatibility
+        $port = (int) $this->port;
+        if (($this->protocol === 'https' && $port === 443) || ($this->protocol === 'http' && $port === 80)) {
+            return "{$this->protocol}://{$this->host}";
+        }
         return "{$this->protocol}://{$this->host}:{$this->port}";
     }
 
@@ -164,15 +169,29 @@ class Client
     }
 
     /**
-     * Upsert a synonym.
+     * Upsert a global synonym set (Typesense v0.30+).
      * 
      * @param string $id Synonym ID.
      * @param array $schema Synonym definition.
      * @return array|bool
      */
-    public function upsert_synonym($id, $schema)
+    public function upsert_synonym($id, $params, $collections = array('posts'))
     {
-        return $this->request('/collections/posts/synonyms/' . $id, 'PUT', $schema);
+        /**
+         * v0.30.0+ uses /synonym_sets (underscore) and REQUIRES an "items" array.
+         * EACH item inside that array also REQUIRES its own internal "id".
+         * To "link" these global rules to collections, we use the "collections" array.
+         */
+        $item = $params;
+        if (!isset($item['id'])) {
+            $item['id'] = $id . '-item';
+        }
+
+        $payload = array(
+            'items' => array($item),
+            'collections' => $collections
+        );
+        return $this->request("/synonym_sets/{$id}", 'PUT', $payload);
     }
 
     /**
@@ -230,5 +249,35 @@ class Client
         // We can parse it to check for individual errors if we want strict mode
         // For now, assume success if 200 OK.
         return array('success' => true, 'raw_response' => $body);
+    }
+
+    /**
+     * Patch a collection (Update schema/config).
+     * 
+     * @param string $name Collection name.
+     * @param array $data Delta to apply.
+     * @return array|bool
+     */
+    public function patch_collection($name, $data)
+    {
+        return $this->request("/collections/{$name}", 'PATCH', $data);
+    }
+
+    /**
+     * Link a global synonym set to a collection (Typesense v0.30+).
+     * 
+     * @param string $collection Collection name.
+     * @param string $id         Synonym Set ID.
+     * @return array|bool
+     */
+    public function link_synonym_to_collection($collection, $id)
+    {
+        // NO LONGER RECOMMENDED for v0.30+ Global Rules; use patch_collection(['synonym_sets' => [...]]) instead.
+        // Keeping for legacy but we will migrate RestController to patch_collection.
+        $payload = array(
+            'id' => $id,
+            'synonym_set_id' => $id
+        );
+        return $this->request("/collections/{$collection}/synonyms/{$id}", 'PUT', $payload);
     }
 }

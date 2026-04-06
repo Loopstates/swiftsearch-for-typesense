@@ -91,6 +91,7 @@
             // Relevance
             this.$relevanceRange = $('#ss-relevance-range');
             this.$synonymsInput = $('#ss-synonyms-list');
+            this.$synonymColsContainer = $('#ss-synonym-collections-container');
 
             // Post Types
             // Post Types
@@ -141,6 +142,7 @@
             this.$saveSearchUIBtn.on('click', this.handleSearchUISave.bind(this));
             this.$savePinningBtn.on('click', this.savePinnedItems.bind(this));
             this.$saveStylingBtn.on('click', this.saveStylingSettings.bind(this));
+            $('#ss-test-synonyms').on('click', this.handleDiagnose.bind(this));
 
             // Pinning
             this.$pinningSearch.on('input', this.handlePinningSearch.bind(this));
@@ -209,17 +211,20 @@
             // Set Relevance State
             if (swiftSearchConfig.relevance) {
                 // Post Title Weight
-                if (swiftSearchConfig.relevance.weights && swiftSearchConfig.relevance.weights.post_title) {
-                    const val = swiftSearchConfig.relevance.weights.post_title * 10;
-                    this.$relevanceRange.val(val); // Scale 1-10 to 1-100 UI
-                    $('#ss-relevance-val').text(val);
+                if (swiftSearchConfig.relevance.weights) {
+                    this.$relevanceRange.val(swiftSearchConfig.relevance.weights.post_title * 10);
+                    $('#ss-relevance-val').text(swiftSearchConfig.relevance.weights.post_title * 10);
                 }
+
+                // Render dynamic collections first
+                this.renderSynonymCollections();
 
                 // Synonyms
                 if (swiftSearchConfig.relevance.synonyms) {
                     let text = '';
                     swiftSearchConfig.relevance.synonyms.forEach(group => {
-                        text += group.root + ', ' + group.synonyms.join(', ') + '\n';
+                        const rootPart = group.root ? group.root + ', ' : '';
+                        text += rootPart + group.synonyms.join(', ') + '\n';
                     });
                     this.$synonymsInput.val(text.trim());
                 }
@@ -313,6 +318,33 @@
                     <span class="meta">Index public authors for "By Author" searches.</span>
                 </div>
             </label>`;
+            html += '</div>';
+
+            container.html(html);
+        },
+
+        renderSynonymCollections: function () {
+            const container = this.$synonymColsContainer;
+            if (!container || !container.length) return;
+
+            const collections = swiftSearchConfig.available_collections || [];
+            const savedCols = (swiftSearchConfig.relevance && swiftSearchConfig.relevance.synonym_collections) ? swiftSearchConfig.relevance.synonym_collections : ['posts'];
+
+            if (collections.length === 0) {
+                container.html('<p class="ss-hint" style="color: #ef4444;">No active collections found. Please index some content first.</p>');
+                return;
+            }
+
+            let html = '<div class="ss-checkbox-list" style="display: flex; flex-wrap: wrap; gap: 15px;">';
+            collections.forEach(col => {
+                const isChecked = savedCols.indexOf(col) !== -1 ? 'checked' : '';
+                html += `
+                    <label class="ss-checkbox-inline">
+                        <input type="checkbox" class="ss-synonym-col" value="${this.escapeHtml(col)}" ${isChecked}>
+                        ${this.escapeHtml(col)}
+                    </label>
+                `;
+            });
             html += '</div>';
 
             container.html(html);
@@ -413,17 +445,22 @@
             const weightVal = this.$relevanceRange.val();
             const weight = Math.max(1, Math.round(weightVal / 10)); // Scale 100 -> 10
 
+            const synonymCols = [];
+            $('.ss-synonym-col').each(function () {
+                if ($(this).is(':checked')) {
+                    synonymCols.push($(this).val());
+                }
+            });
+
             const lines = this.$synonymsInput.val().split('\n');
             const synonyms = [];
 
             lines.forEach(line => {
                 const parts = line.split(',').map(s => s.trim()).filter(s => s.length > 0);
                 if (parts.length > 1) {
-                    const root = parts[0];
-                    const others = parts.slice(1);
+                    // Send all as equivalent (multi-way) for best UX
                     synonyms.push({
-                        root: root,
-                        synonyms: others
+                        synonyms: parts
                     });
                 }
             });
@@ -438,7 +475,8 @@
                         category: 2,
                         tag: 2
                     },
-                    synonyms: synonyms
+                    synonyms: synonyms,
+                    synonym_collections: synonymCols
                 }
             };
 
@@ -446,21 +484,37 @@
                 if (response.success) {
                     alert('Relevance Settings Saved!');
                 } else {
-                    alert('Failed to save settings.');
+                    let msg = 'Failed to save settings.\n';
+                    if (response.errors && response.errors.length > 0) {
+                        response.errors.forEach(err => {
+                            msg += `- ${err.id}: ${err.error}\n`;
+                        });
+                    } else if (response.message) {
+                        msg += response.message;
+                    }
+                    alert(msg);
                 }
+            }).fail(function (xhr) {
+                const response = xhr.responseJSON;
+                let msg = 'Failed to save settings.\n';
+                if (response && response.errors && response.errors.length > 0) {
+                    response.errors.forEach(err => {
+                        msg += `- ${err.id}: ${err.error}\n`;
+                    });
+                } else if (response && response.message) {
+                    msg += response.message;
+                }
+                alert(msg);
             }).always(function () {
                 $btn.prop('disabled', false).text(originalText);
             });
         },
 
-        saveStylingSettings: function (e) {
-            if (e) e.preventDefault();
+        saveStylingSettings: function () {
             const $btn = this.$saveStylingBtn;
             const originalText = $btn.text();
-            $btn.prop('disabled', true).text('Saving...');
 
             const payload = {
-                section: 'styling',
                 primary_color: this.$ssPrimaryColor.val(),
                 text_color: this.$ssTextColor.val(),
                 card_bg: this.$ssCardBg.val(),
@@ -468,16 +522,63 @@
                 custom_css: this.$ssCustomCss.val()
             };
 
-            this.request('POST', '/settings', payload).done(function (response) {
+            $btn.prop('disabled', true).text('Saving...');
+
+            this.request('POST', '/settings/styling', payload).done((response) => {
                 if (response.success) {
                     alert('Styling Settings Saved!');
+                    // Refresh custom CSS if we have a way, or just reload
+                    location.reload();
                 } else {
-                    alert('Failed to save settings.');
+                    alert('Failed to save styling.');
                 }
-            }).always(function () {
+            }).always(() => {
                 $btn.prop('disabled', false).text(originalText);
             });
         },
+
+        handleDiagnose: function () {
+            const $btn = $('#ss-test-synonyms');
+            const originalText = $btn.text();
+
+            $btn.prop('disabled', true).text('Testing Paths...');
+
+            this.request('GET', '/diagnose').done((response) => {
+                if (response.success) {
+                    let msg = "Advanced Synonym Discovery:\n\n";
+                    msg += "Detected Version: " + response.report.version + "\n";
+                    msg += "Admin Connection: " + response.report.admin_status + "\n\n";
+                    
+                    msg += "ENDPOINT MATRIX:\n";
+                    for (const path in response.report.paths) {
+                        msg += `${path}: ${response.report.paths[path]}\n`;
+                    }
+                    
+                    msg += "\nRECOMMENDATION:\n";
+                    let found = false;
+                    for (const path in response.report.paths) {
+                        if (response.report.paths[path].includes('200 OK')) {
+                            msg += `✔ Detected active path: ${path}\n`;
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!found) {
+                        msg += "✖ All synonym paths 404'd. This confirms a Proxy/WAF is blocking these specific URL segments.";
+                    }
+                    
+                    alert(msg);
+                } else {
+                    alert('Diagnostic failed: ' + (response.message || 'Unknown error'));
+                }
+            }).fail((xhr) => {
+                alert('Request failed. Check server logs.');
+            }).always(() => {
+                $btn.prop('disabled', false).text(originalText);
+            });
+        }
+,
 
         handleSearchUISave: function (e) {
             e.preventDefault();

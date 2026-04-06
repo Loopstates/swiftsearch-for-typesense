@@ -64,6 +64,12 @@ class RestController extends WP_REST_Controller
             'permission_callback' => array($this, 'check_permission'),
         ));
 
+        register_rest_route($this->namespace, '/diagnose', array(
+            'methods'  => \WP_REST_Server::READABLE,
+            'callback' => array($this, 'handle_diagnose'),
+            'permission_callback' => array($this, 'check_permission'),
+        ));
+
         register_rest_route($this->namespace, '/sync/status', array(
             'methods' => WP_REST_Server::READABLE,
             'callback' => array($this, 'handle_sync_status'),
@@ -490,19 +496,23 @@ class RestController extends WP_REST_Controller
 
         // 2. Experience Section (Search UI)
         if ($section === 'experience') {
-            // Relevance Weights (Pro)
-            if (isset($params['weights'])) {
-                foreach ($params['weights'] as $key => $weight) {
+            // Relevance Weights (Pro) - Handle both flat and nested for compatibility
+            $relevance = isset($params['relevance_settings']) ? $params['relevance_settings'] : array();
+            $weights = isset($relevance['weights']) ? $relevance['weights'] : ($params['weights'] ?? array());
+
+            if (!empty($weights)) {
+                foreach ($weights as $key => $weight) {
                     $current_settings['weights'][sanitize_key($key)] = absint($weight);
                 }
             }
 
-            // Synonyms (Pro)
-            if (isset($params['synonyms'])) {
-                $synonyms = is_array($params['synonyms']) ? $params['synonyms'] : array();
+            // Synonyms (Pro) - Handle both flat and nested
+            $synonyms = isset($relevance['synonyms']) ? $relevance['synonyms'] : ($params['synonyms'] ?? array());
+            
+            if (!empty($synonyms) && is_array($synonyms)) {
                 $clean_synonyms = array();
                 foreach ($synonyms as $group) {
-                    $syn_list = is_array($group['synonyms']) ? $group['synonyms'] : array();
+                    $syn_list = isset($group['synonyms']) && is_array($group['synonyms']) ? $group['synonyms'] : array();
                     if (!empty($syn_list)) {
                         $syn_item = array(
                             'synonyms' => array_map('sanitize_text_field', $syn_list)
@@ -515,17 +525,69 @@ class RestController extends WP_REST_Controller
                         $clean_synonyms[] = $syn_item;
                     }
                 }
-                $current_settings['synonyms'] = $clean_synonyms;
+                    // Sync to Typesense
+                    $sync_errors = array();
+                    if (!empty($current_settings['api_key'])) {
+                        $client = new \SwiftSearch\Client\Client($current_settings);
 
-                // Sync to Typesense
-                if (!empty($current_settings['api_key'])) {
-                    $client = new \SwiftSearch\Client\Client($current_settings);
-                    foreach ($clean_synonyms as $idx => $syn) {
-                        // Typesense accepts either (root + synonyms) OR (synonyms only)
-                        $client->upsert_synonym("synonym-$idx", $syn);
+                        // Fetch all available collections to verify existence
+                        $collections_data = $client->request('/collections', 'GET');
+                        $ts_all_collections = array();
+                        if (is_array($collections_data)) {
+                            foreach ($collections_data as $col) {
+                                if (isset($col['name'])) {
+                                    $ts_all_collections[] = $col['name'];
+                                }
+                            }
+                        }
+
+                        // Determine which collections to link to based on user selection
+                        $link_targets = isset($relevance['synonym_collections']) ? (array) $relevance['synonym_collections'] : array('posts');
+                        
+                        // Filter link targets against actual collections on server
+                        if (!empty($ts_all_collections)) {
+                            $link_targets = array_values(array_intersect($link_targets, $ts_all_collections));
+                        }
+
+                        $all_synonyms_applied = array();
+                        foreach ($clean_synonyms as $idx => $syn) {
+                            // Use a unique prefix for global synonym sets to avoid collisions
+                            $syn_id = "ss-synonym-$idx";
+                            $result = $client->upsert_synonym($syn_id, $syn, $link_targets);
+
+                            if ($result !== false) {
+                                $all_synonyms_applied[] = $syn_id;
+                            }
+
+                            if ($result === false) {
+                                $sync_errors[] = array(
+                                    'id' => $syn_id,
+                                    'error' => $client->get_last_error()
+                                );
+                            }
+                        }
+
+                        // Official v0.30+ Linking: Patch the collection schema to include the synonym sets
+                        if (empty($sync_errors) && !empty($all_synonyms_applied)) {
+                            foreach ($link_targets as $col_name) {
+                                $client->patch_collection($col_name, array(
+                                    'synonym_sets' => $all_synonyms_applied
+                                ));
+                            }
+                        }
                     }
+
+                    if (!empty($sync_errors)) {
+                        return new \WP_REST_Response(array(
+                            'success' => false,
+                            'message' => 'Synonyms saved to database but failed to sync with Typesense.',
+                            'errors' => $sync_errors
+                        ), 400);
+                    }
+
+                    $current_settings['synonyms'] = $clean_synonyms;
+                    $current_settings['synonym_collections'] = isset($relevance['synonym_collections']) ? (array) $relevance['synonym_collections'] : array('posts');
                 }
-            }
 
             // Facets (Pro)
             if (isset($params['facets_config'])) {
@@ -770,5 +832,46 @@ class RestController extends WP_REST_Controller
     {
         $items = get_option('swift_search_pinned_items', array());
         return new \WP_REST_Response(array('success' => true, 'data' => $items), 200);
+    }
+
+    /**
+     * Diagnose synonym endpoint connectivity.
+     */
+    public function handle_diagnose(\WP_REST_Request $request) {
+        $settings = get_option('swift_search_settings', array());
+        if (empty($settings['api_key'])) {
+            return new \WP_REST_Response(array('success' => false, 'message' => 'No API Key found.'), 400);
+        }
+
+        $client = new \SwiftSearch\Client\Client($settings);
+
+        // Test 0: Root (Version detection)
+        $root = $client->request('/', 'GET');
+        $version_info = is_array($root) && isset($root['version']) ? $root['version'] : 'Unknown';
+
+        // Test 1: Collections List (Basic Admin Check)
+        $collections_res = $client->request('/collections', 'GET');
+        $admin_status = ($collections_res !== false) ? 'OK (Admin Connection Success)' : $client->get_last_error();
+
+        // Path Matrix
+        $tests = array(
+            '/synonym_sets' => $client->request('/synonym_sets', 'GET'),
+            '/synonyms' => $client->request('/synonyms', 'GET'),
+            '/collections/posts/synonyms' => $client->request('/collections/posts/synonyms', 'GET'),
+        );
+
+        $report_paths = array();
+        foreach ($tests as $path => $res) {
+            $report_paths[$path] = ($res !== false) ? '200 OK' : $client->get_last_error();
+        }
+
+        return new \WP_REST_Response(array(
+            'success' => true,
+            'report' => array(
+                'version'       => $version_info,
+                'admin_status'  => $admin_status,
+                'paths'         => $report_paths
+            )
+        ), 200);
     }
 }

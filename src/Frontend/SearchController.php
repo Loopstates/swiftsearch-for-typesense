@@ -48,6 +48,14 @@ class SearchController
         // Pass Config
         $settings = get_option('swift_search_settings', array());
         if (!empty($settings['search_key'])) {
+            $relevance = isset($settings['relevance']) ? $settings['relevance'] : array();
+            $synonym_sets = array();
+            if (!empty($relevance['synonyms']) && is_array($relevance['synonyms'])) {
+                foreach ($relevance['synonyms'] as $index => $syn) {
+                    $synonym_sets[] = "ss-synonym-{$index}";
+                }
+            }
+
             wp_localize_script('swift-search-frontend', 'swiftSearchVars', array(
                 'host' => $settings['host'],
                 'port' => $settings['port'],
@@ -61,6 +69,7 @@ class SearchController
                 'custom_fields' => isset($settings['custom_fields']) ? $settings['custom_fields'] : array(),
                 'pinned_items' => get_option('swift_search_pinned_items', array()),
                 'weights' => isset($settings['weights']) ? $settings['weights'] : array(), // Pass Weights
+                'synonym_sets' => $synonym_sets, // Pass Synonyms
                 'apiUrl' => rest_url('swift-search/v1'),
                 'nonce' => wp_create_nonce('wp_rest'),
             ));
