@@ -106,7 +106,12 @@
                             <div class="ss-form-group">
                                 <label
                                     for="ts-api-key"><?php esc_html_e('Admin API Key', 'swift-search-typesense'); ?></label>
-                                <input type="password" id="ts-api-key" name="api_key" required>
+                                <div class="ss-input-wrapper">
+                                    <input type="password" id="ts-api-key" name="api_key" required>
+                                    <button type="button" class="ss-input-toggle ss-toggle-api-key" title="<?php esc_attr_e('Toggle Visibility', 'swift-search-typesense'); ?>">
+                                        <span class="dashicons dashicons-visibility"></span>
+                                    </button>
+                                </div>
                                 <p class="description">
                                     <?php esc_html_e('Required for indexing actions.', 'swift-search-typesense'); ?>
                                 </p>
@@ -114,7 +119,12 @@
                             <div class="ss-form-group">
                                 <label
                                     for="ts-search-key"><?php esc_html_e('Search-Only API Key', 'swift-search-typesense'); ?></label>
-                                <input type="text" id="ts-search-key" name="search_key">
+                                <div class="ss-input-wrapper">
+                                    <input type="password" id="ts-search-key" name="search_key">
+                                    <button type="button" class="ss-input-toggle ss-toggle-api-key" title="<?php esc_attr_e('Toggle Visibility', 'swift-search-typesense'); ?>">
+                                        <span class="dashicons dashicons-visibility"></span>
+                                    </button>
+                                </div>
                                 <p class="description">
                                     <?php esc_html_e('Public key for the frontend search.', 'swift-search-typesense'); ?>
                                 </p>

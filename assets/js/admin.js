@@ -104,6 +104,9 @@
             this.$pinningEmpty = $('#ss-pinning-empty');
             this.pinnedItems = [];
             this.searchTimeout = null;
+
+            // API Toggles
+            this.$apiKeyToggles = $('.ss-toggle-api-key');
         },
 
         bindEvents: function () {
@@ -140,6 +143,9 @@
             this.$savePinningBtn.on('click', this.savePinnedItems.bind(this));
             this.$saveStylingBtn.on('click', this.saveStylingSettings.bind(this));
             $('#ss-test-synonyms').on('click', this.handleDiagnose.bind(this));
+
+            // API Toggle
+            this.$apiKeyToggles.on('click', this.toggleApiKeyVisibility.bind(this));
 
             // Pinning
             this.$pinningSearch.on('input', this.handlePinningSearch.bind(this));
@@ -1600,6 +1606,20 @@
                 </style>
             `;
             container.html(html);
+        },
+
+        toggleApiKeyVisibility: function (e) {
+            const $btn = $(e.currentTarget);
+            const $input = $btn.siblings('input');
+            const $icon = $btn.find('.dashicons');
+
+            if ($input.attr('type') === 'password') {
+                $input.attr('type', 'text');
+                $icon.removeClass('dashicons-visibility').addClass('dashicons-hidden');
+            } else {
+                $input.attr('type', 'password');
+                $icon.removeClass('dashicons-hidden').addClass('dashicons-visibility');
+            }
         }
     };
 

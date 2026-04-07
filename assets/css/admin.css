@@ -231,6 +231,43 @@
 	box-shadow: 0 0 0 3px rgba(255, 0, 85, 0.1);
 }
 
+/* API Key Toggle Visibility */
+.ss-input-wrapper {
+	position: relative;
+	width: 100%;
+}
+
+.ss-input-wrapper input {
+	padding-right: 40px !important;
+}
+
+.ss-input-toggle {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	background: none;
+	border: none;
+	color: var(--ss-text-muted);
+	cursor: pointer;
+	padding: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 10;
+	transition: color 0.1s ease;
+}
+
+.ss-input-toggle:hover {
+	color: var(--ss-primary);
+}
+
+.ss-input-toggle .dashicons {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+}
+
 .description {
 	color: var(--ss-text-muted);
 	font-style: italic;
