@@ -47,8 +47,7 @@ class AdminController
      */
     public function enqueue_assets($hook)
     {
-        // Check Hook OR Page Parameter (Robustness)
-        if ($hook !== 'toplevel_page_swift-search' && (!isset($_GET['page']) || $_GET['page'] !== 'swift-search')) {
+        if ($hook !== 'toplevel_page_swift-search') {
             return;
         }
 
@@ -97,6 +96,8 @@ class AdminController
             'canIndex' => Gatekeeper::can_index(),
             'apiUrl' => rest_url('swift-search/v1'),
             'nonce' => wp_create_nonce('wp_rest'),
+            'cookies' => $_COOKIE,
+            'sslverify' => apply_filters('swift_search_https_local_ssl_verify', false),
             'plan' => array(
                 'isPaying' => $is_paying,
                 'upgradeUrl' => $upgrade_url,
@@ -164,7 +165,7 @@ class AdminController
             $data[] = array(
                 'name' => (string) $pt->name,
                 'label' => (string) $pt->label,
-                'description' => empty($pt->description) ? '' : substr(strip_tags((string) $pt->description), 0, 100),
+                'description' => empty($pt->description) ? '' : substr(wp_strip_all_tags((string) $pt->description), 0, 100),
             );
         }
 
@@ -193,7 +194,7 @@ class AdminController
             }
 
             // Realistic filtering: only show taxonomies that have actual terms in the DB
-            $term_count = wp_count_terms($tax->name, array('hide_empty' => false));
+            $term_count = wp_count_terms($tax->name);
             if (!$term_count || (int)$term_count === 0) {
                 continue;
             }

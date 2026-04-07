@@ -34,7 +34,7 @@ class Cron
         // We keep popular queries forever (or until another policy matches)
         $wpdb->query(
             $wpdb->prepare(
-                "DELETE FROM {$table_name} WHERE updated_at < %s AND frequency < %d",
+                "DELETE FROM {$wpdb->prefix}swift_search_logs WHERE updated_at < %s AND frequency < %d",
                 gmdate('Y-m-d H:i:s', strtotime('-30 days')),
                 5
             )

@@ -174,15 +174,15 @@ class SearchController
         echo "\n<!-- SwiftSearch Custom Styles -->\n";
         echo "<style id='swift-search-dynamic-css'>\n";
         echo "  .ss-wrapper {\n";
-        echo "    --ss-primary: {$primary} !important;\n";
-        echo "    --ss-primary-rgb: {$primary_rgb[0]}, {$primary_rgb[1]}, {$primary_rgb[2]} !important;\n";
-        echo "    --ss-text-main: {$text} !important;\n";
-        echo "    --ss-card-bg: {$bg} !important;\n";
-        echo "    --ss-radius: {$radius}px !important;\n";
+        echo "    --ss-primary: " . esc_html($primary) . " !important;\n";
+        echo "    --ss-primary-rgb: " . absint($primary_rgb[0]) . ", " . absint($primary_rgb[1]) . ", " . absint($primary_rgb[2]) . " !important;\n";
+        echo "    --ss-text-main: " . esc_html($text) . " !important;\n";
+        echo "    --ss-card-bg: " . esc_html($bg) . " !important;\n";
+        echo "    --ss-radius: " . absint($radius) . "px !important;\n";
         echo "  }\n";
         if (!empty($custom_css)) {
             echo "  /* User Custom CSS Overrides */\n";
-            echo "  " . wp_strip_all_tags($custom_css) . "\n";
+            echo "  " . esc_html(wp_strip_all_tags($custom_css)) . "\n";
         }
         echo "</style>\n";
     }

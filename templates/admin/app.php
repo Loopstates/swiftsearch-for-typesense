@@ -384,10 +384,10 @@ if (!defined('ABSPATH')) {
                         <div class="ss-form-group" style="margin-top: 15px;">
                             <label style="display:block; margin-bottom: 8px; font-weight: 500;">Limit Post Types (Optional)</label>
                             <div class="ss-checkbox-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 4px;">
-                                <?php foreach ($data['available_post_types'] as $pt): ?>
+                                <?php foreach ($data['available_post_types'] as $swift_search_pt): ?>
                                     <label class="ss-checkbox-inline">
-                                        <input type="checkbox" class="sc-post-type-selector" value="<?php echo esc_attr($pt['name']); ?>">
-                                        <?php echo esc_html($pt['label']); ?>
+                                        <input type="checkbox" class="sc-post-type-selector" value="<?php echo esc_attr($swift_search_pt['name']); ?>">
+                                        <?php echo esc_html($swift_search_pt['label']); ?>
                                     </label>
                                 <?php endforeach; ?>
                             </div>

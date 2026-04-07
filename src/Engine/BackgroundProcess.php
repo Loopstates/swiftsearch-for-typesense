@@ -40,7 +40,7 @@ class BackgroundProcess
                 'data' => $data,
             ),
             'cookies' => $_COOKIE,
-            'sslverify' => apply_filters('https_local_ssl_verify', false),
+            'sslverify' => apply_filters('swift_search_https_local_ssl_verify', false),
         );
 
         wp_remote_post($url, $args);
@@ -60,22 +60,13 @@ class BackgroundProcess
          * Relaxed Security for Background Process:
          * Since this is internal, strict nonce check is good enough.
          */
-        if (!isset($_POST['nonce']) || !wp_verify_nonce(wp_unslash($_POST['nonce']), 'swift_search_async_bg')) {
+        // Sanitize Nonce and Data
+        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+        if (!wp_verify_nonce($nonce, 'swift_search_async_bg')) {
             wp_die('Invalid Nonce');
         }
 
-        if (!isset($_POST['data'])) {
-            wp_die('No Data');
-        }
-
-        $data = wp_unslash($_POST['data']);
-
-        // Sanitize Data (Recursive for nested arrays)
-        if (is_array($data)) {
-            $data = map_deep($data, 'sanitize_text_field');
-        } else {
-            $data = sanitize_text_field($data);
-        }
+        $data = isset($_POST['data']) ? map_deep(wp_unslash($_POST['data']), 'sanitize_text_field') : array();
 
         // Route the request
         // In this specific architecture, we are hard-looping the Indexer batch.
@@ -94,5 +85,16 @@ class BackgroundProcess
         }
 
         wp_die();
+    }
+
+    /**
+     * Recursive sanitization for background payloads.
+     */
+    private function sanitize_payload($data)
+    {
+        if (is_array($data)) {
+            return map_deep($data, 'sanitize_text_field');
+        }
+        return sanitize_text_field($data);
     }
 }

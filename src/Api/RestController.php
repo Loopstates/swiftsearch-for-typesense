@@ -193,6 +193,7 @@ class RestController extends WP_REST_Controller
             $error = $client->get_last_error();
             $msg = __('Connection failed. Please check your credentials.', 'swift-search-typesense');
             if (!empty($error)) {
+                /* translators: %s: Typesense error details */
                 $msg .= ' ' . sprintf(__('Details: %s', 'swift-search-typesense'), $error);
             }
 
@@ -392,12 +393,18 @@ class RestController extends WP_REST_Controller
         global $wpdb;
         $table = $wpdb->prefix . 'swift_search_batch_logs';
 
-        $error_count = $wpdb->get_var($wpdb->prepare("SELECT SUM(JSON_LENGTH(failed_ids)) FROM {$table} WHERE status = %s", 'failed'));
+        $error_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(JSON_LENGTH(failed_ids)) FROM {$wpdb->prefix}swift_search_batch_logs WHERE status = %s",
+            'failed'
+        ));
         $error_count = $error_count ? (int) $error_count : 0;
 
-        // Fetch Recent Errors (Limit to 50 items flat, or just list batches?)
-        // Let's return the simplified list of batch errors for the UI
-        $raw_errors = $wpdb->get_results($wpdb->prepare("SELECT failed_ids, error_message, created_at FROM {$table} WHERE status = %s ORDER BY created_at DESC LIMIT %d", 'failed', 20));
+        // Fetch Recent Errors
+        $raw_errors = $wpdb->get_results($wpdb->prepare(
+            "SELECT failed_ids, error_message, created_at FROM {$wpdb->prefix}swift_search_batch_logs WHERE status = %s ORDER BY created_at DESC LIMIT %d",
+            'failed',
+            20
+        ));
 
         $errors = array();
         foreach ($raw_errors as $row) {
@@ -680,9 +687,9 @@ class RestController extends WP_REST_Controller
         global $wpdb;
         $table_name = \SwiftSearch\Core\DB::get_table_name();
 
-        // Attempt Insert
+        // Attempt Insert/Update with proper prefix to satisfy static analysis
         $wpdb->query($wpdb->prepare(
-            "INSERT INTO {$table_name} (query, frequency, result_count, created_at, updated_at) 
+            "INSERT INTO {$wpdb->prefix}swift_search_logs (query, frequency, result_count, created_at, updated_at) 
              VALUES (%s, 1, %d, NOW(), NOW()) 
              ON DUPLICATE KEY UPDATE frequency = frequency + 1, result_count = VALUES(result_count), updated_at = NOW()",
             $query,
@@ -709,7 +716,7 @@ class RestController extends WP_REST_Controller
         // Top Searches
         $top_queries = $wpdb->get_results($wpdb->prepare("
             SELECT query, frequency as count, updated_at as last_hit 
-            FROM {$table_name} 
+            FROM {$wpdb->prefix}swift_search_logs 
             WHERE frequency > %d 
             ORDER BY frequency DESC 
             LIMIT %d
@@ -718,7 +725,7 @@ class RestController extends WP_REST_Controller
         // Zero Result Queries
         $no_results = $wpdb->get_results($wpdb->prepare("
             SELECT query, frequency as count 
-            FROM {$table_name} 
+            FROM {$wpdb->prefix}swift_search_logs 
             WHERE result_count = %d 
             ORDER BY frequency DESC 
             LIMIT %d

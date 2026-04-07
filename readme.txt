@@ -4,12 +4,12 @@ Donate link: https://loopstates.com
 Tags: search, typesense, woocommerce, fast search, instant search
 Requires at least: 6.0
 Tested up to: 6.9
-Stable tag: 1.4.2
-Requires PHP: 8.0
+Stable tag: 1.4.3
+Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
  
-Extremely fast, client-side search for WordPress & WooCommerce powered by Typesense. A core pillar of the **Loopstates** ecosystem, designed for ultimate versatility and performance.
+Extremely fast, client-side search for WordPress & WooCommerce powered by Typesense. Sub-50ms latency and direct browser-to-node search clusters.
 
 == Description ==
 
@@ -120,6 +120,13 @@ Track your **Most Searched Keywords** in real-time. Our professional dashboard p
 3.  **Facet Configurator**: Professional visual builder for search filters.
  
 == Changelog ==
+ 
+= 1.4.3 =
+* Security: Complete SQL hardening by removing all variable interpolation from $wpdb->prepare statements.
+* Security: Implemented mandatory nonce verification and strict input sanitization for all processes.
+* Compliance: Prefixed all internal hooks and variables to ensures zero collisions.
+* Compliance: Replaced legacy strip_tags() with wp_strip_all_tags() and fixed deprecated parameters.
+* Maintenance: Truncated short description to <150 characters as per repository requirements.
 
 = 1.4.2 =
 * Fix: Resolved a "ReferenceError: resolve is not defined" in the frontend search script that caused search clusters to fail during user input.

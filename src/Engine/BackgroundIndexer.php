@@ -1,6 +1,10 @@
 <?php
 namespace SwiftSearch\Engine;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Class BackgroundIndexer
  *

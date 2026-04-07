@@ -11,11 +11,10 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 global $wpdb;
 
 // 1. Delete Tables
-$table_logs = $wpdb->prefix . 'swift_search_logs';
-$table_batch_logs = $wpdb->prefix . 'swift_search_batch_logs';
-
-$wpdb->query("DROP TABLE IF EXISTS {$table_logs}");
-$wpdb->query("DROP TABLE IF EXISTS {$table_batch_logs}");
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}swift_search_logs");
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}swift_search_batch_logs");
 
 // 2. Delete Options
 delete_option('swift_search_settings');

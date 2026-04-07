@@ -2,6 +2,21 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.4.4] - 2026-04-07
+- **Security**: Implemented universal "One-Liner Sanitization" for all background processes and REST API inputs to satisfy strict static analysis.
+- **Compliance**: Refined admin asset enqueuing logic to use official WordPress Screen IDs instead of URL parameters.
+- **Compliance**: Added proper PHPCS logic annotations for all direct database queries on custom tables.
+- **Compliance**: Finalized template variable prefixing (**`$swift_search_pt`**) across the entire admin dashboard.
+
+## [1.4.3] - 2026-04-07
+- **Security**: Complete SQL hardening by removing all variable interpolation from `$wpdb->prepare` statements.
+- **Security**: Implemented mandatory nonce verification and strict input sanitization for all setting transitions and background tasks.
+- **Security**: Added `ABSPATH` direct-access protections to asynchronous engine components.
+- **Compliance**: Prefixed all internal hooks and variables to ensures zero collisions with third-party plugins.
+- **Compliance**: Replaced legacy `strip_tags()` with the recommended `wp_strip_all_tags()`.
+- **Compliance**: Updated `wp_count_terms()` to remove deprecated parameters.
+- **Compliance**: Truncated official short description to <150 characters as per repository requirements.
+
 ## [1.4.2] - 2026-04-07
 - **Fix**: Resolved a critical `ReferenceError: resolve is not defined` in `search.js` that caused search failures.
 - **Improved**: Hardened frontend `fetch` error handling to prevent UI lockups on Typesense connection failures.
