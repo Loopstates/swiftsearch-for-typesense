@@ -14,8 +14,8 @@ global $wpdb;
 $table_logs = $wpdb->prefix . 'swift_search_logs';
 $table_batch_logs = $wpdb->prefix . 'swift_search_batch_logs';
 
-$wpdb->query("DROP TABLE IF EXISTS $table_logs");
-$wpdb->query("DROP TABLE IF EXISTS $table_batch_logs");
+$wpdb->query("DROP TABLE IF EXISTS {$table_logs}");
+$wpdb->query("DROP TABLE IF EXISTS {$table_batch_logs}");
 
 // 2. Delete Options
 delete_option('swift_search_settings');
@@ -24,8 +24,7 @@ delete_option('swift_search_sync_errors');
 delete_option('swift_search_db_version');
 delete_option('swift_search_debug_injected_v2');
 
-// 3. Clear Async Actions (optional but good practice)
+// 3. Clear Async Actions
 if (class_exists('ActionScheduler_QueueRunner')) {
     \ActionScheduler_QueueRunner::instance()->unhook_dispatch_async_request();
 }
-// Note: We don't delete Typesense Cloud content here to avoid accidental data loss. User can delete index from UI before uninstall.

@@ -171,12 +171,13 @@ class RestController extends WP_REST_Controller
             // Save to Options
             update_option('swift_search_settings', $config);
 
-            // Init Collection
+            // Init Collection if possible
             $indexer = new \SwiftSearch\Engine\Indexer();
             try {
                 $indexer->create_collection();
             } catch (\Exception $e) {
-            } // Ignore if exists
+                // Silently ignore if already exists or other non-fatal error
+            }
 
             // Get Stats
             $stats = $client->get_stats();
@@ -184,15 +185,15 @@ class RestController extends WP_REST_Controller
             return new \WP_REST_Response(array(
                 'success' => true,
                 'data' => array(
-                    'message' => 'Connected!',
+                    'message' => __('Connected successfully!', 'swift-search-typesense'),
                     'doc_count' => $stats['num_documents'] ?? 0
                 )
             ), 200);
         } else {
             $error = $client->get_last_error();
-            $msg = 'Connection failed. Please check your credentials.';
+            $msg = __('Connection failed. Please check your credentials.', 'swift-search-typesense');
             if (!empty($error)) {
-                $msg .= ' Details: ' . $error;
+                $msg .= ' ' . sprintf(__('Details: %s', 'swift-search-typesense'), $error);
             }
 
             return new \WP_REST_Response(array(
@@ -269,7 +270,7 @@ class RestController extends WP_REST_Controller
             );
 
             $terms = get_terms($args);
-            $count = wp_count_terms($taxonomies, array('hide_empty' => false)); // Approximation
+            $terms = wp_count_terms($taxonomies); // Approximation
 
             if (!is_wp_error($terms)) {
                 foreach ($terms as $term_id) {
@@ -284,7 +285,7 @@ class RestController extends WP_REST_Controller
             // Simple logic: if count(terms) < per_page, we are done.
             $complete = count($terms) < $per_page;
             // Fake total pages for progress bar if possible, else just keep going
-            $total_pages = ceil((int) $count / $per_page);
+            $total_pages = ceil((int) $terms / $per_page);
 
         } elseif ($type === 'users') {
             // Sync Users
@@ -391,12 +392,12 @@ class RestController extends WP_REST_Controller
         global $wpdb;
         $table = $wpdb->prefix . 'swift_search_batch_logs';
 
-        $error_count = $wpdb->get_var("SELECT SUM(JSON_LENGTH(failed_ids)) FROM $table WHERE status = 'failed'");
+        $error_count = $wpdb->get_var($wpdb->prepare("SELECT SUM(JSON_LENGTH(failed_ids)) FROM {$table} WHERE status = %s", 'failed'));
         $error_count = $error_count ? (int) $error_count : 0;
 
         // Fetch Recent Errors (Limit to 50 items flat, or just list batches?)
         // Let's return the simplified list of batch errors for the UI
-        $raw_errors = $wpdb->get_results("SELECT failed_ids, error_message, created_at FROM $table WHERE status = 'failed' ORDER BY created_at DESC LIMIT 20");
+        $raw_errors = $wpdb->get_results($wpdb->prepare("SELECT failed_ids, error_message, created_at FROM {$table} WHERE status = %s ORDER BY created_at DESC LIMIT %d", 'failed', 20));
 
         $errors = array();
         foreach ($raw_errors as $row) {
@@ -681,7 +682,7 @@ class RestController extends WP_REST_Controller
 
         // Attempt Insert
         $wpdb->query($wpdb->prepare(
-            "INSERT INTO $table_name (query, frequency, result_count, created_at, updated_at) 
+            "INSERT INTO {$table_name} (query, frequency, result_count, created_at, updated_at) 
              VALUES (%s, 1, %d, NOW(), NOW()) 
              ON DUPLICATE KEY UPDATE frequency = frequency + 1, result_count = VALUES(result_count), updated_at = NOW()",
             $query,
@@ -706,22 +707,22 @@ class RestController extends WP_REST_Controller
         }
 
         // Top Searches
-        $top_queries = $wpdb->get_results("
+        $top_queries = $wpdb->get_results($wpdb->prepare("
             SELECT query, frequency as count, updated_at as last_hit 
-            FROM $table_name 
-            WHERE frequency > 0 
+            FROM {$table_name} 
+            WHERE frequency > %d 
             ORDER BY frequency DESC 
-            LIMIT 10
-        ");
+            LIMIT %d
+        ", 0, 10));
 
         // Zero Result Queries
-        $no_results = $wpdb->get_results("
+        $no_results = $wpdb->get_results($wpdb->prepare("
             SELECT query, frequency as count 
-            FROM $table_name 
-            WHERE result_count = 0 
+            FROM {$table_name} 
+            WHERE result_count = %d 
             ORDER BY frequency DESC 
-            LIMIT 10
-        ");
+            LIMIT %d
+        ", 0, 10));
 
         return new \WP_REST_Response(array(
             'success' => true,

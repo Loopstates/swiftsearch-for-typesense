@@ -101,11 +101,7 @@ class Plugin
      */
     public function load_textdomain()
     {
-        load_plugin_textdomain(
-            'swift-search-typesense',
-            false,
-            dirname(plugin_basename(SWIFT_SEARCH_FILE)) . '/languages'
-        );
+        // Note: load_plugin_textdomain is removed for WP.org compliance as translations are managed centrally.
     }
 
     /**

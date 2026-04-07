@@ -55,7 +55,7 @@ class AdminController
         // Chart.js for Analytics
         wp_enqueue_script(
             'chart-js',
-            'https://cdn.jsdelivr.net/npm/chart.js',
+            SWIFT_SEARCH_URL . 'assets/vendor/chart.js',
             array(),
             '4.4.1',
             true
@@ -201,7 +201,7 @@ class AdminController
             $data[] = array(
                 'name' => (string) $tax->name,
                 'label' => (string) $tax->label,
-                'description' => empty($tax->description) ? '' : substr(strip_tags((string) $tax->description), 0, 100),
+                'description' => empty($tax->description) ? '' : substr(wp_strip_all_tags((string) $tax->description), 0, 100),
             );
         }
 

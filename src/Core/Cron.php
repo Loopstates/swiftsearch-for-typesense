@@ -34,8 +34,9 @@ class Cron
         // We keep popular queries forever (or until another policy matches)
         $wpdb->query(
             $wpdb->prepare(
-                "DELETE FROM $table_name WHERE updated_at < %s AND frequency < 5",
-                date('Y-m-d H:i:s', strtotime('-30 days'))
+                "DELETE FROM {$table_name} WHERE updated_at < %s AND frequency < %d",
+                gmdate('Y-m-d H:i:s', strtotime('-30 days')),
+                5
             )
         );
     }

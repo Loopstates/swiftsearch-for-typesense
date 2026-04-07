@@ -237,7 +237,7 @@
         const url = `${config.protocol}://${config.host}:${config.port}/multi_search`;
 
         // DEBUG: Log the payload
-        console.log('Typesense Request:', searches);
+
 
         fetch(url, {
             method: 'POST',
@@ -247,22 +247,16 @@
             },
             body: JSON.stringify({ searches: searches })
         })
-            .then(async response => {
-                const data = await response.json().catch(() => ({ message: 'JSON Parsing Error' }));
+            .then(response => {
                 if (!response.ok) {
-                    console.error("SwiftSearch: API Error", response.status, data);
-                    throw new Error(data.message || 'API Error');
+                    throw new Error('Typesense request failed');
                 }
-                return data;
+                return response.json();
             })
             .then(data => {
-                console.log('Typesense Response:', data);
-                loader.style.display = 'none';
                 renderHits(data, searches);
             })
             .catch(err => {
-                console.error("SwiftSearch: Request Failed", err);
-                loader.style.display = 'none';
                 hitsContainer.innerHTML = '<div class="ss-no-results">Search currently unavailable. Please try again later.</div>';
             });
     }
@@ -540,7 +534,7 @@
         logTimer = setTimeout(() => {
             const payload = { query: query, hits: hits };
 
-            // console.log('SwiftSearch Logging:', payload); // Debug
+
 
             const headers = {
                 'Content-Type': 'application/json'
@@ -555,7 +549,7 @@
                 body: JSON.stringify(payload)
             }).then(response => {
                 if (!response.ok) console.warn('SwiftSearch Log Failed', response.status);
-            }).catch(e => console.error('Log error', e));
+            }).catch(e => { /* Error logged silently */ });
         }, 2000);
     }
 

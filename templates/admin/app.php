@@ -1,10 +1,15 @@
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+?>
 <div class="swift-search-dashboard" id="swift-search-app">
     <header class="ss-header">
         <div class="ss-logo">
             <img src="<?php echo esc_url(SWIFT_SEARCH_URL . 'assets/images/swift-search-typesense.png'); ?>"
                 alt="SwiftSearch" class="ss-brand-logo"
                 style="max-height: 40px; margin-right: 12px; vertical-align: middle;">
-            <h1 style="display: inline-block; vertical-align: middle; margin: 0;">SwiftSearch Typesense <span
+            <h1 style="display: inline-block; vertical-align: middle; margin: 0;">SwiftSearch for Typesense <span
                     class="ss-version">v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?></span></h1>
         </div>
         <div class="ss-actions">
@@ -611,8 +616,7 @@
     <div class="ss-footer"
         style="text-align: center; margin-top: 30px; padding: 20px; color: #6b7280; font-size: 13px;">
         <p>A <a href="https://loopstates.com" target="_blank"
-                style="color: inherit; text-decoration: none; font-weight: 500; color: #632489;">Loopstates</a> Product. SwiftSearch
-            Typesense
+                style="color: inherit; text-decoration: none; font-weight: 500; color: #632489;">Loopstates</a> Product. SwiftSearch for Typesense
             v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?>. <?php esc_html_e('Optimized for Typesense v0.30.1+.', 'swift-search-typesense'); ?></p>
     </div>
 </div>

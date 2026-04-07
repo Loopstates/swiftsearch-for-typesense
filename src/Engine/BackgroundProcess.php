@@ -60,7 +60,7 @@ class BackgroundProcess
          * Relaxed Security for Background Process:
          * Since this is internal, strict nonce check is good enough.
          */
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'swift_search_async_bg')) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(wp_unslash($_POST['nonce']), 'swift_search_async_bg')) {
             wp_die('Invalid Nonce');
         }
 
@@ -68,7 +68,14 @@ class BackgroundProcess
             wp_die('No Data');
         }
 
-        $data = $_POST['data'];
+        $data = wp_unslash($_POST['data']);
+
+        // Sanitize Data (Recursive for nested arrays)
+        if (is_array($data)) {
+            $data = map_deep($data, 'sanitize_text_field');
+        } else {
+            $data = sanitize_text_field($data);
+        }
 
         // Route the request
         // In this specific architecture, we are hard-looping the Indexer batch.

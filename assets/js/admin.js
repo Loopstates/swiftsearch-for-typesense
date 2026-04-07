@@ -7,7 +7,6 @@
     const SwiftSearchAdmin = {
         init: function () {
             if (typeof swiftSearchConfig === 'undefined') {
-                console.error("SwiftSearch: FATAL - swiftSearchConfig MISSING");
                 return;
             }
 
@@ -30,7 +29,6 @@
                 // Initial Status Check
                 this.pollStatus(true);
             } catch (e) {
-                console.error("SwiftSearch: CRITICAL INIT ERROR", e);
                 alert("SwiftSearch Error: " + e.message);
             }
         },
@@ -727,7 +725,7 @@
 
             this.request('GET', '/analytics')
                 .done(function (response) {
-                    console.log('SwiftSearch Analytics Response:', response); // Debug Log
+
 
                     if (response && response.success) {
                         // Render Top Searches
@@ -772,7 +770,6 @@
                     }
                 })
                 .fail(function (jqXHR, textStatus, errorThrown) {
-                    console.error('SwiftSearch Analytics API Error:', textStatus, errorThrown);
                     $topTable.html('<tr><td colspan="3">Failed to load data (API Error).</td></tr>');
                     $zeroTable.html('<tr><td colspan="2">Failed to load data.</td></tr>');
                 });
@@ -795,7 +792,6 @@
 
             // Check if Chart is loaded
             if (typeof Chart === 'undefined') {
-                console.warn('Swift Search: Chart.js not loaded.');
                 return;
             }
 
@@ -1031,22 +1027,18 @@
                     self.updateStatus(true, response.data.doc_count);
                     self.renderConnectionState(true);
                 } else {
-                    console.warn('SwiftSearch: Connect Success=False', response);
                     const msg = response.data && response.data.message ? response.data.message : swiftSearchConfig.texts.error;
                     self.showConnectionError(msg);
                     self.updateStatus(false);
                     self.renderConnectionState(false);
                 }
             }).fail(function (xhr, status, error) {
-                console.error('SwiftSearch: Connect Failed', { status: xhr.status, response: xhr.responseJSON });
-
                 let msg = swiftSearchConfig.texts.error;
                 const res = xhr.responseJSON;
-
-                if (res && res.message) {
-                    msg = res.message;
-                } else if (res && res.data && res.data.message) {
+                if (res && res.data && res.data.message) {
                     msg = res.data.message;
+                } else if (res && res.message) {
+                    msg = res.message;
                 }
 
                 self.showConnectionError(msg + ' (HTTP ' + xhr.status + ')');

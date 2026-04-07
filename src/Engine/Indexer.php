@@ -11,7 +11,6 @@ if (!defined('ABSPATH')) {
  * Class Indexer
  *
  * Handles indexing of content.
- * Supports Asynchronous Indexing and Schema Guardrails.
  */
 class Indexer
 {
@@ -27,7 +26,6 @@ class Indexer
     {
         $this->client = new Client();
         $this->config_loader = new ConfigLoader();
-        // Builder instantiated on demand to get fresh config
 
         // Hook into WP lifecycle using Async handlers
         add_action('save_post', array($this, 'handle_save_hook'), 10, 3);
@@ -63,16 +61,11 @@ class Indexer
      * Start Bulk Indexing.
      * Calculates totals and triggers first batch.
      */
-    /**
-     * Start Bulk Indexing.
-     * Calculates totals and triggers first batch.
-     */
     public function start_bulk_index()
     {
         $config = $this->config_loader->get_config();
 
         // 1. Calculate Totals
-        // For MVP we only count Posts. In future we can sequence Terms/Users.
         $post_types = isset($config['indexed_post_types']) ? (array) $config['indexed_post_types'] : array('product');
 
         $args = array(

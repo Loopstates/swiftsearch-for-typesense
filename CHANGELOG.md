@@ -1,6 +1,24 @@
 # Changelog
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
+
+## [1.4.2] - 2026-04-07
+- **Fix**: Resolved a critical `ReferenceError: resolve is not defined` in `search.js` that caused search failures.
+- **Improved**: Hardened frontend `fetch` error handling to prevent UI lockups on Typesense connection failures.
+
+## [1.4.1] - 2026-04-07
+- **Fix**: Resolved a critical JavaScript syntax error in `admin.js` that caused the "Connect" button to fail silently.
+- **Improved**: Enhanced the REST API `handle_connect` response to provide localized, descriptive error messages for Typesense connection failures.
+- **Stability**: Properly scoped variables and added robust XHR error parsing to prevent UI lockups.
+
+## [1.4.0] - 2026-04-07
+- **Security**: Hardened all Custom Table queries with `$wpdb->prepare()`.
+- **Security**: Implemented `wp_unslash()` for global input verification in background processes.
+- **Security**: Added `esc_attr()` and `absint()` to dynamic CSS generation.
+- **Compliance**: Renamed to "SwiftSearch for Typesense" for trademark policy.
+- **Compliance**: Replaced `strip_tags()` with `wp_strip_all_tags()`.
+- **Compliance**: Removed `load_plugin_textdomain()` (managed by WP.org).
+- **Maintenance**: Corrected `date()` to `gmdate()` and updated `wp_count_terms()` logic.
  
 ## [1.3.19] - 2026-04-06
 - **Fix**: Corrected accidental "faded" style on the "Show Excerpts" global setting.

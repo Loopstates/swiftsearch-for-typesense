@@ -1,9 +1,11 @@
 <?php
 /**
- * Plugin Name: SwiftSearch - Typesense Search for WordPress
+ * Plugin Name: SwiftSearch for Typesense
  * Plugin URI:  https://loopstates.com/products/swift-search-typesense/
  * Description: Extremely fast, client-side search for WordPress & WooCommerce powered by Typesense.
- * Version:           1.3.21
+ * Version:           1.4.2
+ * Tested up to:      6.9
+ * Requires PHP:      8.0.0
  * Author:      Loopstates
  * Author URI:  https://loopstates.com
  * License:     GPL-2.0+
@@ -16,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('SWIFT_SEARCH_VERSION', '1.3.21');
+define('SWIFT_SEARCH_VERSION', '1.4.2');
 define('SWIFT_SEARCH_DB_VERSION', '1.1.0');
 define('SWIFT_SEARCH_FILE', __FILE__);
 define('SWIFT_SEARCH_PATH', plugin_dir_path(__FILE__));
