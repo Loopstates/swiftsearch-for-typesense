@@ -15,8 +15,6 @@ if (!defined('ABSPATH')) {
         <div class="ss-actions">
             <a href="https://docs.loopstates.com/swift-search-typesense/" target="_blank"
                 class="ss-link"><?php esc_html_e('Documentation', 'swift-search-typesense'); ?></a>
-            <a href="https://docs.loopstates.com/swift-search-typesense/" target="_blank"
-                class="ss-link"><?php esc_html_e('Support', 'swift-search-typesense'); ?></a>
         </div>
     </header>
 
