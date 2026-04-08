@@ -1,7 +1,7 @@
 === SwiftSearch for Typesense ===
 Contributors: loopstates
 Donate link: https://loopstates.com
-Tags: search, typesense, woocommerce, fast search, instant search
+Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 6.9
 Stable tag: 1.4.3
@@ -118,6 +118,10 @@ Track your **Most Searched Keywords** in real-time. Our professional dashboard p
 1.  **Connection Wizard**: Direct connection setup for Typesense clusters.
 2.  **Instant Search UI**: Blazing fast results with typo tolerance.
 3.  **Facet Configurator**: Professional visual builder for search filters.
+
+== Upgrade Notice ==
+= 1.4.4 =
+Critical security hardening and Freemius compliance update. Please update immediately.
  
 == Changelog ==
  
