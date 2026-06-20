@@ -84,18 +84,9 @@ class Gatekeeper
      */
     public static function can_use_features($feature = 'pro')
     {
-        if (null !== self::$can_use_pro_cache) {
-            return self::$can_use_pro_cache;
-        }
-
-        // Use Freemius SDK to validate license/plan
-        if (function_exists('swift_search_fs')) {
-            self::$can_use_pro_cache = (bool) swift_search_fs()->can_use_premium_code();
-            return self::$can_use_pro_cache;
-        }
-
-        return false;
+        return true;
     }
+
 
     /**
      * Check if User is Admin (Capability Check).

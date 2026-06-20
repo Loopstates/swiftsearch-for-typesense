@@ -182,11 +182,10 @@ if (!defined('ABSPATH')) {
                     </div>
                 </div>
 
-                <!-- Advanced Data (Pro) -->
-                <div class="ss-card ss-pro-gate" style="margin-top: 20px;">
+                <!-- Advanced Data -->
+                <div class="ss-card" style="margin-top: 20px;">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Advanced Data', 'swift-search-typesense'); ?> <span
-                                class="ss-pro-badge">PRO</span></h2>
+                        <h2><?php esc_html_e('Advanced Data', 'swift-search-typesense'); ?></h2>
                         <p><?php esc_html_e('Map custom meta fields to Typesense schema (e.g. Price, SKU, Brand).', 'swift-search-typesense'); ?>
                         </p>
                     </div>
@@ -204,15 +203,15 @@ if (!defined('ABSPATH')) {
                 </div>
             </section>
 
-            <!-- Step 3: Relevance (Pro) -->
+            <!-- Step 3: Relevance -->
             <section class="ss-step-view" id="view-relevance" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Relevance Settings', 'swift-search-typesense'); ?> <span class="ss-pro-badge">PRO</span></h2>
+                        <h2><?php esc_html_e('Relevance Settings', 'swift-search-typesense'); ?></h2>
                         <p><?php esc_html_e('Fine-tune search results ranking.', 'swift-search-typesense'); ?></p>
                     </div>
                     <div class="ss-card-body">
-                        <div class="ss-pro-gate" data-feature="relevance">
+                        <div class="ss-relevance-settings-wrapper">
                             <div class="ss-form-group">
                                 <label>Global Relevance Score: <span id="ss-relevance-val" style="font-weight:700;">50</span></label>
                                 <input type="range" id="ss-relevance-range" min="1" max="100" value="50" oninput="document.getElementById('ss-relevance-val').innerText = this.value">
@@ -397,11 +396,10 @@ if (!defined('ABSPATH')) {
                     </div>
                 </div>
 
-                <!-- Faceted Navigation (Pro) -->
-                <div class="ss-card ss-pro-gate">
+                <!-- Faceted Navigation -->
+                <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Faceted Navigation (Sidebar)', 'swift-search-typesense'); ?> <span
-                                class="ss-pro-badge">PRO</span></h2>
+                        <h2><?php esc_html_e('Faceted Navigation (Sidebar)', 'swift-search-typesense'); ?></h2>
                         <p><?php esc_html_e('Configure filters for your search results sidebar.', 'swift-search-typesense'); ?>
                         </p>
                     </div>
@@ -465,12 +463,11 @@ if (!defined('ABSPATH')) {
                 </div>
             </section>
 
-            <!-- Step 6: Analytics (Pro) -->
+            <!-- Step 6: Analytics -->
             <section class="ss-step-view" id="view-analytics" style="display:none;">
-                <div class="ss-card ss-pro-gate">
+                <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Search Analytics', 'swift-search-typesense'); ?> <span
-                                class="ss-pro-badge">PRO</span></h2>
+                        <h2><?php esc_html_e('Search Analytics', 'swift-search-typesense'); ?></h2>
                         <p><?php esc_html_e('Insights into what your users are searching for.', 'swift-search-typesense'); ?>
                         </p>
                     </div>
@@ -519,17 +516,16 @@ if (!defined('ABSPATH')) {
                 </div>
             </section>
 
-            <!-- Step 6: Results Pinning (Pro) -->
+            <!-- Step 6: Results Pinning -->
             <section class="ss-step-view" id="view-pinning" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Pinned Results', 'swift-search-typesense'); ?> <span
-                                class="ss-pro-badge">PRO</span></h2>
+                        <h2><?php esc_html_e('Pinned Results', 'swift-search-typesense'); ?></h2>
                         <p><?php esc_html_e('Manually fix specific products or items to the top of search results.', 'swift-search-typesense'); ?>
                         </p>
                     </div>
                     <div class="ss-card-body">
-                        <div class="ss-pro-gate" data-feature="pinning">
+                        <div class="ss-pinning-settings-wrapper">
                             <div class="ss-pinning-ui">
                                 <div class="ss-form-group" style="position:relative;">
                                     <label><?php esc_html_e('Select Pinned Item', 'swift-search-typesense'); ?></label>

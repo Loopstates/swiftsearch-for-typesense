@@ -5,26 +5,22 @@ namespace SwiftSearch\Engine;
  * Class ConfigLoader
  *
  * Defines the Search Configuration locally.
- * "Pro" features are enabled strictly via Freemius SDK check.
+ * All features are enabled by default.
  * ABSOLUTELY NO EXTERNAL SERVER CALLS.
  */
 class ConfigLoader
 {
 
     /**
-     * Get the configuration (Locally defined, gated by Freemius).
+     * Get the configuration (Locally defined).
      *
      * @return array
      */
     public function get_config()
     {
-        // Check if Freemius Premium is active
-        if (function_exists('swift_search_fs') && swift_search_fs()->can_use_premium_code()) {
-            return $this->get_pro_config();
-        }
-
-        return $this->get_free_config();
+        return $this->get_pro_config();
     }
+
 
     /**
      * Pro Configuration (Smart Defaults).

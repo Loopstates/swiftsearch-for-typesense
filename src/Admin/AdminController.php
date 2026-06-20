@@ -65,7 +65,7 @@ class AdminController
             'swift-search-admin',
             SWIFT_SEARCH_URL . 'assets/css/admin.css',
             array(),
-            SWIFT_SEARCH_VERSION
+            SWIFT_SEARCH_VERSION . '.' . time()
         );
 
         // Admin JS
@@ -73,13 +73,13 @@ class AdminController
             'swift-search-admin',
             SWIFT_SEARCH_URL . 'assets/js/admin.js',
             array('jquery', 'chart-js'),
-            SWIFT_SEARCH_VERSION,
+            SWIFT_SEARCH_VERSION . '.' . time(),
             true
         );
 
-        // Freemius State
-        $is_paying = function_exists('swift_search_fs') ? swift_search_fs()->can_use_premium_code() : false;
-        $upgrade_url = function_exists('swift_search_fs') ? swift_search_fs()->get_upgrade_url() : '#';
+        // Configuration State
+        $is_paying = true;
+        $upgrade_url = '#';
 
         // Check Schema Mismatch
         $schema_mismatch = get_option('swift_search_schema_mismatch', false);
@@ -251,15 +251,6 @@ class AdminController
      */
     public function render_app()
     {
-        // Enforce Freemius Registration
-        if (function_exists('swift_search_fs')) {
-            if (!swift_search_fs()->is_registered()) {
-                // Redirect logic or Show SDK Connect Page
-                swift_search_fs()->_connect_page_render();
-                return;
-            }
-        }
-
         // Prepare Data for View
         $data = array(
             'available_post_types' => $this->get_public_post_types(),

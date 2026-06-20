@@ -4,7 +4,7 @@ Donate link: https://loopstates.com
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 6.9
-Stable tag: 1.4.3
+Stable tag: 1.4.7
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -20,10 +20,15 @@ Built by [Loopstates](https://loopstates.com), SwiftSearch is architected for ma
 **Official Documentation**: [https://docs.loopstates.com/swift-search-typesense/](https://docs.loopstates.com/swift-search-typesense/)
 
 
-### Key Features (Free Forever)
+### Key Features
 
 *   **Instant Search**: Blazing fast search-as-you-type results.
-*   **Typo Tolerance**: Native Typesense fuzzy matching handles misspellings out of the box.
+*   **Faceted Navigation & Filters**: Create and manage multi-select sidebar filters for taxonomies and metadata.
+*   **Merchandising & Pinning**: Manually fix specific items to the top of results for a curated user experience.
+*   **Result Weighting & Tuning**: Fine-tune field importance (e.g., prioritize SKU hits over Content).
+*   **Global Synonym Sets**: Integrated modern synonym architecture (Typesense v0.30+).
+*   **Advanced Custom Fields Mappings**: Search and filter by any Custom Field (Price, SKU, Brand, etc.).
+*   **Interactive Search Analytics**: Detailed dashboard for tracking popular searches and identifying "Zero Result" gaps.
 *   **Background Indexing**: High-reliability "Chain Reaction" sync handles thousands of items without timing out.
 *   **Automated Sync**: Real-time indexing when you Save, Update, or Delete any content.
 *   **Unlimited CPT Support**: Index Posts, Pages, Products, and all Custom Post Types.
@@ -31,16 +36,6 @@ Built by [Loopstates](https://loopstates.com), SwiftSearch is architected for ma
 *   **Global UI Toggles**: Instantly show or hide Thumbnails, Prices, and Excerpts globally.
 *   **Developer Ready**: Built-in Custom CSS support and granular Shortcode overrides.
 *   **WooCommerce Global Search**: Fully optimized for product titles, prices, and imagery.
-
-### Pro Features (Merchandising & Relevance)
-
-*   **Facet Configurator**: A dedicated visual builder to create and manage multi-select sidebar filters for taxonomies and metadata.
-*   **Advanced Metadata Indexing**: Search and filter by any Custom Field (Price, SKU, Brand, etc.).
-*   **Merchandising (Pinning)**: Manually fix specific items to the top of results for a curated user experience.
-*   **Result Weighting**: fine-tune field importance (e.g., prioritize SKU hits over Content).
-*   **Global Synonym Sets**: Integrated modern synonym architecture (Typesense v0.30+).
-*   **Interactive Search Analytics**: Detailed dashboard for tracking popular searches and identifying "Zero Result" gaps.
-*   **Priority Ecosystem Support**: Direct access to Loopstates developers for complex integrations.
  
 == Installation ==
 
@@ -49,11 +44,11 @@ Built by [Loopstates](https://loopstates.com), SwiftSearch is architected for ma
 3.  Follow our **8-Step Setup Wizard** in the sidebar:
     *   **Step 1: Connect** - Enter your Typesense host, port, and API keys.
     *   **Step 2: Content** - select your Post Types (Posts, Products, etc.) and enable the global search override.
-    *   **Step 3: Relevance (Pro)** - Manage synonyms and global ranking scores.
+    *   **Step 3: Relevance** - Manage synonyms and global ranking scores.
     *   **Step 4: Search UI** - Configure your instant search behavior and visual result toggles.
     *   **Step 5: Styling** - Pick your accent colors and set your custom CSS.
-    *   **Step 6: Analytics (Pro)** - Review your search trend dashboard.
-    *   **Step 7: Pinning (Pro)** - Merchandise specific results to the top.
+    *   **Step 6: Analytics** - Review your search trend dashboard.
+    *   **Step 7: Pinning** - Merchandise specific results to the top.
     *   **Step 8: Sync** - Perform your initial bulk index to build the Typesense collection.
 
 == Privacy & Compliance ==
@@ -62,10 +57,8 @@ SwiftSearch is designed with a "Privacy First" architecture:
 - **Zero Middleware**: We do NOT use any proxy or Loopstates-hosted servers. Search queries go directly from the user's browser to **your** Typesense cluster.
 - **Self-Contained**: All configuration, analytics data, and result pinning rules are stored locally in your WordPress database.
 - **GDPR Ready**: Since you control the Typesense node, you maintain full ownership of the search logs and user data flow.
+- **100% Free & Open Source**: No telemetry, no third-party data disclosure, and no licensing hooks.
 
-**Third-Party Data Disclosure**:
-This plugin uses [Freemius](https://freemius.com) for license management, optional telemetry, and automated updates. By registering your license, you agree to the [Freemius Privacy Policy](https://freemius.com/privacy). 
-Note: Search queries and user interaction data are NEVER sent to Freemius or Loopstates; they stay strictly between the browser and your Typesense server.
 
 
 == Known Limitations ==
@@ -88,16 +81,16 @@ Absolutely. SwiftSearch is WooCommerce-native, indexing product titles, prices, 
 = How fast is the search? =
 Because of our "Zero-Middleware" architecture, search results are typically returned in **under 50ms**, directly from the browser to your nearest Typesense node.
 
-= What is Result Pinning (Pro)? =
+= What is Result Pinning? =
 Result Pinning (Merchandising) allows you to manually force specific items to the top of results for a given keyword—perfect for boosting sales of specific products or featured content.
 
-= How do Synonym Sets (Pro) improve search? =
+= How do Synonym Sets improve search? =
 They allow you to link similar terms together (e.g., "watch", "clock", "timepiece"). If a user searches for one, results for all are returned, significantly improving discovery.
 
 = Is the Background Indexing free? =
-Yes! Our high-reliability "Chain Reaction" sync engine is included in the free version to ensure every Loopstates user has a stable search experience.
+Yes! Our high-reliability "Chain Reaction" sync engine is included to ensure every user has a stable search experience.
 
-= What is the Facet Configurator (Pro)? =
+= What is the Facet Configurator? =
 It's a professional-grade visual builder found in Step 4 that allows you to easily create and manage multi-select sidebar filters for categories, tags, and custom meta.
 
 = Does it work with Elementor or Divi? =
@@ -107,10 +100,11 @@ Yes. You can use the `[swift_search]` shortcode in any page builder module, or e
 Yes. We do NOT use a proxy server. All search interactions happen locally between your visitor and your Typesense cluster. No search data is sent to Loopstates.
 
 = Does it handle variable products? =
-In the Pro version, you can map custom metadata (like variation SKUs and prices) to ensure users can find exact product variations in one click.
+Yes, you can map custom metadata (like variation SKUs and prices) to ensure users can find exact product variations in one click.
 
-= What insights does Search Analytics (Pro) provide? =
+= What insights does Search Analytics provide? =
 Track your **Most Searched Keywords** in real-time. Our professional dashboard provides a complete landscape of user trends, keyword volume, and search behavior. It also identifies "Zero Result" queries, giving you a full roadmap to optimize your product catalog and content strategy.
+
 
 
 == Screenshots ==
@@ -120,11 +114,37 @@ Track your **Most Searched Keywords** in real-time. Our professional dashboard p
 3.  **Facet Configurator**: Professional visual builder for search filters.
 
 == Upgrade Notice ==
-= 1.4.4 =
-Critical security hardening and Freemius compliance update. Please update immediately.
+= 1.4.7 =
+Upgraded admin styling to include Plus Jakarta Sans font and unified input/select heights. Please update immediately.
+
+= 1.4.6 =
+Minor bug fixes to resolve the browser-driven sync infinite loop. Please update immediately.
+
+= 1.4.5 =
+Robust browser fallback for servers with loopback/cURL security restrictions. Please update immediately.
  
 == Changelog ==
- 
+
+= 1.4.7 =
+* Design: Introduced Plus Jakarta Sans professional font family.
+* Design: Modernized overall admin UI dashboard variables, card borders, radii, and shadows.
+* Fix: Unified text/number inputs and select elements heights to prevent alignment mismatch in connection settings card.
+
+= 1.4.6 =
+* Fix: Resolved a bug where browser-driven indexing fallback ran recursively in an infinite loop upon completion.
+* Fix: Set active flag to false in the database when completing index types that are disabled (e.g. user indexing).
+
+= 1.4.5 =
+* Feature: Added automatic browser-driven AJAX fallback for servers with local loopback or cURL block restrictions (e.g. OpenResty WAF 403 Forbidden blocks).
+* Improvement: Added real-time loopback diagnostics printed to the browser developer tools console.
+* Maintenance: Force-bust CSS/JS browser cache by appending dynamic version timestamps in admin.
+
+= 1.4.4 =
+* Security: Implemented universal sanitization for all background processes and REST API inputs.
+* Compliance: Refined admin asset enqueuing logic to use official WordPress Screen IDs instead of URL parameters.
+* Compliance: Added proper PHPCS logic annotations for all direct database queries on custom tables.
+* Compliance: Finalized template variable prefixing ($swift_search_pt) across the entire admin dashboard.
+
 = 1.4.3 =
 * Security: Complete SQL hardening by removing all variable interpolation from $wpdb->prepare statements.
 * Security: Implemented mandatory nonce verification and strict input sanitization for all processes.

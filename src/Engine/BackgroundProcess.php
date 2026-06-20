@@ -44,6 +44,30 @@ class BackgroundProcess
         );
 
         wp_remote_post($url, $args);
+
+        // Run a test BLOCKING request to capture the exact server response/error
+        $test_args = $args;
+        $test_args['blocking'] = true;
+        $test_args['timeout'] = 10;
+        
+        $response = wp_remote_post($url, $test_args);
+        
+        if (is_wp_error($response)) {
+            $log = array(
+                'success' => false,
+                'error_message' => $response->get_error_message(),
+                'error_code' => $response->get_error_code(),
+                'time' => time(),
+            );
+        } else {
+            $log = array(
+                'success' => true,
+                'response_code' => wp_remote_retrieve_response_code($response),
+                'response_body' => wp_remote_retrieve_body($response),
+                'time' => time(),
+            );
+        }
+        update_option('swift_search_debug_loopback', $log);
     }
 
     /**

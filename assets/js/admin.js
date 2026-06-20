@@ -216,9 +216,13 @@
             // Set Relevance State
             if (swiftSearchConfig.relevance) {
                 // Post Title Weight
-                if (swiftSearchConfig.relevance.weights) {
-                    this.$relevanceRange.val(swiftSearchConfig.relevance.weights.post_title * 10);
-                    $('#ss-relevance-val').text(swiftSearchConfig.relevance.weights.post_title * 10);
+                if (swiftSearchConfig.relevance.weights && typeof swiftSearchConfig.relevance.weights.post_title !== 'undefined' && !isNaN(swiftSearchConfig.relevance.weights.post_title)) {
+                    const wVal = Math.round(parseFloat(swiftSearchConfig.relevance.weights.post_title) * 10);
+                    this.$relevanceRange.val(wVal);
+                    $('#ss-relevance-val').text(wVal);
+                } else {
+                    this.$relevanceRange.val(50);
+                    $('#ss-relevance-val').text(50);
                 }
 
                 // Render dynamic collections first
@@ -1102,39 +1106,10 @@
         },
 
         checkPlan: function () {
-
-
-            // Check if paying (handle bool or string 'true')
-            if (swiftSearchConfig.plan && (swiftSearchConfig.plan.isPaying === true || swiftSearchConfig.plan.isPaying === 'true')) {
-
-                this.$proGates.removeClass('locked');
-                this.$proGates.removeClass('ss-feature-disabled');
-                this.$proGates.find('.ss-feature-lock-overlay').remove();
-                this.$proGates.find('input, select, textarea').prop('disabled', false);
-                return;
-            }
-
-
-            const self = this;
-            this.$proGates.each(function () {
-                const $el = $(this);
-                // Avoid double locking
-                if (!$el.hasClass('ss-feature-disabled')) {
-                    $el.addClass('ss-feature-disabled locked');
-                    const url = swiftSearchConfig.plan && swiftSearchConfig.plan.upgradeUrl ? swiftSearchConfig.plan.upgradeUrl : '#';
-                    $el.append(`
-                        <div class="ss-feature-lock-overlay">
-                            <div class="lock-content">
-                                <span class="dashicons dashicons-lock"></span>
-                                <h3>Pro Feature</h3>
-                                <p>Upgrade to unlock this feature.</p>
-                                <a href="${url}" target="_blank" class="ss-lock-btn">Upgrade Now</a>
-                            </div>
-                        </div>
-                    `);
-                    $el.find('input, select, textarea').prop('disabled', true);
-                }
-            });
+            // All features are unlocked in the open-source version.
+            this.$proGates.removeClass('locked ss-feature-disabled');
+            this.$proGates.find('.ss-feature-lock-overlay').remove();
+            this.$proGates.find('input, select, textarea').prop('disabled', false);
         },
 
         updateStatus: function (isConnected, docCount) {
@@ -1177,6 +1152,20 @@
                 if (response.success) {
                     const data = response.data;
 
+                    if (data.debug_loopback) {
+                        // If loopback failed (non-200), fallback to browser-driven indexing
+                        // BUT ONLY if we are actively trying to run a sync (not on page load / init check)
+                        if (!isInitCheck && data.debug_loopback.response_code && data.debug_loopback.response_code !== 200) {
+                            self.syncActive = true;
+                            self.syncType = 'posts';
+                            self.syncPage = 1;
+                            self.syncRetry = 0;
+                            self.updateProgress(0, 'Background blocked by server firewall. Running via browser...');
+                            self.runBrowserSync();
+                            return;
+                        }
+                    }
+
                     if (data.active) {
                         // Resuming or Running
                         self.$syncBtn.prop('disabled', true);
@@ -1190,9 +1179,11 @@
                         self.updateProgress(Math.min(percent, 99), data.message || 'Indexing...');
 
                         // Poll again
-                        setTimeout(function () {
-                            self.pollStatus();
-                        }, 2000);
+                        if (!isInitCheck) {
+                            setTimeout(function () {
+                                self.pollStatus();
+                            }, 2000);
+                        }
                     } else {
                         // Not Active (Complete or Idle)
 
@@ -1203,8 +1194,6 @@
 
                             if (data.error_count > 0) {
                                 statusHtml += ` | <span style="color: #ef4444; font-weight: bold;">${data.error_count} Failed</span>`;
-                                // Display breakdown as tooltip or subtext?
-                                // For now, keep it simple. The count is accurate.
                             } else {
                                 statusHtml += ` ( <span style="color: #10b981; font-weight: bold;">Success</span> )`;
                             }
@@ -1247,6 +1236,95 @@
             setTimeout(function () {
                 alert('Success: Background indexing complete.');
             }, 500);
+        },
+
+        runBrowserSync: function () {
+            if (!this.syncActive) return;
+
+            const self = this;
+            this.$syncBtn.prop('disabled', true);
+            this.$resetBtn.prop('disabled', true);
+
+            this.request('POST', '/sync/batch', {
+                type: self.syncType,
+                page: self.syncPage
+            }).done(function (response) {
+                if (response.success && response.data) {
+                    self.syncRetry = 0;
+                    const data = response.data;
+
+                    // Calculate overall percent based on type
+                    let overallPercent = 0;
+                    const page = parseInt(data.page) || 1;
+                    const total_pages = parseInt(data.total_pages) || 1;
+
+                    if (self.syncType === 'posts') {
+                        let subPercent = Math.min(Math.round((page / Math.max(total_pages, 1)) * 100), 100);
+                        overallPercent = Math.round(subPercent * 0.7);
+                    } else if (self.syncType === 'terms') {
+                        let subPercent = Math.min(Math.round((page / Math.max(total_pages, 1)) * 100), 100);
+                        overallPercent = 70 + Math.round(subPercent * 0.2);
+                    } else if (self.syncType === 'users') {
+                        let subPercent = Math.min(Math.round((page / Math.max(total_pages, 1)) * 100), 100);
+                        overallPercent = 90 + Math.round(subPercent * 0.1);
+                    }
+
+                    self.updateProgress(
+                        Math.min(overallPercent, 99),
+                        `Firewall block detected. Running via browser: Indexing ${self.syncType} (page ${page} of ${total_pages})...`
+                    );
+
+                    if (!data.complete) {
+                        self.syncPage = page + 1;
+                        setTimeout(function () {
+                            self.runBrowserSync();
+                        }, 100);
+                    } else {
+                        // Current type complete. Move to next type.
+                        if (self.syncType === 'posts') {
+                            self.syncType = 'terms';
+                            self.syncPage = 1;
+                            setTimeout(function () {
+                                self.runBrowserSync();
+                            }, 100);
+                        } else if (self.syncType === 'terms') {
+                            self.syncType = 'users';
+                            self.syncPage = 1;
+                            setTimeout(function () {
+                                self.runBrowserSync();
+                            }, 100);
+                        } else {
+                            // All complete!
+                            self.syncActive = false;
+                            self.updateProgress(100, 'Complete!');
+                            self.finishSync(data);
+                        }
+                    }
+                } else {
+                    self.handleSyncBatchError();
+                }
+            }).fail(function () {
+                self.handleSyncBatchError();
+            });
+        },
+
+        handleSyncBatchError: function () {
+            const self = this;
+            if (this.syncRetry < 3) {
+                this.syncRetry++;
+                this.updateProgress(
+                    null,
+                    `<span style="color: #ef4444;">Network issue. Retrying batch in 3s (Attempt ${this.syncRetry}/3)...</span>`
+                );
+                setTimeout(function () {
+                    self.runBrowserSync();
+                }, 3000);
+            } else {
+                this.syncActive = false;
+                this.$syncBtn.prop('disabled', false);
+                this.$resetBtn.prop('disabled', false);
+                this.syncError('Sync failed due to persistent connection or server errors. Please try again.');
+            }
         },
 
         updateProgress: function (percent, text) {

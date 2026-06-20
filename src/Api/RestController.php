@@ -243,7 +243,7 @@ class RestController extends WP_REST_Controller
         $page = (int) $request->get_param('page');
         $page = $page > 0 ? $page : 1;
         $type = $request->get_param('type') ? sanitize_text_field($request->get_param('type')) : 'posts';
-        $per_page = 20;
+        $per_page = 50;
         $offset = ($page - 1) * $per_page;
 
         $config = get_option('swift_search_settings', array());
@@ -270,58 +270,91 @@ class RestController extends WP_REST_Controller
                 'fields' => 'ids',
             );
 
-            $terms = get_terms($args);
-            $terms = wp_count_terms($taxonomies); // Approximation
+            $term_ids = get_terms($args);
+            $total_terms = wp_count_terms($taxonomies);
+            if (is_wp_error($total_terms)) {
+                $total_terms = 0;
+            }
 
-            if (!is_wp_error($terms)) {
-                foreach ($terms as $term_id) {
-                    $indexer->index_term($term_id);
+            $documents = array();
+            if (!is_wp_error($term_ids) && !empty($term_ids)) {
+                $term_indexer = new \SwiftSearch\Engine\TermIndexer(new \SwiftSearch\Engine\ConfigLoader());
+                foreach ($term_ids as $term_id) {
+                    $term = get_term($term_id);
+                    if ($term) {
+                        try {
+                            $doc = $term_indexer->build($term);
+                            if ($doc) {
+                                $documents[] = $doc;
+                            }
+                        } catch (\Exception $e) {
+                            // Skip
+                        }
+                    }
                     $processed++;
+                }
+
+                if (!empty($documents)) {
+                    $client = new Client();
+                    $client->import('terms', $documents);
                 }
             }
 
-            // Calculate Pages
-            // wp_count_terms might return string or int, and it counts individual terms, so sum needs care involved or just rely on result count
-            // Actually get_terms with offset doesn't return max_num_pages easily. 
-            // Simple logic: if count(terms) < per_page, we are done.
-            $complete = count($terms) < $per_page;
-            // Fake total pages for progress bar if possible, else just keep going
-            $total_pages = ceil((int) $terms / $per_page);
+            $complete = empty($term_ids) || count($term_ids) < $per_page;
+            $total_pages = ceil((int) $total_terms / $per_page);
 
         } elseif ($type === 'users') {
             // Sync Users
             $index_users = isset($config['indexed_users']) ? (bool) $config['indexed_users'] : false;
 
             if (!$index_users) {
+                $status = get_option('swift_search_index_status', array());
+                if (is_array($status)) {
+                    $status['active'] = false;
+                    $status['message'] = 'Complete!';
+                    $status['last_sync_completed_at'] = time();
+                    update_option('swift_search_index_status', $status);
+                }
                 return new \WP_REST_Response(array('success' => true, 'data' => array('processed' => 0, 'page' => 1, 'total_pages' => 0, 'complete' => true)), 200);
             }
 
-            // Only Authors/Editors +
             $args = array(
                 'number' => $per_page,
                 'offset' => $offset,
                 'fields' => 'ID',
-                'who' => 'authors', // This gets authors and admins usually? Deprecated in WP 5.9 but still works.
-                // Better: capability check or role__in
+                'who' => 'authors',
             );
-
-            // Fallback for modern WP: use capability if 'who' feels risky, but 'who' => 'authors' is standard short-hand.
-            // Actually, 'who' => 'authors' only gets levels > 0. 
-            // Let's rely on UserIndexer strict check, but fetch wide here? 
-            // Efficient: 'role__in' => ['administrator', 'editor', 'author', 'contributor']? 
-            // Let's use 'who' => 'authors' for simplicity.
 
             $query = new \WP_User_Query($args);
             $ids = $query->get_results();
             $total_users = $query->get_total();
 
-            foreach ($ids as $user_id) {
-                $indexer->index_user($user_id);
-                $processed++;
+            $documents = array();
+            if (!empty($ids)) {
+                $user_indexer = new \SwiftSearch\Engine\UserIndexer(new \SwiftSearch\Engine\ConfigLoader());
+                foreach ($ids as $user_id) {
+                    $user = get_userdata($user_id);
+                    if ($user) {
+                        try {
+                            $doc = $user_indexer->build($user);
+                            if ($doc) {
+                                $documents[] = $doc;
+                            }
+                        } catch (\Exception $e) {
+                            // Skip
+                        }
+                    }
+                    $processed++;
+                }
+
+                if (!empty($documents)) {
+                    $client = new Client();
+                    $client->import('users', $documents);
+                }
             }
 
             $total_pages = ceil($total_users / $per_page);
-            $complete = $page >= $total_pages;
+            $complete = empty($ids) || $page >= $total_pages;
 
         } else {
             // Sync Posts (Default)
@@ -340,14 +373,52 @@ class RestController extends WP_REST_Controller
             $query = new \WP_Query($args);
             $ids = $query->posts;
 
-            foreach ($ids as $id) {
-                $indexer->index_post($id);
-                $processed++;
+            $documents = array();
+            if (!empty($ids)) {
+                foreach ($ids as $id) {
+                    try {
+                        $doc = $indexer->index_post($id, true);
+                        if ($doc) {
+                            $documents[] = $doc;
+                        }
+                    } catch (\Exception $e) {
+                        // Skip
+                    }
+                    $processed++;
+                }
+
+                if (!empty($documents)) {
+                    $client = new Client();
+                    $client->import('posts', $documents);
+                }
             }
 
             $total_pages = $query->max_num_pages;
-            $complete = $page >= $total_pages;
+            $complete = empty($ids) || $page >= $total_pages;
         }
+
+        // Update DB status for browser fallback
+        $status = get_option('swift_search_index_status', array());
+        if (!is_array($status)) {
+            $status = array();
+        }
+        $cumulative_processed = $offset + $processed;
+        $status['processed'] = $cumulative_processed;
+        $status['last_updated'] = time();
+        $status['message'] = "Indexing {$type} (page {$page} of {$total_pages})...";
+
+        if ($complete) {
+            if ($type === 'posts') {
+                $status['message'] = "Posts complete. Moving to Terms...";
+            } elseif ($type === 'terms') {
+                $status['message'] = "Terms complete. Moving to Users...";
+            } elseif ($type === 'users') {
+                $status['active'] = false;
+                $status['message'] = 'Complete!';
+                $status['last_sync_completed_at'] = time();
+            }
+        }
+        update_option('swift_search_index_status', $status);
 
         return new \WP_REST_Response(array(
             'success' => true,
@@ -370,6 +441,7 @@ class RestController extends WP_REST_Controller
             return new \WP_REST_Response(array('success' => false, 'message' => 'Indexing not allowed. Check connection or plan limits.'), 403);
         }
 
+        delete_option('swift_search_debug_loopback');
         $indexer = new \SwiftSearch\Engine\Indexer();
         $total = $indexer->start_bulk_index();
 
@@ -439,6 +511,7 @@ class RestController extends WP_REST_Controller
         // Ensure error data is present
         $response['error_count'] = $error_count;
         $response['errors'] = $errors;
+        $response['debug_loopback'] = get_option('swift_search_debug_loopback');
 
         return new \WP_REST_Response(array(
             'success' => true,
@@ -664,6 +737,9 @@ class RestController extends WP_REST_Controller
             $indexer->create_collection();
         } catch (\Exception $e) {
         }
+
+        delete_option('swift_search_index_status');
+        delete_option('swift_search_debug_loopback');
 
         return new \WP_REST_Response(array('success' => true), 200);
     }

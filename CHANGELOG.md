@@ -2,6 +2,20 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.4.7] - 2026-06-20
+- **Design**: Introduced Plus Jakarta Sans professional font family.
+- **Design**: Modernized overall admin UI dashboard variables, card borders, radii, and shadows.
+- **Fix**: Unified text/number inputs and select elements heights to prevent alignment mismatch in connection settings card.
+
+## [1.4.6] - 2026-06-20
+- **Fix**: Resolved a bug where browser-driven indexing fallback ran recursively in an infinite loop upon completion.
+- **Fix**: Set active flag to false in the database when completing index types that are disabled (e.g. user indexing).
+
+## [1.4.5] - 2026-06-20
+- **Feature**: Added automatic browser-driven AJAX fallback for servers with local loopback or cURL block restrictions (e.g. OpenResty WAF 403 Forbidden blocks).
+- **Improvement**: Added real-time loopback diagnostics printed to the browser developer tools console.
+- **Maintenance**: Force-bust CSS/JS browser cache by appending dynamic version timestamps in admin.
+
 ## [1.4.4] - 2026-04-07
 - **Security**: Implemented universal "One-Liner Sanitization" for all background processes and REST API inputs to satisfy strict static analysis.
 - **Compliance**: Refined admin asset enqueuing logic to use official WordPress Screen IDs instead of URL parameters.
