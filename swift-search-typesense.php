@@ -9,7 +9,7 @@
  * Author:      Loopstates
  * Author URI:  https://loopstates.com
  * License:     GPL-2.0+
- * Text Domain: swift-search-typesense
+ * Text Domain: swiftsearch-for-typesense
  * Domain Path: /languages
  */
 

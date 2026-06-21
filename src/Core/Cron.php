@@ -32,6 +32,7 @@ class Cron
 
         // Delete queries updated > 60 days ago AND that are relatively rare (frequency < 5)
         // We keep popular queries forever (or until another policy matches)
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM {$wpdb->prefix}swift_search_logs WHERE updated_at < %s AND frequency < %d",

@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
         </div>
         <div class="ss-actions">
             <a href="https://docs.loopstates.com/swift-search-typesense/" target="_blank"
-                class="ss-link"><?php esc_html_e('Documentation', 'swift-search-typesense'); ?></a>
+                class="ss-link"><?php esc_html_e('Documentation', 'swiftsearch-for-typesense'); ?></a>
         </div>
     </header>
 
@@ -25,45 +25,45 @@ if (!defined('ABSPATH')) {
                 <ul>
                     <li class="ss-nav-item active" data-step="connect">
                         <span class="step-num">1</span>
-                        <span class="step-label"><?php esc_html_e('Connect', 'swift-search-typesense'); ?></span>
+                        <span class="step-label"><?php esc_html_e('Connect', 'swiftsearch-for-typesense'); ?></span>
                     </li>
                     <li class="ss-nav-item" data-step="content">
                         <span class="step-num">2</span>
-                        <span class="step-label"><?php esc_html_e('Content', 'swift-search-typesense'); ?></span>
+                        <span class="step-label"><?php esc_html_e('Content', 'swiftsearch-for-typesense'); ?></span>
                     </li>
                     <li class="ss-nav-item" data-step="relevance">
                         <span class="step-num">3</span>
-                        <span class="step-label"><?php esc_html_e('Relevance', 'swift-search-typesense'); ?></span>
+                        <span class="step-label"><?php esc_html_e('Relevance', 'swiftsearch-for-typesense'); ?></span>
                     </li>
                     <li class="ss-nav-item" data-step="search-ui">
                         <span class="step-num">4</span>
-                        <span class="step-label"><?php esc_html_e('Search UI', 'swift-search-typesense'); ?></span>
+                        <span class="step-label"><?php esc_html_e('Search UI', 'swiftsearch-for-typesense'); ?></span>
                     </li>
                     <li class="ss-nav-item" data-step="styling">
                         <span class="step-num">5</span>
-                        <span class="step-label"><?php esc_html_e('Styling & UI', 'swift-search-typesense'); ?></span>
+                        <span class="step-label"><?php esc_html_e('Styling & UI', 'swiftsearch-for-typesense'); ?></span>
                     </li>
                     <li class="ss-nav-item" data-step="analytics">
                         <span class="step-num">6</span>
-                        <span class="step-label"><?php esc_html_e('Analytics', 'swift-search-typesense'); ?></span>
+                        <span class="step-label"><?php esc_html_e('Analytics', 'swiftsearch-for-typesense'); ?></span>
                     </li>
                     <li class="ss-nav-item" data-step="pinning">
                         <span class="step-num">7</span>
-                        <span class="step-label"><?php esc_html_e('Pinning', 'swift-search-typesense'); ?></span>
+                        <span class="step-label"><?php esc_html_e('Pinning', 'swiftsearch-for-typesense'); ?></span>
                     </li>
                     <li class="ss-nav-item" data-step="sync">
                         <span class="step-num">8</span>
-                        <span class="step-label"><?php esc_html_e('Sync', 'swift-search-typesense'); ?></span>
+                        <span class="step-label"><?php esc_html_e('Sync', 'swiftsearch-for-typesense'); ?></span>
                     </li>
                 </ul>
             </nav>
 
             <div class="ss-status-card">
-                <h3><?php esc_html_e('System Status', 'swift-search-typesense'); ?></h3>
+                <h3><?php esc_html_e('System Status', 'swiftsearch-for-typesense'); ?></h3>
                 <div class="status-row">
                     <span class="label">Typesense</span>
                     <span class="value disconnected"
-                        id="ss-connection-status"><?php esc_html_e('Disconnected', 'swift-search-typesense'); ?></span>
+                        id="ss-connection-status"><?php esc_html_e('Disconnected', 'swiftsearch-for-typesense'); ?></span>
                 </div>
                 <div class="status-row">
                     <span class="label">Documents</span>
@@ -81,25 +81,25 @@ if (!defined('ABSPATH')) {
             <section class="ss-step-view active" id="view-connect">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Connect to Typesense', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Enter your Typesense server credentials. You can use Typesense Cloud or a self-hosted node.', 'swift-search-typesense'); ?>
+                        <h2><?php esc_html_e('Connect to Typesense', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Enter your Typesense server credentials. You can use Typesense Cloud or a self-hosted node.', 'swiftsearch-for-typesense'); ?>
                         </p>
                     </div>
                     <div class="ss-card-body">
                         <form id="ss-connect-form">
                             <div class="ss-form-group">
-                                <label for="ts-host"><?php esc_html_e('Host', 'swift-search-typesense'); ?></label>
+                                <label for="ts-host"><?php esc_html_e('Host', 'swiftsearch-for-typesense'); ?></label>
                                 <input type="text" id="ts-host" name="host" placeholder="e.g. xxx.a1.typesense.net"
                                     required>
                             </div>
                             <div class="ss-form-group-row">
                                 <div class="ss-form-group">
-                                    <label for="ts-port"><?php esc_html_e('Port', 'swift-search-typesense'); ?></label>
+                                    <label for="ts-port"><?php esc_html_e('Port', 'swiftsearch-for-typesense'); ?></label>
                                     <input type="number" id="ts-port" name="port" value="443" required>
                                 </div>
                                 <div class="ss-form-group">
                                     <label
-                                        for="ts-protocol"><?php esc_html_e('Protocol', 'swift-search-typesense'); ?></label>
+                                        for="ts-protocol"><?php esc_html_e('Protocol', 'swiftsearch-for-typesense'); ?></label>
                                     <select id="ts-protocol" name="protocol">
                                         <option value="https">https</option>
                                         <option value="http">http</option>
@@ -108,28 +108,28 @@ if (!defined('ABSPATH')) {
                             </div>
                             <div class="ss-form-group">
                                 <label
-                                    for="ts-api-key"><?php esc_html_e('Admin API Key', 'swift-search-typesense'); ?></label>
+                                    for="ts-api-key"><?php esc_html_e('Admin API Key', 'swiftsearch-for-typesense'); ?></label>
                                 <div class="ss-input-wrapper">
                                     <input type="password" id="ts-api-key" name="api_key" required>
-                                    <button type="button" class="ss-input-toggle ss-toggle-api-key" title="<?php esc_attr_e('Toggle Visibility', 'swift-search-typesense'); ?>">
+                                    <button type="button" class="ss-input-toggle ss-toggle-api-key" title="<?php esc_attr_e('Toggle Visibility', 'swiftsearch-for-typesense'); ?>">
                                         <span class="dashicons dashicons-visibility"></span>
                                     </button>
                                 </div>
                                 <p class="description">
-                                    <?php esc_html_e('Required for indexing actions.', 'swift-search-typesense'); ?>
+                                    <?php esc_html_e('Required for indexing actions.', 'swiftsearch-for-typesense'); ?>
                                 </p>
                             </div>
                             <div class="ss-form-group">
                                 <label
-                                    for="ts-search-key"><?php esc_html_e('Search-Only API Key', 'swift-search-typesense'); ?></label>
+                                    for="ts-search-key"><?php esc_html_e('Search-Only API Key', 'swiftsearch-for-typesense'); ?></label>
                                 <div class="ss-input-wrapper">
                                     <input type="password" id="ts-search-key" name="search_key">
-                                    <button type="button" class="ss-input-toggle ss-toggle-api-key" title="<?php esc_attr_e('Toggle Visibility', 'swift-search-typesense'); ?>">
+                                    <button type="button" class="ss-input-toggle ss-toggle-api-key" title="<?php esc_attr_e('Toggle Visibility', 'swiftsearch-for-typesense'); ?>">
                                         <span class="dashicons dashicons-visibility"></span>
                                     </button>
                                 </div>
                                 <p class="description">
-                                    <?php esc_html_e('Public key for the frontend search.', 'swift-search-typesense'); ?>
+                                    <?php esc_html_e('Public key for the frontend search.', 'swiftsearch-for-typesense'); ?>
                                 </p>
                             </div>
                         </form>
@@ -138,7 +138,7 @@ if (!defined('ABSPATH')) {
 
                 <div class="ss-form-actions" style="margin-top: 20px;">
                     <button type="button" id="ss-connect-btn"
-                        class="ss-btn ss-btn-primary"><?php esc_html_e('Save & Test Connection', 'swift-search-typesense'); ?></button>
+                        class="ss-btn ss-btn-primary"><?php esc_html_e('Save & Test Connection', 'swiftsearch-for-typesense'); ?></button>
                 </div>
             </section>
 
@@ -146,8 +146,8 @@ if (!defined('ABSPATH')) {
             <section class="ss-step-view" id="view-content" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Search Behavior', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Configure how SwiftSearch integrates with your theme.', 'swift-search-typesense'); ?>
+                        <h2><?php esc_html_e('Search Behavior', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Configure how SwiftSearch integrates with your theme.', 'swiftsearch-for-typesense'); ?>
                         </p>
                     </div>
                     <div class="ss-card-body">
@@ -157,9 +157,9 @@ if (!defined('ABSPATH')) {
                                     <input type="checkbox" id="ss-override-default">
                                     <div class="info">
                                         <span
-                                            class="title"><?php esc_html_e('Override Default Search', 'swift-search-typesense'); ?></span>
+                                            class="title"><?php esc_html_e('Override Default Search', 'swiftsearch-for-typesense'); ?></span>
                                         <span
-                                            class="meta"><?php esc_html_e('Automatically replace the native WordPress search form with SwiftSearch.', 'swift-search-typesense'); ?></span>
+                                            class="meta"><?php esc_html_e('Automatically replace the native WordPress search form with SwiftSearch.', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -169,8 +169,8 @@ if (!defined('ABSPATH')) {
 
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Searchable Content', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Configure which content types (Posts, Pages, Products, Custom Types) should be indexed.', 'swift-search-typesense'); ?>
+                        <h2><?php esc_html_e('Searchable Content', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Configure which content types (Posts, Pages, Products, Custom Types) should be indexed.', 'swiftsearch-for-typesense'); ?>
                         </p>
                     </div>
                     <div class="ss-card-body">
@@ -185,8 +185,8 @@ if (!defined('ABSPATH')) {
                 <!-- Advanced Data -->
                 <div class="ss-card" style="margin-top: 20px;">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Advanced Data', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Map custom meta fields to Typesense schema (e.g. Price, SKU, Brand).', 'swift-search-typesense'); ?>
+                        <h2><?php esc_html_e('Advanced Data', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Map custom meta fields to Typesense schema (e.g. Price, SKU, Brand).', 'swiftsearch-for-typesense'); ?>
                         </p>
                     </div>
                     <div class="ss-card-body" id="ss-custom-fields-container">
@@ -199,7 +199,7 @@ if (!defined('ABSPATH')) {
 
                 <div class="ss-form-actions" style="margin-top: 20px;">
                     <button type="button" class="ss-btn ss-btn-primary"
-                        id="ss-save-content"><?php esc_html_e('Save Content Settings', 'swift-search-typesense'); ?></button>
+                        id="ss-save-content"><?php esc_html_e('Save Content Settings', 'swiftsearch-for-typesense'); ?></button>
                 </div>
             </section>
 
@@ -207,8 +207,8 @@ if (!defined('ABSPATH')) {
             <section class="ss-step-view" id="view-relevance" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Relevance Settings', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Fine-tune search results ranking.', 'swift-search-typesense'); ?></p>
+                        <h2><?php esc_html_e('Relevance Settings', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Fine-tune search results ranking.', 'swiftsearch-for-typesense'); ?></p>
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-relevance-settings-wrapper">
@@ -216,30 +216,30 @@ if (!defined('ABSPATH')) {
                                 <label>Global Relevance Score: <span id="ss-relevance-val" style="font-weight:700;">50</span></label>
                                 <input type="range" id="ss-relevance-range" min="1" max="100" value="50" oninput="document.getElementById('ss-relevance-val').innerText = this.value">
                                 <p class="description">
-                                    <?php esc_html_e('Adjust the base ranking weight for searches. Higher values favor exact matches.', 'swift-search-typesense'); ?>
+                                    <?php esc_html_e('Adjust the base ranking weight for searches. Higher values favor exact matches.', 'swiftsearch-for-typesense'); ?>
                                 </p>
                             </div>
                             <div class="ss-form-group">
                                 <label>Synonyms</label>
                                 <textarea id="ss-synonyms-list" rows="6" class="ss-input" placeholder="jacket, coat, blazer&#10;bag, backpack, tote&#10;trousers, pants"></textarea>
                                 <p class="description">
-                                    <?php esc_html_e('Enter each group of synonyms on a new line. Comma-separated.', 'swift-search-typesense'); ?>
+                                    <?php esc_html_e('Enter each group of synonyms on a new line. Comma-separated.', 'swiftsearch-for-typesense'); ?>
                                 </p>
                             </div>
                             <div class="ss-form-group" style="margin-top: 15px;">
-                                <label><?php esc_html_e('Apply to Collections:', 'swift-search-typesense'); ?></label>
+                                <label><?php esc_html_e('Apply to Collections:', 'swiftsearch-for-typesense'); ?></label>
                                 <div id="ss-synonym-collections-container" style="margin-top: 10px;">
-                                    <p class="ss-hint" style="font-style: italic; opacity: 0.7;"><?php esc_html_e('Loading active collections...', 'swift-search-typesense'); ?></p>
+                                    <p class="ss-hint" style="font-style: italic; opacity: 0.7;"><?php esc_html_e('Loading active collections...', 'swiftsearch-for-typesense'); ?></p>
                                 </div>
                                 <p class="ss-hint" style="margin-top: 8px;">
-                                    <?php esc_html_e('Select which indices search results should expand with these synonyms.', 'swift-search-typesense'); ?>
+                                    <?php esc_html_e('Select which indices search results should expand with these synonyms.', 'swiftsearch-for-typesense'); ?>
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="ss-form-actions" style="margin-top: 20px;">
-                    <button type="button" class="ss-btn ss-btn-primary" id="ss-save-relevance"><?php esc_html_e('Save Relevance Settings', 'swift-search-typesense'); ?></button>
+                    <button type="button" class="ss-btn ss-btn-primary" id="ss-save-relevance"><?php esc_html_e('Save Relevance Settings', 'swiftsearch-for-typesense'); ?></button>
                 </div>
             </section>
 
@@ -248,7 +248,7 @@ if (!defined('ABSPATH')) {
                 <!-- Experience Options -->
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Experience Options', 'swift-search-typesense'); ?></h2>
+                        <h2><?php esc_html_e('Experience Options', 'swiftsearch-for-typesense'); ?></h2>
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-form-group-row">
@@ -256,8 +256,8 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card" id="ss-instant-search-card">
                                     <input type="checkbox" id="ss-instant-search" checked>
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Instant Search', 'swift-search-typesense'); ?></span>
-                                        <span class="meta"><?php esc_html_e('Search as you type. Shows results as the user enters characters.', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Instant Search', 'swiftsearch-for-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Search as you type. Shows results as the user enters characters.', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -265,8 +265,8 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="ss-typo-tolerance" checked>
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Typo Tolerance', 'swift-search-typesense'); ?></span>
-                                        <span class="meta"><?php esc_html_e('Enable fuzzy matching for spelling errors.', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Typo Tolerance', 'swiftsearch-for-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Enable fuzzy matching for spelling errors.', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -277,8 +277,8 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="ss-global-show-thumb" checked>
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Show Thumbnails', 'swift-search-typesense'); ?></span>
-                                        <span class="meta"><?php esc_html_e('Display product or post images in results.', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Show Thumbnails', 'swiftsearch-for-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Display product or post images in results.', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -286,8 +286,8 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="ss-global-show-price" checked>
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Show Prices', 'swift-search-typesense'); ?></span>
-                                        <span class="meta"><?php esc_html_e('Display WooCommerce product prices.', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Show Prices', 'swiftsearch-for-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Display WooCommerce product prices.', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -298,15 +298,15 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="ss-global-show-excerpt">
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Show Excerpts', 'swift-search-typesense'); ?></span>
-                                        <span class="meta"><?php esc_html_e('Display a short description below titles.', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Show Excerpts', 'swiftsearch-for-typesense'); ?></span>
+                                        <span class="meta"><?php esc_html_e('Display a short description below titles.', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
                             <div class="ss-form-group">
-                                <label><?php esc_html_e('Global Results Limit', 'swift-search-typesense'); ?></label>
+                                <label><?php esc_html_e('Global Results Limit', 'swiftsearch-for-typesense'); ?></label>
                                 <input type="number" id="ss-global-limit" value="10" min="1" max="50">
-                                <p class="description"><?php esc_html_e('Default number of items to show per search.', 'swift-search-typesense'); ?></p>
+                                <p class="description"><?php esc_html_e('Default number of items to show per search.', 'swiftsearch-for-typesense'); ?></p>
                             </div>
                         </div>
 
@@ -315,8 +315,8 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card ss-disabled" style="opacity: 0.5; border-style: dashed;">
                                     <input type="checkbox" disabled>
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Sort Results', 'swift-search-typesense'); ?> <span class="ss-badge" style="background:#e5e7eb; color:#4b5563; font-size:10px; padding:2px 6px;">COMING SOON</span></span>
-                                        <span class="meta"><?php esc_html_e('Allow users to sort by Price, Date, or Relevance.', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Sort Results', 'swiftsearch-for-typesense'); ?> <span class="ss-badge" style="background:#e5e7eb; color:#4b5563; font-size:10px; padding:2px 6px;">COMING SOON</span></span>
+                                        <span class="meta"><?php esc_html_e('Allow users to sort by Price, Date, or Relevance.', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -324,8 +324,8 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card ss-disabled" style="opacity: 0.5; border-style: dashed;">
                                     <input type="checkbox" disabled>
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Floating Mobile Button', 'swift-search-typesense'); ?> <span class="ss-badge" style="background:#e5e7eb; color:#4b5563; font-size:10px; padding:2px 6px;">COMING SOON</span></span>
-                                        <span class="meta"><?php esc_html_e('Add a dedicated search trigger for mobile devices.', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Floating Mobile Button', 'swiftsearch-for-typesense'); ?> <span class="ss-badge" style="background:#e5e7eb; color:#4b5563; font-size:10px; padding:2px 6px;">COMING SOON</span></span>
+                                        <span class="meta"><?php esc_html_e('Add a dedicated search trigger for mobile devices.', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -336,17 +336,17 @@ if (!defined('ABSPATH')) {
                 <!-- Shortcode Builder -->
                 <div class="ss-card" style="margin-top: 30px;">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Shortcode Generator (Overrides)', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Customize individual search bars. Unchecked items will use global defaults.', 'swift-search-typesense'); ?></p>
+                        <h2><?php esc_html_e('Shortcode Generator (Overrides)', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Customize individual search bars. Unchecked items will use global defaults.', 'swiftsearch-for-typesense'); ?></p>
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-form-group-row">
                             <div class="ss-form-group">
-                                <label><?php esc_html_e('Placeholder Text', 'swift-search-typesense'); ?></label>
+                                <label><?php esc_html_e('Placeholder Text', 'swiftsearch-for-typesense'); ?></label>
                                 <input type="text" id="sc-placeholder" value="Search...">
                             </div>
                             <div class="ss-form-group">
-                                <label><?php esc_html_e('Override Results Limit', 'swift-search-typesense'); ?></label>
+                                <label><?php esc_html_e('Override Results Limit', 'swiftsearch-for-typesense'); ?></label>
                                 <input type="number" id="sc-limit" placeholder="Inherit Global">
                             </div>
                         </div>
@@ -356,7 +356,7 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="sc-show-thumb" checked>
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Show Thumbnail', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Show Thumbnail', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -364,7 +364,7 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="sc-show-price" checked>
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Show Price', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Show Price', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -372,7 +372,7 @@ if (!defined('ABSPATH')) {
                                 <label class="ss-checkbox-card">
                                     <input type="checkbox" id="sc-show-excerpt">
                                     <div class="info">
-                                        <span class="title"><?php esc_html_e('Show Excerpt', 'swift-search-typesense'); ?></span>
+                                        <span class="title"><?php esc_html_e('Show Excerpt', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
                             </div>
@@ -399,8 +399,8 @@ if (!defined('ABSPATH')) {
                 <!-- Faceted Navigation -->
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Faceted Navigation (Sidebar)', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Configure filters for your search results sidebar.', 'swift-search-typesense'); ?>
+                        <h2><?php esc_html_e('Faceted Navigation (Sidebar)', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Configure filters for your search results sidebar.', 'swiftsearch-for-typesense'); ?>
                         </p>
                     </div>
                     <div class="ss-card-body">
@@ -414,7 +414,7 @@ if (!defined('ABSPATH')) {
 
                 <div class="ss-form-actions" style="margin-top: 20px;">
                     <button type="button" class="ss-btn ss-btn-primary"
-                        id="ss-save-search-ui"><?php esc_html_e('Save Search UI Settings', 'swift-search-typesense'); ?></button>
+                        id="ss-save-search-ui"><?php esc_html_e('Save Search UI Settings', 'swiftsearch-for-typesense'); ?></button>
                 </div>
             </section>
             
@@ -422,44 +422,44 @@ if (!defined('ABSPATH')) {
             <section class="ss-step-view" id="view-styling" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Styling & Customization', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Customize the appearance of your search results. Changes apply to the frontend search interface.', 'swift-search-typesense'); ?></p>
+                        <h2><?php esc_html_e('Styling & Customization', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Customize the appearance of your search results. Changes apply to the frontend search interface.', 'swiftsearch-for-typesense'); ?></p>
                     </div>
                     <div class="ss-card-body">
                          <div class="ss-form-group-row" style="gap: 20px;">
                             <div class="ss-form-group" style="flex:1;">
-                                <label for="ss-primary-color"><?php esc_html_e('Primary Accent Color', 'swift-search-typesense'); ?></label>
+                                <label for="ss-primary-color"><?php esc_html_e('Primary Accent Color', 'swiftsearch-for-typesense'); ?></label>
                                 <input type="color" id="ss-primary-color" class="ss-input-color" value="#ff0055">
-                                <p class="description"><?php esc_html_e('Used for buttons, icons, and highlights.', 'swift-search-typesense'); ?></p>
+                                <p class="description"><?php esc_html_e('Used for buttons, icons, and highlights.', 'swiftsearch-for-typesense'); ?></p>
                             </div>
                             <div class="ss-form-group" style="flex:1;">
-                                <label for="ss-text-color"><?php esc_html_e('Main Text Color', 'swift-search-typesense'); ?></label>
+                                <label for="ss-text-color"><?php esc_html_e('Main Text Color', 'swiftsearch-for-typesense'); ?></label>
                                 <input type="color" id="ss-text-color" class="ss-input-color" value="#1f2937">
-                                <p class="description"><?php esc_html_e('Color for titles and body text.', 'swift-search-typesense'); ?></p>
+                                <p class="description"><?php esc_html_e('Color for titles and body text.', 'swiftsearch-for-typesense'); ?></p>
                             </div>
                             <div class="ss-form-group" style="flex:1;">
-                                <label for="ss-card-bg"><?php esc_html_e('Card Background', 'swift-search-typesense'); ?></label>
+                                <label for="ss-card-bg"><?php esc_html_e('Card Background', 'swiftsearch-for-typesense'); ?></label>
                                 <input type="color" id="ss-card-bg" class="ss-input-color" value="#ffffff">
-                                <p class="description"><?php esc_html_e('Background color for result cards.', 'swift-search-typesense'); ?></p>
+                                <p class="description"><?php esc_html_e('Background color for result cards.', 'swiftsearch-for-typesense'); ?></p>
                             </div>
                         </div>
 
                         <div class="ss-form-group" style="margin-top: 20px;">
-                            <label for="ss-border-radius"><?php esc_html_e('Border Radius (px)', 'swift-search-typesense'); ?></label>
+                            <label for="ss-border-radius"><?php esc_html_e('Border Radius (px)', 'swiftsearch-for-typesense'); ?></label>
                             <input type="number" id="ss-border-radius" class="ss-input" value="16" min="0" max="100">
-                            <p class="description"><?php esc_html_e('Global roundness for cards, inputs, and buttons.', 'swift-search-typesense'); ?></p>
+                            <p class="description"><?php esc_html_e('Global roundness for cards, inputs, and buttons.', 'swiftsearch-for-typesense'); ?></p>
                         </div>
 
                         <div class="ss-form-group" style="margin-top: 30px;">
-                            <label for="ss-custom-css"><?php esc_html_e('Custom CSS', 'swift-search-typesense'); ?></label>
-                            <p class="description" style="margin-bottom: 10px;"><?php esc_html_e('Add raw CSS to override any part of the search UI. Scope your rules to .ss-wrapper for best results.', 'swift-search-typesense'); ?></p>
+                            <label for="ss-custom-css"><?php esc_html_e('Custom CSS', 'swiftsearch-for-typesense'); ?></label>
+                            <p class="description" style="margin-bottom: 10px;"><?php esc_html_e('Add raw CSS to override any part of the search UI. Scope your rules to .ss-wrapper for best results.', 'swiftsearch-for-typesense'); ?></p>
                             <textarea id="ss-custom-css" rows="10" class="ss-input" style="font-family: monospace; font-size: 13px;" placeholder=".ss-card { border: 1px solid #eee; }"></textarea>
                         </div>
                     </div>
                 </div>
 
                 <div class="ss-form-actions" style="margin-top: 20px;">
-                    <button type="button" class="ss-btn ss-btn-primary" id="ss-save-styling"><?php esc_html_e('Save Styling Settings', 'swift-search-typesense'); ?></button>
+                    <button type="button" class="ss-btn ss-btn-primary" id="ss-save-styling"><?php esc_html_e('Save Styling Settings', 'swiftsearch-for-typesense'); ?></button>
                 </div>
             </section>
 
@@ -467,8 +467,8 @@ if (!defined('ABSPATH')) {
             <section class="ss-step-view" id="view-analytics" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Search Analytics', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Insights into what your users are searching for.', 'swift-search-typesense'); ?>
+                        <h2><?php esc_html_e('Search Analytics', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Insights into what your users are searching for.', 'swiftsearch-for-typesense'); ?>
                         </p>
                     </div>
                     <div class="ss-card-body">
@@ -520,15 +520,15 @@ if (!defined('ABSPATH')) {
             <section class="ss-step-view" id="view-pinning" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Pinned Results', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Manually fix specific products or items to the top of search results.', 'swift-search-typesense'); ?>
+                        <h2><?php esc_html_e('Pinned Results', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Manually fix specific products or items to the top of search results.', 'swiftsearch-for-typesense'); ?>
                         </p>
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-pinning-settings-wrapper">
                             <div class="ss-pinning-ui">
                                 <div class="ss-form-group" style="position:relative;">
-                                    <label><?php esc_html_e('Select Pinned Item', 'swift-search-typesense'); ?></label>
+                                    <label><?php esc_html_e('Select Pinned Item', 'swiftsearch-for-typesense'); ?></label>
                                     <input type="text" id="ss-pinning-search" class="ss-input"
                                         placeholder="Type a product or an item name that you want to pin..."
                                         autocomplete="off">
@@ -541,8 +541,8 @@ if (!defined('ABSPATH')) {
 
                                 <div class="ss-empty-state" id="ss-pinning-empty"
                                     style="border: 2px dashed #e5e7eb; padding: 40px; text-align: center; border-radius: 8px; color: #6b7280; display:none;">
-                                    <h3><?php esc_html_e('No pinned items', 'swift-search-typesense'); ?></h3>
-                                    <p><?php esc_html_e('Search above to pin products to the top of results.', 'swift-search-typesense'); ?>
+                                    <h3><?php esc_html_e('No pinned items', 'swiftsearch-for-typesense'); ?></h3>
+                                    <p><?php esc_html_e('Search above to pin products to the top of results.', 'swiftsearch-for-typesense'); ?>
                                     </p>
                                 </div>
                             </div>
@@ -551,7 +551,7 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="ss-form-actions" style="margin-top: 20px;">
                 <button type="button" class="ss-btn ss-btn-primary"
-                    id="ss-save-pinning"><?php esc_html_e('Save Pinned Items', 'swift-search-typesense'); ?></button>
+                    id="ss-save-pinning"><?php esc_html_e('Save Pinned Items', 'swiftsearch-for-typesense'); ?></button>
             </div>
             </section>
 
@@ -559,7 +559,7 @@ if (!defined('ABSPATH')) {
             <section class="ss-step-view" id="view-sync" style="display:none;">
                 <div class="ss-card">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Index Management', 'swift-search-typesense'); ?></h2>
+                        <h2><?php esc_html_e('Index Management', 'swiftsearch-for-typesense'); ?></h2>
                     </div>
                     <div class="ss-card-body">
                         <div class="ss-sync-card-container" style="display: flex; gap: 30px; align-items: center;">
@@ -573,13 +573,13 @@ if (!defined('ABSPATH')) {
                             <div class="ss-sync-details" style="flex: 1;">
                                 <h3 style="margin: 0 0 10px 0; font-size: 16px;">Index Synchronization</h3>
                                 <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280; line-height: 1.5;">
-                                    <?php esc_html_e('Synchronize your WordPress content with Typesense. This process sends all selected content types to your Typesense server. Run this initial sync or after bulk edits.', 'swift-search-typesense'); ?>
+                                    <?php esc_html_e('Synchronize your WordPress content with Typesense. This process sends all selected content types to your Typesense server. Run this initial sync or after bulk edits.', 'swiftsearch-for-typesense'); ?>
                                 </p>
                                 <div class="ss-actions-row" style="display: flex; gap: 15px;">
                                     <button type="button" id="ss-sync-btn"
-                                        class="ss-btn ss-btn-primary"><?php esc_html_e('Index All Content', 'swift-search-typesense'); ?></button>
+                                        class="ss-btn ss-btn-primary"><?php esc_html_e('Index All Content', 'swiftsearch-for-typesense'); ?></button>
                                     <button type="button" id="ss-reset-btn" class="ss-btn ss-btn-danger ss-btn-outline"
-                                        style="background: transparent; border: 1px solid #ef4444; color: #ef4444;"><?php esc_html_e('Delete Index', 'swift-search-typesense'); ?></button>
+                                        style="background: transparent; border: 1px solid #ef4444; color: #ef4444;"><?php esc_html_e('Delete Index', 'swiftsearch-for-typesense'); ?></button>
                                 </div>
                                 <p id="ss-sync-msg"
                                     style="margin-top: 15px; font-size: 13px; font-weight: 500; min-height: 20px;">
@@ -592,13 +592,13 @@ if (!defined('ABSPATH')) {
                 <!-- Sync Logs Panel -->
                 <div class="ss-card" style="margin-top: 20px;">
                     <div class="ss-card-header">
-                        <h2><?php esc_html_e('Sync Logs', 'swift-search-typesense'); ?></h2>
-                        <p><?php esc_html_e('Recent errors and status messages.', 'swift-search-typesense'); ?></p>
+                        <h2><?php esc_html_e('Sync Logs', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Recent errors and status messages.', 'swiftsearch-for-typesense'); ?></p>
                     </div>
                     <div class="ss-card-body">
                         <div id="ss-sync-log-container" class="ss-log-viewer" style="min-height: 100px;">
                             <div class="ss-log-placeholder" style="color: #9ca3af; text-align: center; padding: 20px;">
-                                <?php esc_html_e('No errors recorded.', 'swift-search-typesense'); ?>
+                                <?php esc_html_e('No errors recorded.', 'swiftsearch-for-typesense'); ?>
                             </div>
                         </div>
                     </div>
@@ -611,6 +611,6 @@ if (!defined('ABSPATH')) {
         style="text-align: center; margin-top: 30px; padding: 20px; color: #6b7280; font-size: 13px;">
         <p>A <a href="https://loopstates.com" target="_blank"
                 style="color: inherit; text-decoration: none; font-weight: 500; color: #632489;">Loopstates</a> Product. SwiftSearch for Typesense
-            v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?>. <?php esc_html_e('Optimized for Typesense v0.30.1+.', 'swift-search-typesense'); ?></p>
+            v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?>. <?php esc_html_e('Optimized for Typesense v0.30.1+.', 'swiftsearch-for-typesense'); ?></p>
     </div>
 </div>

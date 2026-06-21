@@ -185,16 +185,16 @@ class RestController extends WP_REST_Controller
             return new \WP_REST_Response(array(
                 'success' => true,
                 'data' => array(
-                    'message' => __('Connected successfully!', 'swift-search-typesense'),
+                    'message' => __('Connected successfully!', 'swiftsearch-for-typesense'),
                     'doc_count' => $stats['num_documents'] ?? 0
                 )
             ), 200);
         } else {
             $error = $client->get_last_error();
-            $msg = __('Connection failed. Please check your credentials.', 'swift-search-typesense');
+            $msg = __('Connection failed. Please check your credentials.', 'swiftsearch-for-typesense');
             if (!empty($error)) {
                 /* translators: %s: Typesense error details */
-                $msg .= ' ' . sprintf(__('Details: %s', 'swift-search-typesense'), $error);
+                $msg .= ' ' . sprintf(__('Details: %s', 'swiftsearch-for-typesense'), $error);
             }
 
             return new \WP_REST_Response(array(
@@ -465,6 +465,7 @@ class RestController extends WP_REST_Controller
         global $wpdb;
         $table = $wpdb->prefix . 'swift_search_batch_logs';
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $error_count = $wpdb->get_var($wpdb->prepare(
             "SELECT SUM(JSON_LENGTH(failed_ids)) FROM {$wpdb->prefix}swift_search_batch_logs WHERE status = %s",
             'failed'
@@ -472,6 +473,7 @@ class RestController extends WP_REST_Controller
         $error_count = $error_count ? (int) $error_count : 0;
 
         // Fetch Recent Errors
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $raw_errors = $wpdb->get_results($wpdb->prepare(
             "SELECT failed_ids, error_message, created_at FROM {$wpdb->prefix}swift_search_batch_logs WHERE status = %s ORDER BY created_at DESC LIMIT %d",
             'failed',
@@ -764,6 +766,7 @@ class RestController extends WP_REST_Controller
         $table_name = \SwiftSearch\Core\DB::get_table_name();
 
         // Attempt Insert/Update with proper prefix to satisfy static analysis
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $wpdb->query($wpdb->prepare(
             "INSERT INTO {$wpdb->prefix}swift_search_logs (query, frequency, result_count, created_at, updated_at) 
              VALUES (%s, 1, %d, NOW(), NOW()) 
@@ -790,6 +793,7 @@ class RestController extends WP_REST_Controller
         }
 
         // Top Searches
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $top_queries = $wpdb->get_results($wpdb->prepare("
             SELECT query, frequency as count, updated_at as last_hit 
             FROM {$wpdb->prefix}swift_search_logs 
@@ -799,6 +803,7 @@ class RestController extends WP_REST_Controller
         ", 0, 10));
 
         // Zero Result Queries
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $no_results = $wpdb->get_results($wpdb->prepare("
             SELECT query, frequency as count 
             FROM {$wpdb->prefix}swift_search_logs 

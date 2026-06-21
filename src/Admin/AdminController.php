@@ -30,8 +30,8 @@ class AdminController
     public function register_menu()
     {
         add_menu_page(
-            __('SwiftSearch', 'swift-search-typesense'),
-            __('SwiftSearch', 'swift-search-typesense'),
+            __('SwiftSearch', 'swiftsearch-for-typesense'),
+            __('SwiftSearch', 'swiftsearch-for-typesense'),
             'manage_options',
             'swift-search',
             array($this, 'render_app'),
@@ -130,11 +130,11 @@ class AdminController
             'available_taxonomies' => $this->get_public_taxonomies(),
             'available_collections' => $this->get_active_collections(), 
             'texts' => array(
-                'connecting' => __('Connecting to Typesense...', 'swift-search-typesense'),
-                'success' => __('Connected Successfully!', 'swift-search-typesense'),
-                'error' => __('Connection Failed.', 'swift-search-typesense'),
-                'mismatch' => __('⚠️ Schema Out of Sync: Please perform a Full Re-Index now to enable your new fields & facets.', 'swift-search-typesense'),
-                'apiKeyWarning' => __('Security Warning: This looks like an Admin Key. For Frontend Search, please use a Search-Only API Key.', 'swift-search-typesense'),
+                'connecting' => __('Connecting to Typesense...', 'swiftsearch-for-typesense'),
+                'success' => __('Connected Successfully!', 'swiftsearch-for-typesense'),
+                'error' => __('Connection Failed.', 'swiftsearch-for-typesense'),
+                'mismatch' => __('⚠️ Schema Out of Sync: Please perform a Full Re-Index now to enable your new fields & facets.', 'swiftsearch-for-typesense'),
+                'apiKeyWarning' => __('Security Warning: This looks like an Admin Key. For Frontend Search, please use a Search-Only API Key.', 'swiftsearch-for-typesense'),
             ),
         ));
     }

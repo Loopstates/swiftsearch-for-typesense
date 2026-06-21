@@ -116,9 +116,8 @@ class SearchController
         $default_price = (isset($exp['show_price']) && $exp['show_price'] === false) ? 'false' : 'true';
         $default_excerpt = (isset($exp['show_excerpt']) && $exp['show_excerpt'] === true) ? 'true' : 'false';
         $default_instant = (isset($exp['instant_search']) && $exp['instant_search'] === false) ? 'false' : 'true';
-
         $a = shortcode_atts(array(
-            'placeholder' => __('Search...', 'swift-search-typesense'),
+            'placeholder' => __('Search...', 'swiftsearch-for-typesense'),
             'limit' => $default_limit,
             'show_thumbnail' => $default_thumb,
             'show_price' => $default_price,
