@@ -202,7 +202,7 @@ All notable changes to the SwiftSearch - Typesense Search for WordPress plugin w
 - **Search Result Scope**: Reinforced the frontend search logic to ensure results are strictly filtered by the `post_type` and `scope` parameters.
 
 ### Improved
-- **Admin UI Polish**: Refined the Pro feature overlays and plan clarity.
+- **Admin UI Polish**: Refined the admin dashboard layout and settings clarity.
 - **Version Management**: Transitioned to the 1.1.x versioning scheme for better milestone tracking.
 
 ## [1.0.52] - 2026-04-03

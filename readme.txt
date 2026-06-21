@@ -3,25 +3,51 @@ Contributors: loopstates
 Donate link: https://loopstates.com
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
-Tested up to: 6.9
+Tested up to: 7.0
 Stable tag: 1.4.7
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
  
-Extremely fast, client-side search for WordPress & WooCommerce powered by Typesense. Sub-50ms latency and direct browser-to-node search clusters.
+Blazing-fast, typo-tolerant search for WordPress, WooCommerce, CPTs, and taxonomies with direct-to-node queries, facets, and merchandising.
 
 == Description ==
 
-**SwiftSearch** replaces the slow, native WordPress search with a blazing-fast, typo-tolerant engine powered by [Typesense](https://typesense.org). 
+**SwiftSearch for Typesense** is the ultimate high-performance search engine replacement for WordPress and WooCommerce. By replacing the default, resource-heavy WordPress database query search with a lightning-fast, typo-tolerant engine powered by [Typesense](https://typesense.org), SwiftSearch delivers an autocomplete experience that loads in milliseconds.
 
-Built by [Loopstates](https://loopstates.com), SwiftSearch is architected for maximum performance and privacy. Unlike other solutions that use heavy middleware, SwiftSearch connects **Directly from your visitors' browser to your Typesense cluster**. This "Zero-Middleware" approach results in sub-50ms search latency while keeping your user data secure.
+Built by [Loopstates](https://loopstates.com), SwiftSearch is architected for maximum performance and privacy. Unlike other search plugins that route queries through a heavy middle-layer proxy, SwiftSearch connects **directly from your visitors' browser to your Typesense cluster** with sub-50ms latency. No heavy PHP processes are loaded, no database queries are executed on your server, and your customer data remains secure and GDPR-compliant.
+
+#### Why Choose SwiftSearch & Typesense?
+Native WordPress search is slow, lacks typo tolerance, and degrades database performance under high traffic. SwiftSearch connects your site to Typesense—the premier open-source, developer-friendly alternative to Algolia. 
+
+Whether you run a large blog, a complex directory site, or a high-traffic WooCommerce store with thousands of SKUs, SwiftSearch ensures your visitors find exactly what they are looking for in real-time.
 
 **Official Documentation**: [https://docs.loopstates.com/swift-search-typesense/](https://docs.loopstates.com/swift-search-typesense/)
 
+== Key Features ==
 
-### Key Features
+### Blazing-Fast Autocomplete and Search-As-You-Type
+Deliver instant results as users type. The client-side search UI updates dynamically in real-time, fetching data directly from your nearest Typesense node to provide an experience comparable to major ecommerce brands.
 
+### Built-in WooCommerce Merchandising and Product Pinning
+Take control of your search results to drive sales. The Merchandising dashboard allows you to manually "pin" specific products, posts, or pages to the very top of search results for specific keywords—perfect for promotional campaigns and seasonal clearance.
+
+### Smart Typo Tolerance and Synonym Sets
+Never show a "No Results Found" page due to a simple spelling mistake. Typesense's state-of-the-art typo tolerance handles complex spelling errors automatically. Additionally, define global multi-way Synonym Sets (compatible with Typesense v0.30+) to link terms like "laptop", "notebook", and "macbook".
+
+### Real-Time Search Analytics and Zero-Result Insights
+Track exactly what your users are looking for. Our admin dashboard provides a complete overview of search volumes and trends. Most importantly, it flags "Zero Result Queries" so you can spot inventory gaps or set up synonyms for missing terms.
+
+### Custom Fields and Faceted Sidebar Navigation
+Give users the power to filter results instantly. Map any custom meta fields (such as Price, Brand, SKU, or custom ACF fields) and build multi-select facet filters using our visual drag-and-drop layout builder.
+
+### Chain-Reaction Background Sync and Real-Time Updates
+Syncing large databases is seamless. When you first connect, our background sync engine processes your content in safe, self-scheduling batches to prevent script timeouts. Once indexed, any new, updated, or deleted posts/products are automatically synchronized in real-time.
+
+### Fully Customizable and Page Builder Friendly
+Customize the search UI without writing code. Control primary colors, typography, card layouts, and toggles (show/hide prices, thumbnails, and excerpts) directly from the settings. It works seamlessly out-of-the-box with Elementor, Divi, Gutenberg, or any page builder via a lightweight shortcode `[swift_search]`.
+
+### Technical Capabilities
 *   **Instant Search**: Blazing fast search-as-you-type results.
 *   **Faceted Navigation & Filters**: Create and manage multi-select sidebar filters for taxonomies and metadata.
 *   **Merchandising & Pinning**: Manually fix specific items to the top of results for a curated user experience.
@@ -109,9 +135,14 @@ Track your **Most Searched Keywords** in real-time. Our professional dashboard p
 
 == Screenshots ==
 
-1.  **Connection Wizard**: Direct connection setup for Typesense clusters.
-2.  **Instant Search UI**: Blazing fast results with typo tolerance.
-3.  **Facet Configurator**: Professional visual builder for search filters.
+1. **Connection Settings**: Configure direct-to-node cluster credentials and Search-Only keys.
+2. **Content Settings**: Choose searchable post types and register custom field mappings.
+3. **Relevance and Synonyms**: Manage base search weights and register synonym sets.
+4. **Search UI Configuration**: Setup autocomplete toggles, facets sidebar, and item limits.
+5. **Styling Customizer**: Visually customize colors, border radius, and add custom CSS overrides.
+6. **Search Analytics Dashboard**: Track search volume trends and flag zero-result queries.
+7. **Merchandising and Pinning**: Pin selected products or posts to the top of search results.
+8. **Sync Management**: Run bulk indexing processes and monitor real-time sync status logs.
 
 == Upgrade Notice ==
 = 1.4.7 =
@@ -169,10 +200,10 @@ Robust browser fallback for servers with loopback/cURL security restrictions. Pl
 * Maintenance: Updated wp_count_terms() and date functions for WordPress 6.7 compatibility.
  
 = 1.3.20 =
-* Security: Hardened Pro feature enforcement with server-side validation for Synonyms, Weights, and Facets.
-* Security: Implemented final frontend data masking to prevent Pro configuration leakage on Free versions.
-* Security: Added Indexer protection to block premium metadata extraction for non-licensed users.
-* Performance: Optimized license checking with static caching in Gatekeeper.
+* Security: Hardened server-side validation for Synonyms, Weights, and Facet parameters.
+* Security: Implemented frontend data masking to prevent configuration leakage.
+* Security: Optimized Indexer protection to block unauthorized metadata extraction.
+* Performance: Optimized connection checking with static caching in Gatekeeper.
  
 = 1.3.19 =
 * Fix: Corrected accidental "faded" disabled style from the "Show Excerpts" setting.
