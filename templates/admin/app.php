@@ -310,26 +310,7 @@ if (!defined('ABSPATH')) {
                             </div>
                         </div>
 
-                        <div class="ss-form-group-row">
-                            <div class="ss-form-group">
-                                <label class="ss-checkbox-card ss-disabled" style="opacity: 0.5; border-style: dashed;">
-                                    <input type="checkbox" disabled>
-                                    <div class="info">
-                                        <span class="title"><?php esc_html_e('Sort Results', 'swiftsearch-for-typesense'); ?> <span class="ss-badge" style="background:#e5e7eb; color:#4b5563; font-size:10px; padding:2px 6px;">COMING SOON</span></span>
-                                        <span class="meta"><?php esc_html_e('Allow users to sort by Price, Date, or Relevance.', 'swiftsearch-for-typesense'); ?></span>
-                                    </div>
-                                </label>
-                            </div>
-                            <div class="ss-form-group">
-                                <label class="ss-checkbox-card ss-disabled" style="opacity: 0.5; border-style: dashed;">
-                                    <input type="checkbox" disabled>
-                                    <div class="info">
-                                        <span class="title"><?php esc_html_e('Floating Mobile Button', 'swiftsearch-for-typesense'); ?> <span class="ss-badge" style="background:#e5e7eb; color:#4b5563; font-size:10px; padding:2px 6px;">COMING SOON</span></span>
-                                        <span class="meta"><?php esc_html_e('Add a dedicated search trigger for mobile devices.', 'swiftsearch-for-typesense'); ?></span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 
@@ -450,11 +431,7 @@ if (!defined('ABSPATH')) {
                             <p class="description"><?php esc_html_e('Global roundness for cards, inputs, and buttons.', 'swiftsearch-for-typesense'); ?></p>
                         </div>
 
-                        <div class="ss-form-group" style="margin-top: 30px;">
-                            <label for="ss-custom-css"><?php esc_html_e('Custom CSS', 'swiftsearch-for-typesense'); ?></label>
-                            <p class="description" style="margin-bottom: 10px;"><?php esc_html_e('Add raw CSS to override any part of the search UI. Scope your rules to .ss-wrapper for best results.', 'swiftsearch-for-typesense'); ?></p>
-                            <textarea id="ss-custom-css" rows="10" class="ss-input" style="font-family: monospace; font-size: 13px;" placeholder=".ss-card { border: 1px solid #eee; }"></textarea>
-                        </div>
+
                     </div>
                 </div>
 

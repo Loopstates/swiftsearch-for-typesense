@@ -1,39 +1,42 @@
 === SwiftSearch for Typesense ===
 Contributors: loopstates
-Donate link: https://loopstates.com
+Donate link: https://buymeacoffee.com/loopstates
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.4.7
+Stable tag: 1.4.8
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
  
-Blazing-fast, typo-tolerant search for WordPress, WooCommerce, CPTs, and taxonomies with direct-to-node queries, facets, and merchandising.
+Lightning-Fast, typo-tolerant search for WordPress, WooCommerce, CPTs, and taxonomies with direct-to-node queries, facets, and merchandising.
 
 == Description ==
 
-**SwiftSearch for Typesense** is the ultimate high-performance search engine replacement for WordPress and WooCommerce. By replacing the default, resource-heavy WordPress database query search with a lightning-fast, typo-tolerant engine powered by [Typesense](https://typesense.org), SwiftSearch delivers an autocomplete experience that loads in milliseconds.
+**SwiftSearch for Typesense** is a search engine replacement for WordPress and WooCommerce. By replacing the default, resource-heavy WordPress database query search with a fast, typo-tolerant engine powered by [Typesense](https://typesense.org), SwiftSearch delivers an autocomplete experience that loads quickly.
 
-Built by [Loopstates](https://loopstates.com), SwiftSearch is architected for maximum performance and privacy. Unlike other search plugins that route queries through a heavy middle-layer proxy, SwiftSearch connects **directly from your visitors' browser to your Typesense cluster** with sub-50ms latency. No heavy PHP processes are loaded, no database queries are executed on your server, and your customer data remains secure and GDPR-compliant.
+Built by [Loopstates](https://loopstates.com), SwiftSearch is architected for privacy and direct connectivity. Unlike other search plugins that route queries through a heavy middle-layer proxy, SwiftSearch connects **directly from your visitors' browser to your Typesense cluster**. No heavy PHP processes are loaded, no database queries are executed on your server, and your customer data remains secure and GDPR-compliant.
 
-#### Why Choose SwiftSearch & Typesense?
-Native WordPress search is slow, lacks typo tolerance, and degrades database performance under high traffic. SwiftSearch connects your site to Typesense—the premier open-source, developer-friendly alternative to Algolia. 
+#### Why SwiftSearch & Typesense?
+Native WordPress search lacks typo tolerance and can affect database performance under high traffic. SwiftSearch connects your site to Typesense—an open-source, developer-friendly alternative to Algolia. 
 
-Whether you run a large blog, a complex directory site, or a high-traffic WooCommerce store with thousands of SKUs, SwiftSearch ensures your visitors find exactly what they are looking for in real-time.
+Whether you run a blog, a directory site, or a WooCommerce store, SwiftSearch ensures your visitors find exactly what they are looking for in real-time.
 
 **Official Documentation**: [https://docs.loopstates.com/swift-search-typesense/](https://docs.loopstates.com/swift-search-typesense/)
 
 == Key Features ==
 
-### Blazing-Fast Autocomplete and Search-As-You-Type
-Deliver instant results as users type. The client-side search UI updates dynamically in real-time, fetching data directly from your nearest Typesense node to provide an experience comparable to major ecommerce brands.
+### Millisecond Search Results
+Deliver search results in milliseconds. Because SwiftSearch connects visitors' browsers directly to your Typesense nodes, search queries bypass WordPress entirely—yielding lightning-fast results and saving server resources.
+
+### Autocomplete and Search-As-You-Type
+Deliver results as users type. The client-side search UI updates dynamically in real-time, fetching data directly from your nearest Typesense node.
 
 ### Built-in WooCommerce Merchandising and Product Pinning
-Take control of your search results to drive sales. The Merchandising dashboard allows you to manually "pin" specific products, posts, or pages to the very top of search results for specific keywords—perfect for promotional campaigns and seasonal clearance.
+Take control of your search results to drive sales. The Merchandising dashboard allows you to manually "pin" specific products, posts, or pages to the very top of search results for specific keywords—suited for promotional campaigns and seasonal clearance.
 
 ### Smart Typo Tolerance and Synonym Sets
-Never show a "No Results Found" page due to a simple spelling mistake. Typesense's state-of-the-art typo tolerance handles complex spelling errors automatically. Additionally, define global multi-way Synonym Sets (compatible with Typesense v0.30+) to link terms like "laptop", "notebook", and "macbook".
+Never show a "No Results Found" page due to a simple spelling mistake. Typesense's typo tolerance handles spelling errors automatically. Additionally, define global multi-way Synonym Sets (compatible with Typesense v0.30+) to link terms like "laptop", "notebook", and "macbook".
 
 ### Real-Time Search Analytics and Zero-Result Insights
 Track exactly what your users are looking for. Our admin dashboard provides a complete overview of search volumes and trends. Most importantly, it flags "Zero Result Queries" so you can spot inventory gaps or set up synonyms for missing terms.
@@ -41,27 +44,35 @@ Track exactly what your users are looking for. Our admin dashboard provides a co
 ### Custom Fields and Faceted Sidebar Navigation
 Give users the power to filter results instantly. Map any custom meta fields (such as Price, Brand, SKU, or custom ACF fields) and build multi-select facet filters using our visual drag-and-drop layout builder.
 
-### Chain-Reaction Background Sync and Real-Time Updates
-Syncing large databases is seamless. When you first connect, our background sync engine processes your content in safe, self-scheduling batches to prevent script timeouts. Once indexed, any new, updated, or deleted posts/products are automatically synchronized in real-time.
+### Background Sync and Real-Time Updates
+When you first connect, our background sync engine processes your content in self-scheduling batches to prevent script timeouts. Once indexed, any new, updated, or deleted posts/products are synchronized.
 
-### Fully Customizable and Page Builder Friendly
-Customize the search UI without writing code. Control primary colors, typography, card layouts, and toggles (show/hide prices, thumbnails, and excerpts) directly from the settings. It works seamlessly out-of-the-box with Elementor, Divi, Gutenberg, or any page builder via a lightweight shortcode `[swift_search]`.
+### Page Builder Friendly
+Customize the search UI without writing code. Control colors, typography, card layouts, and toggles (show/hide prices, thumbnails, and excerpts) directly from the settings. It works with Elementor, Divi, Gutenberg, or any page builder via a lightweight shortcode `[swift_search]`.
 
-### Technical Capabilities
-*   **Instant Search**: Blazing fast search-as-you-type results.
+### Features & Technical Capabilities
+*   **Instant Autocomplete**: Displays matching products and posts the moment visitors start typing.
 *   **Faceted Navigation & Filters**: Create and manage multi-select sidebar filters for taxonomies and metadata.
-*   **Merchandising & Pinning**: Manually fix specific items to the top of results for a curated user experience.
-*   **Result Weighting & Tuning**: Fine-tune field importance (e.g., prioritize SKU hits over Content).
-*   **Global Synonym Sets**: Integrated modern synonym architecture (Typesense v0.30+).
-*   **Advanced Custom Fields Mappings**: Search and filter by any Custom Field (Price, SKU, Brand, etc.).
-*   **Interactive Search Analytics**: Detailed dashboard for tracking popular searches and identifying "Zero Result" gaps.
-*   **Background Indexing**: High-reliability "Chain Reaction" sync handles thousands of items without timing out.
-*   **Automated Sync**: Real-time indexing when you Save, Update, or Delete any content.
-*   **Unlimited CPT Support**: Index Posts, Pages, Products, and all Custom Post Types.
-*   **Styling Customizer**: Dedicated visual controls for Primary colors, Text colors, and Card backgrounds.
-*   **Global UI Toggles**: Instantly show or hide Thumbnails, Prices, and Excerpts globally.
-*   **Developer Ready**: Built-in Custom CSS support and granular Shortcode overrides.
-*   **WooCommerce Global Search**: Fully optimized for product titles, prices, and imagery.
+*   **Merchandising & Pinning**: Fix specific items to the top of results for a curated user experience.
+*   **Result Weighting & Tuning**: Tune field importance (e.g., prioritize SKU hits over Content).
+*   **Global Synonym Sets**: Integrated synonym architecture (compatible with Typesense v0.30+).
+*   **Advanced Custom Fields Mappings**: Search and filter by custom fields (Price, SKU, Brand, etc.).
+*   **Search Analytics**: Dashboard for tracking popular searches and identifying "Zero Result" gaps.
+*   **Background Indexing**: Sync engine handles items in self-scheduling batches without timing out.
+*   **Automated Sync**: Real-time indexing when you Save, Update, or Delete content.
+*   **CPT Support**: Index Posts, Pages, Products, and Custom Post Types.
+*   **Easy Setup (No Coding Required)**: Configure search layouts, color schemes, and settings visually without writing code.
+*   **Global UI Toggles**: Show or hide Thumbnails, Prices, and Excerpts globally.
+*   **WooCommerce Search**: Optimized for product titles, prices, and product imagery.
+*   **Translation Ready**: Works perfectly with multilingual websites and translation plugins.
+*   **Mobile Ready**: Fits perfectly on all screens, including phones, tablets, and desktops.
+*   **SEO Optimized**: Keeps your website light and fast, which helps improve your Google search rankings.
+*   **Fast & Secure**: Loads search results instantly while keeping your customer data fully secure.
+*   **Automatic Updates**: Receive new features and security fixes automatically right inside your dashboard.
+*   **Full Search Replacement**: Replace the default, slow WordPress search sitewide with a single click.
+*   **Easy Placement**: Put custom search bars anywhere on your site using simple shortcodes.
+*   **Page Builder Ready**: Integrates with Elementor, Divi, and Gutenberg blocks using shortcodes or automatic form replacement.
+*   **Developer Customizable**: Built with clean standards and standard hooks/filters for advanced customization.
  
 == Installation ==
 
@@ -72,7 +83,7 @@ Customize the search UI without writing code. Control primary colors, typography
     *   **Step 2: Content** - select your Post Types (Posts, Products, etc.) and enable the global search override.
     *   **Step 3: Relevance** - Manage synonyms and global ranking scores.
     *   **Step 4: Search UI** - Configure your instant search behavior and visual result toggles.
-    *   **Step 5: Styling** - Pick your accent colors and set your custom CSS.
+    *   **Step 5: Styling** - Pick your accent colors and border radius.
     *   **Step 6: Analytics** - Review your search trend dashboard.
     *   **Step 7: Pinning** - Merchandise specific results to the top.
     *   **Step 8: Sync** - Perform your initial bulk index to build the Typesense collection.
@@ -89,9 +100,9 @@ SwiftSearch is designed with a "Privacy First" architecture:
 
 == Known Limitations ==
 
-1. **Search-Only Keys**: For public-facing sites, we strongly recommend using a "Search Only" API key from Typesense for frontend queries. Using your Admin key on the frontend is a security risk.
+1. **Search-Only Keys**: For public-facing sites, we recommend using a "Search Only" API key from Typesense for frontend queries. Using your Admin key on the frontend is a security risk.
 2. **Schema Sensitivity**: Changing core settings (like adding a new Facet or Custom Field) modifies the underlying Typesense schema. A full **Re-Index** (Step 8) is required after such changes.
-3. **Background Sync**: Initial indexing of large catalogs (10k+ items) can take a few minutes via the Chain Reaction sync engine.
+3. **Background Sync**: Initial indexing of large catalogs (10k+ items) can take a few minutes via the sync engine.
 
 == Frequently Asked Questions ==
 
@@ -99,25 +110,25 @@ SwiftSearch is designed with a "Privacy First" architecture:
 Yes. You need a running Typesense instance. This can be [Typesense Cloud](https://cloud.typesense.org) or a self-hosted node on your own VPS.
 
 = Is Typesense free? =
-Typesense is open-source and free to self-host. If you prefer a managed solution, Typesense Cloud offers a paid tier with global clusters.
+Typesense is open-source and free to self-host. If you prefer a managed solution, Typesense Cloud offers a paid tier.
 
 = Does this work with WooCommerce? =
 Absolutely. SwiftSearch is WooCommerce-native, indexing product titles, prices, SKUs, and thumbnails automatically.
 
 = How fast is the search? =
-Because of our "Zero-Middleware" architecture, search results are typically returned in **under 50ms**, directly from the browser to your nearest Typesense node.
+Because of our "Zero-Middleware" architecture, search results are typically returned directly from the browser to your nearest Typesense node.
 
 = What is Result Pinning? =
-Result Pinning (Merchandising) allows you to manually force specific items to the top of results for a given keyword—perfect for boosting sales of specific products or featured content.
+Result Pinning (Merchandising) allows you to manually force specific items to the top of results for a given keyword—ideal for boosting sales of specific products or featured content.
 
 = How do Synonym Sets improve search? =
-They allow you to link similar terms together (e.g., "watch", "clock", "timepiece"). If a user searches for one, results for all are returned, significantly improving discovery.
+They allow you to link similar terms together (e.g., "watch", "clock", "timepiece"). If a user searches for one, results for all are returned, improving discovery.
 
 = Is the Background Indexing free? =
-Yes! Our high-reliability "Chain Reaction" sync engine is included to ensure every user has a stable search experience.
+Yes! Our background sync engine is included to ensure every user has a stable search experience.
 
 = What is the Facet Configurator? =
-It's a professional-grade visual builder found in Step 4 that allows you to easily create and manage multi-select sidebar filters for categories, tags, and custom meta.
+It's a visual builder found in Step 4 that allows you to easily create and manage multi-select sidebar filters for categories, tags, and custom meta.
 
 = Does it work with Elementor or Divi? =
 Yes. You can use the `[swift_search]` shortcode in any page builder module, or enable the "Override Default" toggle to automatically replace your theme's search form.
@@ -129,7 +140,7 @@ Yes. We do NOT use a proxy server. All search interactions happen locally betwee
 Yes, you can map custom metadata (like variation SKUs and prices) to ensure users can find exact product variations in one click.
 
 = What insights does Search Analytics provide? =
-Track your **Most Searched Keywords** in real-time. Our professional dashboard provides a complete landscape of user trends, keyword volume, and search behavior. It also identifies "Zero Result" queries, giving you a full roadmap to optimize your product catalog and content strategy.
+Track your **Most Searched Keywords**. Our dashboard provides an overview of user trends, keyword volume, and search behavior. It also identifies "Zero Result" queries, giving you a roadmap to optimize your product catalog and content strategy.
 
 
 
@@ -139,12 +150,15 @@ Track your **Most Searched Keywords** in real-time. Our professional dashboard p
 2. **Content Settings**: Choose searchable post types and register custom field mappings.
 3. **Relevance and Synonyms**: Manage base search weights and register synonym sets.
 4. **Search UI Configuration**: Setup autocomplete toggles, facets sidebar, and item limits.
-5. **Styling Customizer**: Visually customize colors, border radius, and add custom CSS overrides.
+5. **Styling Customizer**: Visually customize colors and border radius.
 6. **Search Analytics Dashboard**: Track search volume trends and flag zero-result queries.
 7. **Merchandising and Pinning**: Pin selected products or posts to the top of search results.
 8. **Sync Management**: Run bulk indexing processes and monitor real-time sync status logs.
 
 == Upgrade Notice ==
+= 1.4.8 =
+Removed Coming Soon settings placeholders, updated the feature descriptions list, and upgraded the Chart.js vendor library to v4.4.4. Please update immediately.
+
 = 1.4.7 =
 Upgraded admin styling to include Plus Jakarta Sans font and unified input/select heights. Please update immediately.
 
@@ -156,8 +170,13 @@ Robust browser fallback for servers with loopback/cURL security restrictions. Pl
  
 == Changelog ==
 
+= 1.4.8 =
+* Library: Upgraded Chart.js to v4.4.4.
+* UI: Removed inactive Coming Soon settings placeholders from styling card.
+* Documentation: Consolidated key features and capabilities in the readme file.
+
 = 1.4.7 =
-* Design: Introduced Plus Jakarta Sans professional font family.
+* Design: Introduced Plus Jakarta Sans font family.
 * Design: Modernized overall admin UI dashboard variables, card borders, radii, and shadows.
 * Fix: Unified text/number inputs and select elements heights to prevent alignment mismatch in connection settings card.
 

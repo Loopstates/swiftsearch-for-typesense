@@ -91,7 +91,7 @@ class RestController extends WP_REST_Controller
         register_rest_route($this->namespace, '/log', array(
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => array($this, 'handle_log'),
-            'permission_callback' => '__return_true', // Public
+            'permission_callback' => array($this, 'check_log_permission'),
         ));
 
         register_rest_route($this->namespace, '/analytics', array(
@@ -131,6 +131,21 @@ class RestController extends WP_REST_Controller
     public function check_permission()
     {
         return current_user_can('manage_options');
+    }
+
+    /**
+     * Check log permission.
+     *
+     * @param \WP_REST_Request $request REST request object.
+     * @return bool|\WP_Error
+     */
+    public function check_log_permission($request)
+    {
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (wp_verify_nonce($nonce, 'swift_search_log_nonce')) {
+            return true;
+        }
+        return new \WP_Error('rest_forbidden', __('Forbidden', 'swiftsearch-for-typesense'), array('status' => 403));
     }
 
     /**
@@ -715,7 +730,6 @@ class RestController extends WP_REST_Controller
                 'card_bg' => sanitize_text_field($params['card_bg'] ?? '#ffffff'),
                 'text_color' => sanitize_text_field($params['text_color'] ?? '#1f2937'),
                 'border_radius' => absint($params['border_radius'] ?? 16),
-                'custom_css' => wp_strip_all_tags($params['custom_css'] ?? ''),
             );
         }
 

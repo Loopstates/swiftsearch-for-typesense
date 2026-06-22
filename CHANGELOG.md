@@ -2,6 +2,11 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.4.8] - 2026-06-22
+- **Library**: Upgraded Chart.js to v4.4.4.
+- **UI**: Removed inactive Coming Soon settings placeholders.
+- **Documentation**: Simplified and consolidated user-friendly features list in readme.txt.
+
 ## [1.4.7] - 2026-06-20
 - **Design**: Introduced Plus Jakarta Sans professional font family.
 - **Design**: Modernized overall admin UI dashboard variables, card borders, radii, and shadows.

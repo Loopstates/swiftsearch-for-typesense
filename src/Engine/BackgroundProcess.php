@@ -39,7 +39,6 @@ class BackgroundProcess
                 'nonce' => wp_create_nonce('swift_search_async_bg'),
                 'data' => $data,
             ),
-            'cookies' => $_COOKIE,
             'sslverify' => apply_filters('swift_search_https_local_ssl_verify', false),
         );
 

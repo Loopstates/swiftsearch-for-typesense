@@ -60,7 +60,6 @@
             this.$ssTextColor = $('#ss-text-color');
             this.$ssCardBg = $('#ss-card-bg');
             this.$ssBorderRadius = $('#ss-border-radius');
-            this.$ssCustomCss = $('#ss-custom-css');
 
             // Pro Gates
             this.$proGates = $('.ss-pro-gate');
@@ -251,7 +250,6 @@
                 this.$ssTextColor.val(swiftSearchConfig.styling.text_color || '#1f2937');
                 this.$ssCardBg.val(swiftSearchConfig.styling.card_bg || '#ffffff');
                 this.$ssBorderRadius.val(swiftSearchConfig.styling.border_radius || 16);
-                this.$ssCustomCss.val(swiftSearchConfig.styling.custom_css || '');
             }
 
             // Resume Sync State / Show History
@@ -527,8 +525,7 @@
                 primary_color: this.$ssPrimaryColor.val(),
                 text_color: this.$ssTextColor.val(),
                 card_bg: this.$ssCardBg.val(),
-                border_radius: this.$ssBorderRadius.val(),
-                custom_css: this.$ssCustomCss.val()
+                border_radius: this.$ssBorderRadius.val()
             };
 
             $btn.prop('disabled', true).text('Saving...');

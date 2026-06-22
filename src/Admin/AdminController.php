@@ -56,7 +56,7 @@ class AdminController
             'chart-js',
             SWIFT_SEARCH_URL . 'assets/vendor/chart.js',
             array(),
-            '4.4.1',
+            '4.4.4',
             true
         );
 
@@ -96,7 +96,6 @@ class AdminController
             'canIndex' => Gatekeeper::can_index(),
             'apiUrl' => rest_url('swift-search/v1'),
             'nonce' => wp_create_nonce('wp_rest'),
-            'cookies' => $_COOKIE,
             'sslverify' => apply_filters('swift_search_https_local_ssl_verify', false),
             'plan' => array(
                 'isPaying' => $is_paying,

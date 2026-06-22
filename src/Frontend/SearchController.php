@@ -24,7 +24,6 @@ class SearchController
         add_shortcode('swift_search', array($this, 'render_shortcode'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
         add_filter('get_search_form', array($this, 'override_search_form'));
-        add_action('wp_head', array($this, 'render_frontend_styles'), 100);
     }
 
     /**
@@ -49,6 +48,28 @@ class SearchController
 
         // Pass Config
         $settings = get_option('swift_search_settings', array());
+        $styling = isset($settings['styling']) ? $settings['styling'] : array();
+
+        if (!empty($styling)) {
+            $primary = !empty($styling['primary_color']) ? $styling['primary_color'] : '#ff0055';
+            $text = !empty($styling['text_color']) ? $styling['text_color'] : '#1f2937';
+            $bg = !empty($styling['card_bg']) ? $styling['card_bg'] : '#ffffff';
+            $radius = isset($styling['border_radius']) ? (int)$styling['border_radius'] : 16;
+            
+            $primary_rgb = $this->hex2rgb($primary);
+            
+            $custom_css = "
+                .ss-wrapper {
+                    --ss-primary: " . esc_html($primary) . " !important;
+                    --ss-primary-rgb: " . absint($primary_rgb[0]) . ", " . absint($primary_rgb[1]) . ", " . absint($primary_rgb[2]) . " !important;
+                    --ss-text-main: " . esc_html($text) . " !important;
+                    --ss-card-bg: " . esc_html($bg) . " !important;
+                    --ss-radius: " . absint($radius) . "px !important;
+                }
+            ";
+            wp_add_inline_style('swift-search-frontend', $custom_css);
+        }
+
         if (!empty($settings['search_key'])) {
             $relevance = isset($settings['relevance']) ? $settings['relevance'] : array();
             $synonym_sets = array();
@@ -76,7 +97,7 @@ class SearchController
                 'weights' => ($is_pro && isset($settings['weights'])) ? $settings['weights'] : array(),
                 'synonym_sets' => ($is_pro) ? $synonym_sets : array(),
                 'apiUrl' => rest_url('swift-search/v1'),
-                'nonce' => wp_create_nonce('wp_rest'),
+                'nonce' => wp_create_nonce('swift_search_log_nonce'),
             ));
         }
     }
@@ -151,40 +172,7 @@ class SearchController
         return ob_get_clean();
     }
 
-    /**
-     * Render dynamic CSS in frontend head based on plugin settings.
-     */
-    public function render_frontend_styles() {
-        $settings = get_option('swift_search_settings', array());
-        $styling = isset($settings['styling']) ? $settings['styling'] : array();
 
-        if (empty($styling)) {
-            return;
-        }
-
-        $primary = !empty($styling['primary_color']) ? $styling['primary_color'] : '#ff0055';
-        $text = !empty($styling['text_color']) ? $styling['text_color'] : '#1f2937';
-        $bg = !empty($styling['card_bg']) ? $styling['card_bg'] : '#ffffff';
-        $radius = isset($styling['border_radius']) ? (int)$styling['border_radius'] : 16;
-        $custom_css = !empty($styling['custom_css']) ? $styling['custom_css'] : '';
-        
-        $primary_rgb = $this->hex2rgb($primary);
-        
-        echo "\n<!-- SwiftSearch Custom Styles -->\n";
-        echo "<style id='swift-search-dynamic-css'>\n";
-        echo "  .ss-wrapper {\n";
-        echo "    --ss-primary: " . esc_html($primary) . " !important;\n";
-        echo "    --ss-primary-rgb: " . absint($primary_rgb[0]) . ", " . absint($primary_rgb[1]) . ", " . absint($primary_rgb[2]) . " !important;\n";
-        echo "    --ss-text-main: " . esc_html($text) . " !important;\n";
-        echo "    --ss-card-bg: " . esc_html($bg) . " !important;\n";
-        echo "    --ss-radius: " . absint($radius) . "px !important;\n";
-        echo "  }\n";
-        if (!empty($custom_css)) {
-            echo "  /* User Custom CSS Overrides */\n";
-            echo "  " . esc_html(wp_strip_all_tags($custom_css)) . "\n";
-        }
-        echo "</style>\n";
-    }
 
     /**
      * Helper: Convert Hex to RGB array.
