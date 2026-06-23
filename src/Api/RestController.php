@@ -91,7 +91,7 @@ class RestController extends WP_REST_Controller
         register_rest_route($this->namespace, '/log', array(
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => array($this, 'handle_log'),
-            'permission_callback' => array($this, 'check_log_permission'),
+            'permission_callback' => '__return_true',
         ));
 
         register_rest_route($this->namespace, '/analytics', array(
@@ -768,6 +768,11 @@ class RestController extends WP_REST_Controller
      */
     public function handle_log($request)
     {
+        $permission = $this->check_log_permission($request);
+        if (is_wp_error($permission)) {
+            return $permission;
+        }
+
         $params = $request->get_params();
         $query = sanitize_text_field($params['query'] ?? '');
         $hits = intval($params['hits'] ?? 0);

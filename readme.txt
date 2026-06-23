@@ -4,7 +4,7 @@ Donate link: https://buymeacoffee.com/loopstates
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.4.8
+Stable tag: 1.4.9
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -156,6 +156,9 @@ Track your **Most Searched Keywords**. Our dashboard provides an overview of use
 8. **Sync Management**: Run bulk indexing processes and monitor real-time sync status logs.
 
 == Upgrade Notice ==
+= 1.4.9 =
+Upgraded Chart.js to v4.5.1 and resolved the REST API permission callback warning for the logging endpoint. Please update immediately.
+
 = 1.4.8 =
 Removed Coming Soon settings placeholders, updated the feature descriptions list, and upgraded the Chart.js vendor library to v4.4.4. Please update immediately.
 
@@ -169,6 +172,10 @@ Minor bug fixes to resolve the browser-driven sync infinite loop. Please update 
 Robust browser fallback for servers with loopback/cURL security restrictions. Please update immediately.
  
 == Changelog ==
+
+= 1.4.9 =
+* Library: Upgraded Chart.js to v4.5.1.
+* Security: Resolved REST API permission callback warning for the /log endpoint.
 
 = 1.4.8 =
 * Library: Upgraded Chart.js to v4.4.4.

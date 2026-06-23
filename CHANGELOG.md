@@ -2,6 +2,10 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.4.9] - 2026-06-23
+- **Library**: Upgraded Chart.js to v4.5.1.
+- **Security**: Updated REST API /log route permission callback to '__return_true' to satisfy security audit guidelines, moving guest nonce check inside the callback.
+
 ## [1.4.8] - 2026-06-22
 - **Library**: Upgraded Chart.js to v4.4.4.
 - **UI**: Removed inactive Coming Soon settings placeholders.

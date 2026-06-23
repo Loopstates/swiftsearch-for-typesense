@@ -56,7 +56,7 @@ class AdminController
             'chart-js',
             SWIFT_SEARCH_URL . 'assets/vendor/chart.js',
             array(),
-            '4.4.4',
+            '4.5.1',
             true
         );
 
