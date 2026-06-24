@@ -1,6 +1,5 @@
 === SwiftSearch for Typesense ===
 Contributors: loopstates
-Donate link: https://buymeacoffee.com/loopstates
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 7.0

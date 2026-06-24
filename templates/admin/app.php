@@ -585,9 +585,20 @@ if (!defined('ABSPATH')) {
         </main>
     </div>
     <div class="ss-footer"
-        style="text-align: center; margin-top: 30px; padding: 20px; color: #6b7280; font-size: 13px;">
-        <p>A <a href="https://loopstates.com" target="_blank"
-                style="color: inherit; text-decoration: none; font-weight: 500; color: #632489;">Loopstates</a> Product. SwiftSearch for Typesense
-            v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?>. <?php esc_html_e('Optimized for Typesense v0.30.1+.', 'swiftsearch-for-typesense'); ?></p>
+        style="text-align: center; margin-top: 40px; padding: 20px 20px 40px; color: #6b7280; font-size: 13px; border-top: 1px solid #f3f4f6;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <p style="margin: 0;">
+                A <a href="https://loopstates.com" target="_blank" style="color: inherit; text-decoration: none; font-weight: 600; color: #632489;">Loopstates</a> Product. SwiftSearch for Typesense v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?>. <?php esc_html_e('Optimized for Typesense v0.30.1+.', 'swiftsearch-for-typesense'); ?>
+            </p>
+            <p style="margin: 0; color: #4b5563;">
+                <?php esc_html_e('For custom integrations, enterprise solutions, or dedicated engineering support, contact', 'swiftsearch-for-typesense'); ?> 
+                <a href="mailto:hello@loopstates.com" style="color: #632489; text-decoration: none; font-weight: 500;">hello@loopstates.com</a>
+            </p>
+            <div style="margin-top: 5px;">
+                <img src="<?php echo esc_url(SWIFT_SEARCH_URL . 'assets/images/loopstates.png'); ?>" 
+                     alt="Loopstates" 
+                     style="height: 30px; width: auto;">
+            </div>
+        </div>
     </div>
 </div>
