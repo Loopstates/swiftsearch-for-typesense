@@ -21,6 +21,10 @@
     const showThumb = wrapper.dataset.thumb !== 'false';
     const showPrice = wrapper.dataset.price !== 'false';
     const showExcerpt = wrapper.dataset.excerpt === 'true';
+    const layout = wrapper.dataset.layout || 'overlay';
+    const browseMode = wrapper.dataset.browse === 'true' || layout === 'catalog';
+
+    let currentPage = 1;
 
     // Experience Config
     const useTypo = config.experience && config.experience.typo_tolerance !== false;
@@ -47,6 +51,12 @@
         const scopes = rawScope.split(',');
         scopeTerms = scopes.includes('terms');
         scopeUsers = scopes.includes('users');
+    }
+
+    // In catalog layout, restrict search scope to posts/products only
+    if (layout === 'catalog') {
+        scopeTerms = false;
+        scopeUsers = false;
     }
 
     // Facet State
@@ -90,9 +100,17 @@
     function handleInput(e) {
         clearTimeout(debounceTimer);
         const query = input.value.trim();
+        currentPage = 1;
 
         if (query.length === 0) {
-            resultsContainer.style.display = 'none';
+            if (browseMode) {
+                loader.style.display = 'block';
+                debounceTimer = setTimeout(function () {
+                    performSearch('*');
+                }, 200);
+            } else {
+                resultsContainer.style.display = 'none';
+            }
             return;
         }
 
@@ -125,7 +143,9 @@
 
                 // Type-Safe Quoting: Only wrap strings/string arrays in backticks
                 let safeValues;
-                if (['int32', 'int64', 'float', 'bool'].includes(dataType)) {
+                const isNumeric = ['int32', 'int64', 'float', 'bool'].includes(dataType) || 
+                                  ['int32[]', 'int64[]', 'float[]'].includes(dataType);
+                if (isNumeric) {
                     safeValues = values.join(',');
                 } else {
                     safeValues = values.map(v => '`' + v + '`').join(',');
@@ -138,6 +158,15 @@
     }
 
     function performSearch(query) {
+        if (!query) {
+            if (browseMode) {
+                query = '*';
+            } else {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+        }
+
         let sortParam = '';
         if (currentSort !== 'relevance') {
             sortParam = `&sort_by=${currentSort}`; // Syntax might depend on library, but for multi_search it is in body
@@ -176,6 +205,7 @@
             q: query,
             query_by: 'post_title,post_content',
             per_page: limit,
+            page: currentPage,
             num_typos: numTypos,
             prefix: 'true,true', // Standard and Prefix support (e.g. "hoo" -> "Hoodie")
             sort_by: currentSort === 'relevance' ? '_text_match:desc' : currentSort
@@ -194,7 +224,7 @@
 
         // Pinned Items (Client-Side)
         if (config.pinned_items && Array.isArray(config.pinned_items) && config.pinned_items.length > 0) {
-            const pinnedIds = config.pinned_items.map(i => i.id).join(',');
+            const pinnedIds = config.pinned_items.map((i, idx) => `${i.id}:${idx + 1}`).join(',');
             if (pinnedIds) {
                 postsParams.pinned_hits = pinnedIds;
             }
@@ -236,8 +266,20 @@
 
         const url = `${config.protocol}://${config.host}:${config.port}/multi_search`;
 
-        // DEBUG: Log the payload
+        // Dispatch Custom Event for Before Search
+        const beforeSearchEvent = new CustomEvent('swift-search:before-search', {
+            detail: {
+                query: query,
+                searches: searches
+            },
+            bubbles: true,
+            cancelable: true
+        });
+        wrapper.dispatchEvent(beforeSearchEvent);
 
+        if (beforeSearchEvent.defaultPrevented) {
+            return;
+        }
 
         fetch(url, {
             method: 'POST',
@@ -280,10 +322,12 @@
         }
 
         if (results.length === 0 || !results.some(r => r.found > 0)) {
+            const queryVal = input.value.trim();
+            const msg = queryVal ? `No results found for "<strong>${queryVal}</strong>"` : 'No results found.';
             hitsContainer.innerHTML = `
                 <div class="ss-no-results">
                     <span class="dashicons dashicons-search"></span>
-                    <p>No results found for "<strong>${input.value}</strong>"</p>
+                    <p>${msg}</p>
                 </div>`;
             return;
         }
@@ -379,8 +423,18 @@
                 grid.className = 'ss-grid';
                 section.appendChild(grid);
 
+                const renderedNames = new Set();
                 result.hits.forEach((hit, hitIndex) => {
                     const doc = hit.document;
+
+                    // Deduplicate terms (categories/tags) by name to prevent reduncancy
+                    if (collection === 'terms' && doc.name) {
+                        if (renderedNames.has(doc.name)) {
+                            return;
+                        }
+                        renderedNames.add(doc.name);
+                    }
+
                     const card = document.createElement('div');
                     card.className = 'ss-card';
                     if (hit.curated) {
@@ -401,21 +455,46 @@
                                 </div>` : ''}
                                 <div class="ss-card-body">
                                     <h4 class="ss-card-title">${highlight(hit, 'post_title')}</h4>
-                                    ${(showPrice && isProduct && doc.price) ? `<div class="ss-card-price">$${doc.price}</div>` : ''}
+                                    ${(showPrice && isProduct && typeof doc.price !== 'undefined' && doc.price !== null) ? `<div class="ss-card-price">$${doc.price}</div>` : ''}
                                     ${(showExcerpt && doc.post_excerpt) ? `<p class="ss-card-excerpt">${doc.post_excerpt}</p>` : ''}
                                 </div>
                             </a>`;
                     } else {
-                        // Generic card for Terms/Users
+                        // Generic card for Terms/Users with clean labels
+                        let cleanTag = '';
+                        if (collection === 'terms') {
+                            if (doc.taxonomy === 'product_cat' || doc.taxonomy === 'category') {
+                                cleanTag = 'Category';
+                            } else if (doc.taxonomy === 'post_tag') {
+                                cleanTag = 'Tag';
+                            } else if (doc.taxonomy) {
+                                cleanTag = doc.taxonomy.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+                            }
+                        } else if (collection === 'users') {
+                            cleanTag = 'Author';
+                        }
+
                         html = `
                             <a href="${doc.url || '#'}" class="ss-card-link ss-card-compact">
                                 <div class="ss-card-body">
                                     <h4 class="ss-card-title">${highlight(hit, collection === 'terms' ? 'name' : 'display_name')}</h4>
-                                    ${doc.taxonomy ? `<span class="ss-card-tag">${doc.taxonomy}</span>` : ''}
+                                    ${cleanTag ? `<span class="ss-card-tag">${cleanTag}</span>` : ''}
                                 </div>
                             </a>`;
                     }
                     card.innerHTML = html;
+
+                    // Dispatch Custom Event for Hit Rendering
+                    const hitEvent = new CustomEvent('swift-search:render-hit', {
+                        detail: {
+                            hit: hit,
+                            card: card,
+                            collection: collection
+                        },
+                        bubbles: true
+                    });
+                    wrapper.dispatchEvent(hitEvent);
+
                     grid.appendChild(card);
                 });
             }
@@ -430,12 +509,89 @@
 
         if (!hasHits) {
             hitsContainer.innerHTML = '<div class="ss-no-results">No results found.</div>';
+        } else if (layout === 'catalog' && postsResult && postsResult.found > 0) {
+            const totalFound = postsResult.found;
+            const totalPages = Math.ceil(totalFound / limit);
+            if (totalPages > 1) {
+                renderPagination(totalPages);
+            }
         }
         
         // Log based on ORGANIC results (ignore hits that were only forced by pinning)
         logSearch(input.value.trim(), organicFoundTotal);
+
+        // Dispatch Custom Event for Results Rendered
+        const renderedEvent = new CustomEvent('swift-search:results-rendered', {
+            detail: {
+                data: data,
+                totalFound: organicFoundTotal
+            },
+            bubbles: true
+        });
+        wrapper.dispatchEvent(renderedEvent);
         
         loader.style.display = 'none';
+    }
+
+    function renderPagination(totalPages) {
+        const pagination = document.createElement('div');
+        pagination.className = 'ss-pagination';
+
+        // Prev Button
+        const prevLink = document.createElement('a');
+        prevLink.href = '#';
+        prevLink.className = 'ss-page-link prev' + (currentPage === 1 ? ' disabled' : '');
+        prevLink.innerHTML = '&laquo;';
+        if (currentPage > 1) {
+            prevLink.onclick = (e) => {
+                e.preventDefault();
+                currentPage--;
+                performSearch(input.value.trim());
+                wrapper.scrollIntoView({ behavior: 'smooth' });
+            };
+        }
+        pagination.appendChild(prevLink);
+
+        // Page Numbers
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, startPage + 4);
+        
+        // Adjust start page if we are near the end
+        let adjustedStart = startPage;
+        if (endPage - startPage < 4) {
+            adjustedStart = Math.max(1, endPage - 4);
+        }
+
+        for (let i = adjustedStart; i <= endPage; i++) {
+            const pageLink = document.createElement('a');
+            pageLink.href = '#';
+            pageLink.className = 'ss-page-link' + (i === currentPage ? ' active' : '');
+            pageLink.innerText = i;
+            pageLink.onclick = (e) => {
+                e.preventDefault();
+                currentPage = i;
+                performSearch(input.value.trim());
+                wrapper.scrollIntoView({ behavior: 'smooth' });
+            };
+            pagination.appendChild(pageLink);
+        }
+
+        // Next Button
+        const nextLink = document.createElement('a');
+        nextLink.href = '#';
+        nextLink.className = 'ss-page-link next' + (currentPage === totalPages ? ' disabled' : '');
+        nextLink.innerHTML = '&raquo;';
+        if (currentPage < totalPages) {
+            nextLink.onclick = (e) => {
+                e.preventDefault();
+                currentPage++;
+                performSearch(input.value.trim());
+                wrapper.scrollIntoView({ behavior: 'smooth' });
+            };
+        }
+        pagination.appendChild(nextLink);
+
+        hitsContainer.appendChild(pagination);
     }
 
     function renderFacets(facetCounts) {
@@ -498,6 +654,7 @@
                 clearBtn.innerText = 'Clear All Filters';
                 clearBtn.onclick = () => {
                     for (const k in activeFilters) activeFilters[k] = [];
+                    currentPage = 1;
                     performSearch(input.value.trim());
                 };
                 facetsContainer.prepend(clearBtn);
@@ -515,6 +672,7 @@
         }
 
         // Trigger search
+        currentPage = 1;
         performSearch(input.value.trim());
     }
 
@@ -551,6 +709,10 @@
                 if (!response.ok) console.warn('SwiftSearch Log Failed', response.status);
             }).catch(e => { /* Error logged silently */ });
         }, 2000);
+    }
+
+    if (browseMode) {
+        performSearch('*');
     }
 
 })();

@@ -334,3 +334,81 @@
     color: var(--ss-text-muted);
     margin: 0;
 }
+
+/* Full Page Catalog Layout overrides */
+.ss-layout-catalog.ss-wrapper {
+    max-width: 100% !important;
+}
+
+.ss-layout-catalog .ss-results-container {
+    border: none;
+    overflow: visible;
+    box-shadow: none;
+}
+
+.ss-layout-catalog .ss-facets {
+    overflow-y: visible;
+    background: transparent;
+    border-right: 1px solid var(--ss-border);
+    position: sticky;
+    top: 30px;
+    height: fit-content;
+}
+
+.ss-layout-catalog .ss-hits {
+    max-height: none;
+    overflow-y: visible;
+}
+
+/* Pagination Styling */
+.ss-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 30px 20px;
+    border-top: 1px solid var(--ss-border);
+    margin-top: 30px;
+}
+
+.ss-page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--ss-border);
+    color: var(--ss-text-main);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.ss-page-link:hover {
+    border-color: var(--ss-primary);
+    color: var(--ss-primary);
+    background: rgba(255, 0, 85, 0.05); /* Fallback */
+}
+
+/* If dynamic RGB exists */
+@supports (color: rgba(var(--ss-primary-rgb), 0.1)) {
+    .ss-page-link:hover {
+        background: rgba(var(--ss-primary-rgb), 0.05);
+    }
+}
+
+.ss-page-link.active {
+    background: var(--ss-primary);
+    border-color: var(--ss-primary);
+    color: #fff;
+}
+
+.ss-page-link.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: not-allowed;
+}

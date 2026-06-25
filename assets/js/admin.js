@@ -73,6 +73,7 @@
             this.$scShowThumb = $('#sc-show-thumb');
             this.$scShowPrice = $('#sc-show-price');
             this.$scShowExcerpt = $('#sc-show-excerpt');
+            this.$scLayout = $('#sc-layout');
             this.$scPreview = $('#sc-preview');
             this.$scCopyBtn = $('#ss-copy-sc');
             this.$scPostTypeSelector = $('.sc-post-type-selector');
@@ -84,6 +85,7 @@
             this.$ssGlobalShowPrice = $('#ss-global-show-price');
             this.$ssGlobalShowExcerpt = $('#ss-global-show-excerpt');
             this.$ssGlobalLimit = $('#ss-global-limit');
+            this.$ssGlobalLayout = $('#ss-global-layout');
 
             // Relevance
             this.$relevanceRange = $('#ss-relevance-range');
@@ -126,6 +128,7 @@
             this.$scShowThumb.on('change', this.updateShortcodePreview.bind(this));
             this.$scShowPrice.on('change', this.updateShortcodePreview.bind(this));
             this.$scShowExcerpt.on('change', this.updateShortcodePreview.bind(this));
+            this.$scLayout.on('change', this.updateShortcodePreview.bind(this));
             this.$scCopyBtn.on('click', this.copyShortcode.bind(this));
 
             // Experience Options (Remove auto-save)
@@ -153,6 +156,11 @@
                 if (!$(e.target).closest('.ss-pinning-ui').length) {
                     this.$pinningResults.hide();
                 }
+            });
+
+            // Toggle checked class on checkbox cards change
+            $(document).on('change', '.ss-checkbox-card input[type="checkbox"]', function () {
+                $(this).closest('.ss-checkbox-card').toggleClass('checked', $(this).is(':checked'));
             });
         },
 
@@ -194,11 +202,13 @@
                 this.$ssGlobalShowPrice.prop('checked', typeof exp.show_price !== 'undefined' ? !!exp.show_price : true);
                 this.$ssGlobalShowExcerpt.prop('checked', !!exp.show_excerpt);
                 this.$ssGlobalLimit.val(exp.limit || 10);
+                this.$ssGlobalLayout.val(exp.layout || (exp.browse_mode ? 'catalog' : 'overlay'));
 
                 // Set Shortcode Defaults to match Global initially for better UX
                 this.$scShowThumb.prop('checked', this.$ssGlobalShowThumb.is(':checked'));
                 this.$scShowPrice.prop('checked', this.$ssGlobalShowPrice.is(':checked'));
                 this.$scShowExcerpt.prop('checked', this.$ssGlobalShowExcerpt.is(':checked'));
+                this.$scLayout.val('default');
 
                 if (exp.search_scope) {
                     $('#ss-scope-terms').prop('checked', !!exp.search_scope.terms);
@@ -211,6 +221,11 @@
                     });
                 }
             }
+
+            // Highlight checked cards on load
+            $('.ss-checkbox-card input[type="checkbox"]').each(function() {
+                $(this).closest('.ss-checkbox-card').toggleClass('checked', $(this).is(':checked'));
+            });
 
             // Set Relevance State
             if (swiftSearchConfig.relevance) {
@@ -277,7 +292,7 @@
             if (postTypes.length > 0) {
                 postTypes.forEach(type => {
                     const isChecked = savedPostTypes.includes(type.name) ? 'checked' : '';
-                    html += `<label class="ss-checkbox-card">
+                    html += `<label class="ss-checkbox-card ${isChecked ? 'checked' : ''}">
                         <input type="checkbox" name="post_types[]" value="${type.name}" ${isChecked} class="ss-reindex-trigger">
                         <div class="info">
                             <span class="title">${type.label || type.name}</span>
@@ -301,7 +316,7 @@
             if (taxonomies.length > 0) {
                 taxonomies.forEach(tax => {
                     const isChecked = savedTaxonomies.includes(tax.name) ? 'checked' : '';
-                    html += `<label class="ss-checkbox-card">
+                    html += `<label class="ss-checkbox-card ${isChecked ? 'checked' : ''}">
                         <input type="checkbox" name="taxonomies[]" value="${tax.name}" ${isChecked} class="ss-reindex-trigger">
                         <div class="info">
                             <span class="title">${tax.label || tax.name}</span>
@@ -318,7 +333,7 @@
             html += '<h4 style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Users</h4>';
             html += '<div class="ss-card-grid">';
             const userChecked = savedUsers ? 'checked' : '';
-            html += `<label class="ss-checkbox-card">
+            html += `<label class="ss-checkbox-card ${userChecked ? 'checked' : ''}">
                 <input type="checkbox" id="ss-index-users" name="index_users" ${userChecked} class="ss-reindex-trigger">
                 <div class="info">
                     <span class="title">Authors & Users</span>
@@ -617,6 +632,8 @@
                     show_price: this.$ssGlobalShowPrice.is(':checked'),
                     show_excerpt: this.$ssGlobalShowExcerpt.is(':checked'),
                     limit: parseInt(this.$ssGlobalLimit.val()) || 10,
+                    layout: this.$ssGlobalLayout.val() || 'overlay',
+                    browse_mode: this.$ssGlobalLayout.val() === 'catalog',
                     search_scope: {
                         posts: true,
                         terms: $('#ss-scope-terms').is(':checked'),
@@ -648,6 +665,7 @@
             const globalThumb = this.$ssGlobalShowThumb.is(':checked');
             const globalPrice = this.$ssGlobalShowPrice.is(':checked');
             const globalExcerpt = this.$ssGlobalShowExcerpt.is(':checked');
+            const globalLayout = this.$ssGlobalLayout.val() || 'overlay';
 
             if (placeholder !== 'Search...') {
                 sc += ` placeholder="${placeholder}"`;
@@ -667,6 +685,11 @@
 
             if (this.$scShowExcerpt.is(':checked') !== globalExcerpt) {
                 sc += ` show_excerpt="${this.$scShowExcerpt.is(':checked')}"`;
+            }
+
+            const chosenLayout = this.$scLayout.val();
+            if (chosenLayout !== 'default' && chosenLayout !== globalLayout) {
+                sc += ` layout="${chosenLayout}"`;
             }
 
             // Post Types Override

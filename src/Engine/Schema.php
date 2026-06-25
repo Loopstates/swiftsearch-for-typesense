@@ -30,6 +30,7 @@ class Schema
             array('name' => 'post_type', 'type' => 'string', 'facet' => true),
             array('name' => 'permalink', 'type' => 'string'),
             array('name' => 'thumbnail_url', 'type' => 'string', 'optional' => true),
+            array('name' => 'price', 'type' => 'float', 'optional' => true, 'sort' => true),
             array('name' => 'category', 'type' => 'string[]', 'facet' => isset($config['enable_facets']) ? $config['enable_facets'] : true, 'optional' => true),
             array('name' => 'tag', 'type' => 'string[]', 'facet' => true, 'optional' => true),
             array('name' => 'published_at', 'type' => 'int64', 'sort' => true),

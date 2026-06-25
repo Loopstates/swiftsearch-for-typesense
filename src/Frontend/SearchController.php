@@ -35,14 +35,14 @@ class SearchController
             'swift-search-frontend',
             SWIFT_SEARCH_URL . 'assets/css/search.css',
             array(),
-            SWIFT_SEARCH_VERSION
+            file_exists(SWIFT_SEARCH_PATH . 'assets/css/search.css') ? filemtime(SWIFT_SEARCH_PATH . 'assets/css/search.css') : SWIFT_SEARCH_VERSION
         );
 
         wp_register_script(
             'swift-search-frontend',
             SWIFT_SEARCH_URL . 'assets/js/search.js',
             array(),
-            SWIFT_SEARCH_VERSION,
+            file_exists(SWIFT_SEARCH_PATH . 'assets/js/search.js') ? filemtime(SWIFT_SEARCH_PATH . 'assets/js/search.js') : SWIFT_SEARCH_VERSION,
             true
         );
 
@@ -82,7 +82,7 @@ class SearchController
             // Gating Pro features at the source (Frontend Configuration)
             $is_pro = Gatekeeper::can_use_features();
             
-            wp_localize_script('swift-search-frontend', 'swiftSearchVars', array(
+            $vars = array(
                 'host' => $settings['host'],
                 'port' => $settings['port'],
                 'protocol' => $settings['protocol'],
@@ -98,7 +98,11 @@ class SearchController
                 'synonym_sets' => ($is_pro) ? $synonym_sets : array(),
                 'apiUrl' => rest_url('swift-search/v1'),
                 'nonce' => wp_create_nonce('swift_search_log_nonce'),
-            ));
+            );
+
+            $vars = apply_filters('swift_search_vars', $vars, $settings);
+
+            wp_localize_script('swift-search-frontend', 'swiftSearchVars', $vars);
         }
     }
 
@@ -137,6 +141,8 @@ class SearchController
         $default_price = (isset($exp['show_price']) && $exp['show_price'] === false) ? 'false' : 'true';
         $default_excerpt = (isset($exp['show_excerpt']) && $exp['show_excerpt'] === true) ? 'true' : 'false';
         $default_instant = (isset($exp['instant_search']) && $exp['instant_search'] === false) ? 'false' : 'true';
+        $default_layout = isset($exp['layout']) ? sanitize_text_field($exp['layout']) : ((isset($exp['browse_mode']) && $exp['browse_mode'] === true) ? 'catalog' : 'overlay');
+        $default_browse = ($default_layout === 'catalog') ? 'true' : 'false';
         $a = shortcode_atts(array(
             'placeholder' => __('Search...', 'swiftsearch-for-typesense'),
             'limit' => $default_limit,
@@ -146,24 +152,35 @@ class SearchController
             'instant_search' => $default_instant,
             'scope' => 'default', // 'posts,terms,users' or 'default'
             'post_types' => '', // comma separated 'product,post'
+            'layout' => $default_layout, // 'overlay' or 'catalog'
+            'browse_mode' => '', // legacy parameter override
         ), $atts);
+
+        $a = apply_filters('swift_search_shortcode_args', $a, $atts);
+
+        // Resolve layout override
+        if (!empty($a['browse_mode'])) {
+            $a['layout'] = ($a['browse_mode'] === 'true') ? 'catalog' : 'overlay';
+        }
 
         wp_enqueue_style('swift-search-frontend');
         wp_enqueue_script('swift-search-frontend');
 
         ob_start();
         ?>
-        <div id="swift-search-wrapper" class="ss-wrapper" data-limit="<?php echo esc_attr($a['limit']); ?>"
+        <div id="swift-search-wrapper" class="ss-wrapper ss-layout-<?php echo esc_attr($a['layout']); ?>" data-limit="<?php echo esc_attr($a['limit']); ?>"
             data-thumb="<?php echo esc_attr($a['show_thumbnail']); ?>" data-price="<?php echo esc_attr($a['show_price']); ?>"
             data-excerpt="<?php echo esc_attr($a['show_excerpt']); ?>"
             data-instant="<?php echo esc_attr($a['instant_search']); ?>" data-scope="<?php echo esc_attr($a['scope']); ?>"
-            data-post-types="<?php echo esc_attr($a['post_types']); ?>">
+            data-post-types="<?php echo esc_attr($a['post_types']); ?>"
+            data-layout="<?php echo esc_attr($a['layout']); ?>"
+            data-browse="<?php echo ($a['layout'] === 'catalog') ? 'true' : 'false'; ?>">
             <div class="ss-search-box">
                 <input type="text" id="ss-search-input" placeholder="<?php echo esc_attr($a['placeholder']); ?>"
                     autocomplete="off">
                 <span class="ss-loader" style="display:none;"></span>
             </div>
-            <div class="ss-results-container" style="display:none;">
+            <div class="ss-results-container" <?php echo ($a['browse_mode'] === 'true') ? '' : 'style="display:none;"'; ?>>
                 <div class="ss-facets" id="ss-facets"></div>
                 <div class="ss-hits" id="ss-hits"></div>
             </div>

@@ -30,6 +30,11 @@ class DocumentBuilder
             return false;
         }
 
+        // Allow third-party exclusion of post
+        if (!apply_filters('swift_search_should_index_post', true, $post_id, $post)) {
+            return false;
+        }
+
         // 1. Strict Whitelist Check
         $settings = get_option('swift_search_settings', array());
         $allowed_types = isset($settings['indexed_post_types']) ? (array) $settings['indexed_post_types'] : array('product');
@@ -54,6 +59,17 @@ class DocumentBuilder
         // Thumbnail
         if (has_post_thumbnail($post)) {
             $document['thumbnail_url'] = get_the_post_thumbnail_url($post, 'medium');
+        }
+
+        // WooCommerce Price (Core Field)
+        if (function_exists('wc_get_product') && 'product' === $post->post_type) {
+            $product = wc_get_product($post);
+            if ($product) {
+                $price = $product->get_price();
+                if (is_numeric($price)) {
+                    $document['price'] = (float) $price;
+                }
+            }
         }
 
         // 2. Taxonomies & Universal Facets
@@ -159,6 +175,6 @@ class DocumentBuilder
             }
         }
 
-        return $document;
+        return apply_filters('swift_search_post_document', $document, $post_id, $post);
     }
 }

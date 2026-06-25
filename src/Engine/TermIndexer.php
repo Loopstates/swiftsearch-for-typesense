@@ -46,6 +46,11 @@ class TermIndexer
             return false;
         }
 
+        $url = get_term_link($term);
+        if (is_wp_error($url)) {
+            $url = '';
+        }
+
         $document = array(
             'id' => (string) $term->term_id, // Typesense ID must be string
             'term_id' => (int) $term->term_id,
@@ -53,7 +58,7 @@ class TermIndexer
             'slug' => $term->slug,
             'taxonomy' => $term->taxonomy,
             'count' => (int) $term->count,
-            'url' => get_term_link($term),
+            'url' => (string) $url,
         );
 
         return $document;

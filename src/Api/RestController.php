@@ -703,6 +703,42 @@ class RestController extends WP_REST_Controller
                     );
                 }
                 $current_settings['facets_config'] = $sanitized_facets;
+
+                // Sync newly enabled facets directly to Typesense Collection Schema
+                $client = new \SwiftSearch\Client\Client($current_settings);
+                $patch_fields = array();
+                foreach ($sanitized_facets as $f) {
+                    if (empty($f['enabled'])) continue;
+                    
+                    $target = !empty($f['target']) ? $f['target'] : null;
+                    if (!$target) {
+                        if ($f['type'] === 'taxonomy') {
+                            if ($f['source'] === 'category') $target = 'category';
+                            elseif ($f['source'] === 'post_tag') $target = 'tag';
+                            else $target = 'tax_' . $f['source'];
+                        } elseif ($f['source'] === '_sku') {
+                            $target = 'sku';
+                        } else {
+                            $target = $f['source'];
+                        }
+                    }
+                    
+                    $type = !empty($f['data_type']) ? $f['data_type'] : 'string';
+                    if ($f['type'] === 'taxonomy') $type = 'string[]';
+                    
+                    $patch_fields[] = array(
+                        'name' => $target,
+                        'type' => $type,
+                        'facet' => true,
+                        'optional' => true
+                    );
+                }
+                
+                if (!empty($patch_fields)) {
+                    $client->patch_collection('posts', array(
+                        'fields' => $patch_fields
+                    ));
+                }
             }
 
             // General Experience (Free Features)
@@ -713,6 +749,12 @@ class RestController extends WP_REST_Controller
                     'sort_enabled' => isset($new_exp['sort_enabled']) ? filter_var($new_exp['sort_enabled'], FILTER_VALIDATE_BOOLEAN) : false,
                     'mobile_btn' => isset($new_exp['mobile_btn']) ? filter_var($new_exp['mobile_btn'], FILTER_VALIDATE_BOOLEAN) : false,
                     'instant_search' => isset($new_exp['instant_search']) ? filter_var($new_exp['instant_search'], FILTER_VALIDATE_BOOLEAN) : true,
+                    'show_thumbnail' => isset($new_exp['show_thumbnail']) ? filter_var($new_exp['show_thumbnail'], FILTER_VALIDATE_BOOLEAN) : true,
+                    'show_price' => isset($new_exp['show_price']) ? filter_var($new_exp['show_price'], FILTER_VALIDATE_BOOLEAN) : true,
+                    'show_excerpt' => isset($new_exp['show_excerpt']) ? filter_var($new_exp['show_excerpt'], FILTER_VALIDATE_BOOLEAN) : false,
+                    'limit' => isset($new_exp['limit']) ? intval($new_exp['limit']) : 10,
+                    'layout' => isset($new_exp['layout']) ? sanitize_text_field($new_exp['layout']) : (isset($new_exp['browse_mode']) && filter_var($new_exp['browse_mode'], FILTER_VALIDATE_BOOLEAN) ? 'catalog' : 'overlay'),
+                    'browse_mode' => isset($new_exp['layout']) ? ($new_exp['layout'] === 'catalog') : (isset($new_exp['browse_mode']) ? filter_var($new_exp['browse_mode'], FILTER_VALIDATE_BOOLEAN) : false),
                     'search_scope' => array(
                         'posts' => true,
                         'terms' => isset($new_exp['search_scope']['terms']) ? filter_var($new_exp['search_scope']['terms'], FILTER_VALIDATE_BOOLEAN) : false,

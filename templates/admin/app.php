@@ -309,7 +309,21 @@ if (!defined('ABSPATH')) {
                                 <p class="description"><?php esc_html_e('Default number of items to show per search.', 'swiftsearch-for-typesense'); ?></p>
                             </div>
                         </div>
-
+                        <div class="ss-form-group-row">
+                            <div class="ss-form-group">
+                                <label style="display:block; margin-bottom: 8px; font-weight: 500;"><?php esc_html_e('Layout Setting', 'swiftsearch-for-typesense'); ?></label>
+                                <select id="ss-global-layout" style="width: 100%; max-width: 400px; padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db; height: 40px; box-sizing: border-box;">
+                                    <option value="overlay"><?php esc_html_e('Search Bar (Floating Overlay / Dropdown)', 'swiftsearch-for-typesense'); ?></option>
+                                    <option value="catalog"><?php esc_html_e('Page (Dedicated Catalog / Sticky Sidebar)', 'swiftsearch-for-typesense'); ?></option>
+                                </select>
+                            </div>
+                            <div class="ss-form-group" style="display: flex; flex-direction: column; justify-content: center; padding-top: 24px;">
+                                <div style="font-size: 13px; color: var(--ss-text-muted); line-height: 1.5; background: #fcfcfc; padding: 12px; border-radius: 6px; border: 1px solid #eee;">
+                                    <strong><?php esc_html_e('Search Bar Mode (Floating Overlay)', 'swiftsearch-for-typesense'); ?></strong>: <?php esc_html_e('Displays results dynamically in a dropdown list right below the input field. Best for quick access from headers.', 'swiftsearch-for-typesense'); ?><br><br>
+                                    <strong><?php esc_html_e('Page Mode (Dedicated Catalog)', 'swiftsearch-for-typesense'); ?></strong>: <?php esc_html_e('Loads a full-page search catalog interface with category filters, a sticky sidebar, and pagination. Ideal for a dedicated search results or shop page.', 'swiftsearch-for-typesense'); ?>
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -356,6 +370,14 @@ if (!defined('ABSPATH')) {
                                         <span class="title"><?php esc_html_e('Show Excerpt', 'swiftsearch-for-typesense'); ?></span>
                                     </div>
                                 </label>
+                            </div>
+                            <div class="ss-form-group">
+                                <label style="display:block; margin-bottom: 8px; font-weight: 500;"><?php esc_html_e('Layout Override', 'swiftsearch-for-typesense'); ?></label>
+                                <select id="sc-layout" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db; height: 40px; box-sizing: border-box;">
+                                    <option value="default"><?php esc_html_e('Inherit Global Layout', 'swiftsearch-for-typesense'); ?></option>
+                                    <option value="overlay"><?php esc_html_e('Floating Search Overlay', 'swiftsearch-for-typesense'); ?></option>
+                                    <option value="catalog"><?php esc_html_e('Dedicated Catalog Page', 'swiftsearch-for-typesense'); ?></option>
+                                </select>
                             </div>
                         </div>
                         
