@@ -2,6 +2,11 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.5.0] - 2026-06-25
+- **Feature**: Dedicated Shop & Catalog Page Mode replacing WooCommerce default shop page with horizontal sorting, pagination, and flat card aesthetics.
+- **Developer**: Added custom JavaScript DOM events (`swift-search:hit-rendered` and `swift-search:results-rendered`) to support custom integrations (wishlists, ratings, ajax cart).
+- **Fix**: Resolved price sorting returning zero results by indexing price as a float and utilizing Typesense `missing_values` parameter support.
+
 ## [1.4.9] - 2026-06-23
 - **Library**: Upgraded Chart.js to v4.5.1.
 - **Security**: Updated REST API /log route permission callback to '__return_true' to satisfy security audit guidelines, moving guest nonce check inside the callback.

@@ -413,11 +413,42 @@
 
                 const header = document.createElement('div');
                 header.className = 'ss-section-header';
-                header.innerHTML = `
-                    <h3 class="ss-section-title">${title}</h3>
-                    <span class="ss-section-count">${result.found} found</span>
-                `;
+
+                if (layout === 'catalog' && collection === 'posts') {
+                    header.innerHTML = `
+                        <div class="ss-header-left">
+                            <h3 class="ss-section-title">${title}</h3>
+                            <span class="ss-section-count">${result.found} found</span>
+                        </div>
+                        <div class="ss-sort-container">
+                            <label for="ss-sort-by">Sort by:</label>
+                            <select id="ss-sort-by" class="ss-sort-select">
+                                <option value="relevance" ${currentSort === 'relevance' ? 'selected' : ''}>Relevance</option>
+                                <option value="price(missing_values: last):asc" ${currentSort === 'price(missing_values: last):asc' ? 'selected' : ''}>Price: Low to High</option>
+                                <option value="price(missing_values: last):desc" ${currentSort === 'price(missing_values: last):desc' ? 'selected' : ''}>Price: High to Low</option>
+                                <option value="published_at:desc" ${currentSort === 'published_at:desc' ? 'selected' : ''}>Newest First</option>
+                                <option value="published_at:asc" ${currentSort === 'published_at:asc' ? 'selected' : ''}>Oldest First</option>
+                            </select>
+                        </div>
+                    `;
+                } else {
+                    header.innerHTML = `
+                        <h3 class="ss-section-title">${title}</h3>
+                        <span class="ss-section-count">${result.found} found</span>
+                    `;
+                }
                 section.appendChild(header);
+
+                if (layout === 'catalog' && collection === 'posts') {
+                    const sortSelect = header.querySelector('#ss-sort-by');
+                    if (sortSelect) {
+                        sortSelect.addEventListener('change', (e) => {
+                            currentSort = e.target.value;
+                            currentPage = 1;
+                            performSearch(input.value.trim());
+                        });
+                    }
+                }
 
                 const grid = document.createElement('div');
                 grid.className = 'ss-grid';

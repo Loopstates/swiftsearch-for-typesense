@@ -3,7 +3,7 @@ Contributors: loopstates
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.4.9
+Stable tag: 1.5.0
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -46,6 +46,9 @@ Give users the power to filter results instantly. Map any custom meta fields (su
 ### Background Sync and Real-Time Updates
 When you first connect, our background sync engine processes your content in self-scheduling batches to prevent script timeouts. Once indexed, any new, updated, or deleted posts/products are synchronized.
 
+### Dedicated Shop & Catalog Page Mode
+Easily replace your default WooCommerce Shop page with a high-performance, dedicated search and filter catalog page. Features horizontal sort filters, instant category sidebar counts, pagination, and a clean flat card layout.
+
 ### Page Builder Friendly
 Customize the search UI without writing code. Control colors, typography, card layouts, and toggles (show/hide prices, thumbnails, and excerpts) directly from the settings. It works with Elementor, Divi, Gutenberg, or any page builder via a lightweight shortcode `[swift_search]`.
 
@@ -86,6 +89,46 @@ Customize the search UI without writing code. Control colors, typography, card l
     *   **Step 6: Analytics** - Review your search trend dashboard.
     *   **Step 7: Pinning** - Merchandise specific results to the top.
     *   **Step 8: Sync** - Perform your initial bulk index to build the Typesense collection.
+
+== Developer Customization ==
+
+SwiftSearch is built with custom DOM event dispatching to allow advanced integrations with third-party themes and plugins (e.g. Wishlists, Ajax Add-to-Cart, or Quick View).
+
+= JavaScript Event Hooks =
+You can listen to these custom events on the document or the wrapper element:
+
+1. `swift-search:hit-rendered` - Dispatched for every individual hit/card element that is rendered.
+   * `event.detail.hit`: The raw search hit data from Typesense.
+   * `event.detail.card`: The DOM element node of the rendered card.
+   * `event.detail.collection`: The collection name (e.g. `posts`, `terms`, `users`).
+
+2. `swift-search:results-rendered` - Dispatched after the entire search grid and all sections have completed rendering.
+   * `event.detail.data`: The raw search results payload returned from Typesense.
+   * `event.detail.totalFound`: Total organic hits count.
+
+= Code Example =
+`document.addEventListener('swift-search:hit-rendered', function(e) {
+    if (e.detail.collection === 'posts') {
+        const card = e.detail.card;
+        const hitData = e.detail.hit;
+        // Inject rating badges or custom hooks
+    }
+});`
+
+= WordPress PHP Filters =
+Backend developers can customize data synchronization and query configurations using WordPress filters:
+
+1. `swift_search_post_document` - Filters the structured document data before it is sent/synced to Typesense. Use this to add custom meta fields, dynamic stock rules, or text content modifications.
+   * Arguments: `$document` (array), `$post_id` (int), `$post` (WP_Post object).
+
+2. `swift_search_should_index_post` - Filter returning a boolean. Return `false` to completely exclude specific posts, drafts, or out-of-stock products from the search index.
+   * Arguments: `$should_index` (bool), `$post_id` (int), `$post` (WP_Post object).
+
+3. `swift_search_vars` - Filters the configuration variables passed from PHP to the frontend JavaScript (such as API keys, weights, and enabled facets).
+   * Arguments: `$vars` (array), `$settings` (array).
+
+4. `swift_search_shortcode_args` - Filters default shortcode attributes and display settings.
+   * Arguments: `$args` (array), `$atts` (array).
 
 == Privacy & Compliance ==
 
@@ -155,6 +198,9 @@ Track your **Most Searched Keywords**. Our dashboard provides an overview of use
 8. **Sync Management**: Run bulk indexing processes and monitor real-time sync status logs.
 
 == Upgrade Notice ==
+= 1.5.0 =
+Features a dedicated Shop/Catalog layout mode replacing WooCommerce defaults, plus JS developer events for custom hit/result DOM rendering logic. Please update immediately.
+
 = 1.4.9 =
 Upgraded Chart.js to v4.5.1 and resolved the REST API permission callback warning for the logging endpoint. Please update immediately.
 
@@ -171,6 +217,11 @@ Minor bug fixes to resolve the browser-driven sync infinite loop. Please update 
 Robust browser fallback for servers with loopback/cURL security restrictions. Please update immediately.
  
 == Changelog ==
+
+= 1.5.0 =
+* Feature: Dedicated Shop & Catalog Page Mode replacing WooCommerce default shop page with horizontal sorting, sticky pagination, and flat card aesthetics.
+* Developer: Added custom JavaScript DOM events (`swift-search:hit-rendered` and `swift-search:results-rendered`) to support custom integrations (wishlists, ratings, ajax cart).
+* Fix: Resolved price sorting returning zero results by indexing price as a float and utilizing Typesense `missing_values` parameter support.
 
 = 1.4.9 =
 * Library: Upgraded Chart.js to v4.5.1.

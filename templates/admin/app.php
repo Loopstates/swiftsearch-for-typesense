@@ -12,9 +12,12 @@ if (!defined('ABSPATH')) {
             <h1 style="display: inline-block; vertical-align: middle; margin: 0;">SwiftSearch for Typesense <span
                     class="ss-version">v<?php echo esc_html(SWIFT_SEARCH_VERSION); ?></span></h1>
         </div>
-        <div class="ss-actions">
-            <a href="https://docs.loopstates.com/swift-search-typesense/" target="_blank"
-                class="ss-link"><?php esc_html_e('Documentation', 'swiftsearch-for-typesense'); ?></a>
+        <div class="ss-actions" style="display: flex; align-items: center; gap: 15px;">
+            <a href="https://docs.loopstates.com/swift-search-typesense/?ref=wp-plugin" target="_blank"
+                class="ss-link" style="margin-left: 0;"><?php esc_html_e('Documentation', 'swiftsearch-for-typesense'); ?></a>
+            <span class="ss-link-separator" style="color: var(--ss-text-muted); opacity: 0.5;">|</span>
+            <a href="https://docs.loopstates.com/swift-search-typesense/support.html?action=contact&ref=wp-plugin" target="_blank"
+                class="ss-link" style="margin-left: 0;"><?php esc_html_e('Need Customization?', 'swiftsearch-for-typesense'); ?></a>
         </div>
     </header>
 
