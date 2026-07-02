@@ -1,0 +1,2 @@
+# Copyright (C) 2026 Loopstates
+# This file is distributed under the same license as the SwiftSearch for Typesense package.
