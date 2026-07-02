@@ -39,23 +39,23 @@ Compare the features and capabilities of SwiftSearch for Typesense against the d
 
 | Feature / Capability | Default WP Search | Algolia WP Integration | SwiftSearch for Typesense |
 | :--- | :---: | :---: | :---: |
-| **Typo Tolerance** | ❌ None | ✅ Yes | **✅ Yes (Built-in)** |
-| **Instant Search-as-you-type** | ❌ No (Needs page refresh) | ✅ Yes | **✅ Yes (Client-side)** |
-| **Sub-millisecond Speed** | ❌ No (500ms - 1200ms) | ✅ Yes | **✅ Yes (30ms - 80ms)** |
-| **Direct Browser-to-Node queries** | ❌ No (Hits WordPress DB) | ❌ No (Routes via PHP proxy) | **✅ Yes (Bypasses server DB & PHP)** |
-| **Self-Hosting Capability** | ✅ Yes | ❌ No (Proprietary Cloud only) | **✅ Yes (100% Open-Source)** |
-| **Monthly API Search Costs** | Free | 💸 High (Scales with queries) | **Free (Self-host or flat-rate Cloud)** |
-| **Visual Merchandising (Pinning)** | ❌ No | 💸 Enterprise tier only | **✅ Yes (Included Admin Dashboard)** |
-| **Global Synonym Sets** | ❌ No | ✅ Yes | **✅ Yes (Typesense v0.30+ Sets)** |
-| **WooCommerce Shop Override** | ❌ No (Default layout only) | ⚠️ Requires custom theme code | **✅ Yes (Dedicated Catalog Mode)** |
-| **Faceted Sidebar Navigation** | ❌ No (Needs extra plugins) | ✅ Yes | **✅ Yes (Drag-and-Drop builder)** |
-| **Custom Post Type (CPT) Indexing**| ⚠️ Needs custom code | ✅ Yes | **✅ Yes (Out of the box)** |
-| **Local Search Analytics** | ❌ No | ⚠️ Stored on Algolia servers | **✅ Yes (Local DB + dashboard)** |
-| **GDPR & Privacy Compliance** | ✅ Yes (Local) | ❌ No (Queries sent to Algolia) | **✅ Yes (Zero middleware)** |
-| **Result Weighting & Tuning** | ❌ No | ✅ Yes | **✅ Yes (Visual Admin UI)** |
-| **Automated Real-Time Sync** | ✅ Yes (Direct SQL) | ✅ Yes | **✅ Yes (Background batch sync)** |
-| **Page Builder Integration** | ⚠️ Limited | ⚠️ Needs developer setup | **✅ Yes (Shortcode + overrides)** |
-| **Translation & Multilingual** | ⚠️ Complex | ✅ Yes | **✅ Yes (Compatible out of the box)** |
+| **Typo Tolerance** | None | Yes | **Yes (Built-in)** |
+| **Instant Search-as-you-type** | No (Page refresh) | Yes | **Yes (Client-side)** |
+| **Sub-millisecond Speed** | No (500ms – 1200ms) | Yes | **Yes (30ms – 80ms)** |
+| **Direct Browser-to-Node queries** | No (Hits WP Database) | No (Routes via PHP proxy) | **Yes (Zero-Middleware)** |
+| **Self-Hosting Capability** | Yes | No (Cloud only) | **Yes (Open-Source)** |
+| **Monthly API Search Costs** | Free | High (Scales with queries) | **Free (Self-host or flat-rate)** |
+| **Visual Merchandising (Pinning)** | No | Enterprise tier only | **Yes (Included Dashboard)** |
+| **Global Synonym Sets** | No | Yes | **Yes (Typesense v0.30+ Sets)** |
+| **WooCommerce Shop Override** | No (Default layout only) | Requires custom theme code | **Yes (Dedicated Catalog Mode)** |
+| **Faceted Sidebar Navigation** | No (Needs extra plugins) | Yes | **Yes (Drag-and-Drop builder)** |
+| **Custom Post Type (CPT) Indexing**| Requires custom code | Yes | **Yes (Out of the box)** |
+| **Local Search Analytics** | No | Stored on Algolia servers | **Yes (Local DB + dashboard)** |
+| **GDPR & Privacy Compliance** | Yes (Local) | No (Queries sent to Algolia) | **Yes (Direct Connection)** |
+| **Result Weighting & Tuning** | No | Yes | **Yes (Visual Admin UI)** |
+| **Automated Real-Time Sync** | Yes (Direct SQL) | Yes | **Yes (Background batch sync)** |
+| **Page Builder Integration** | Limited | Needs developer setup | **Yes (Shortcode + overrides)** |
+| **Translation & Multilingual** | Complex | Yes | **Yes (Compatible out of the box)** |
 
 ---
 
