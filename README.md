@@ -155,6 +155,47 @@ Our dashboard tracks your **Most Searched Keywords**, search trends, and volume.
 
 ---
 
+## 📸 Screenshots
+
+<details>
+<summary>Click to view plugin administration screens</summary>
+
+### 1. Connection Settings
+Configure direct-to-node cluster credentials and Search-Only keys.
+![Connection Settings](https://ps.w.org/swiftsearch-for-typesense/assets/screenshot-1.png)
+
+### 2. Content Settings
+Choose searchable post types and register custom field mappings.
+![Content Settings](https://ps.w.org/swiftsearch-for-typesense/assets/screenshot-2.png)
+
+### 3. Relevance and Synonyms
+Manage base search weights and register synonym sets.
+![Relevance and Synonyms](https://ps.w.org/swiftsearch-for-typesense/assets/screenshot-3.png)
+
+### 4. Search UI Configuration
+Setup autocomplete toggles, facets sidebar, and item limits.
+![Search UI Configuration](https://ps.w.org/swiftsearch-for-typesense/assets/screenshot-4.png)
+
+### 5. Styling Customizer
+Visually customize colors and border radius.
+![Styling Customizer](https://ps.w.org/swiftsearch-for-typesense/assets/screenshot-5.png)
+
+### 6. Search Analytics Dashboard
+Track search volume trends and flag zero-result queries.
+![Search Analytics Dashboard](https://ps.w.org/swiftsearch-for-typesense/assets/screenshot-6.png)
+
+### 7. Merchandising and Pinning
+Pin selected products or posts to the top of search results.
+![Merchandising and Pinning](https://ps.w.org/swiftsearch-for-typesense/assets/screenshot-7.png)
+
+### 8. Sync Management
+Run bulk indexing processes and monitor real-time sync status logs.
+![Sync Management](https://ps.w.org/swiftsearch-for-typesense/assets/screenshot-8.png)
+
+</details>
+
+---
+
 ## 📄 License & Changelog
 
 * **License:** This project is licensed under the GPLv2 (or later) License - see the [LICENSE](LICENSE) file for details.
