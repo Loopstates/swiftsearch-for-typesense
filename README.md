@@ -18,16 +18,22 @@
 
 ## ⚡ Key Features
 
-* **Direct-to-Node Architecture:** Search queries go directly from the client's browser to your Typesense cluster, bypassing WordPress completely to save server memory and CPU.
-* **Custom Post Type (CPT) Support:** Native indexing for Posts, Pages, WooCommerce Products, and custom post types or taxonomies.
-* **Visual Product Pinning (Merchandising):** A dedicated admin dashboard to pin specific products or posts to the top of search results for designated queries.
-* **Faceted Navigation & Metadata Mappings:** A visual drag-and-drop builder to map custom meta fields (ACF, price, SKU, brand) and create multi-select sidebar filters.
-* **Smart Typo Tolerance & Synonym Sets:** Global multi-way synonym sets (fully compatible with the Typesense v0.30+ API) to prevent "Zero Result" pages.
-* **Local Search Analytics:** Track search volume trends, popular keywords, and zero-result gaps directly inside your WordPress dashboard with zero third-party middleware.
-* **WooCommerce Catalog Mode:** Replaces default WooCommerce shop and category pages with instant search layouts, sorting, pagination, and count facets.
-* **Page Builder Friendly:** Integrates with Elementor, Divi, and Gutenberg blocks using shortcodes (`[swift_search]`) or automatic theme form overrides.
-* **Background Batch Indexing:** Self-scheduling indexing engine processes catalogs in batches to prevent server script timeouts.
+* **Direct-to-Node Queries:** Sub-millisecond browser-to-node query architecture, bypassing WordPress database and PHP layers.
+* **Custom Post Type (CPT) Support:** Native indexing for Posts, Pages, Products, and custom post types or taxonomies out of the box.
+* **Advanced Typesense Features:** Native support for global Synonym Sets (v0.30+ API compatible).
+* **Visual Product Pinning (Merchandising):** A dedicated admin dashboard to pin specific products or posts to the top of search results for designated search queries.
+* **Faceted Navigation & Metadata Mappings:** A visual drag-and-drop builder to create multi-select filters using taxonomies and metadata (ACF, price, SKU).
+* **Local Search Analytics:** Displays search trends and zero-result queries directly inside the WordPress dashboard without proxy middleware.
+* **WooCommerce Catalog Mode:** Replaces default WooCommerce shop and category pages with instant search and sidebar filters.
+* **Page Builder Friendly:** Integrates with Elementor, Divi, and Gutenberg blocks using shortcodes (`[swift_search]`) or automatic search form replacement.
+* **Developer Extensible:** Includes custom JavaScript event listeners (e.g. `swift-search:hit-rendered`) and WordPress PHP filters for query and document synchronization tuning.
+* **Background Batch Syncing:** Self-scheduling indexing engine processes catalogs in batches to prevent server script timeouts.
 * **GDPR & Privacy Ready:** Bypasses third-party proxy middleware, ensuring direct connectivity and complete data ownership.
+* **Instant Autocomplete:** Displays matching products, posts, and custom types the moment visitors start typing.
+* **Result Weighting & Tuning:** Adjust search relevance and define custom ranking weights for titles, contents, and metadata fields.
+* **Automated Sync:** Real-time document indexing and synchronization triggered automatically whenever content is saved, updated, or deleted.
+* **Global UI Customization:** Visually toggle results layouts, thumbnails, prices, and excerpts directly from the admin panel.
+* **Translation & Multilingual Ready:** Compatible with multi-language sites and translation plugins.
 
 ---
 
