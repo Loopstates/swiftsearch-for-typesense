@@ -26,17 +26,25 @@ class BackgroundProcess
      * Fires immediately without blocking the current page load.
      *
      * @param array $data Data to pass to the handler.
+     * @param bool $test_loopback Whether to run a test blocking loopback diagnostics request.
      */
-    public function dispatch($data = array())
+    public function dispatch($data = array(), $test_loopback = false)
     {
         $url = admin_url('admin-ajax.php');
+
+        $secret = get_option('swift_search_bg_secret');
+        if (empty($secret)) {
+            $secret = wp_generate_password(32, false);
+            update_option('swift_search_bg_secret', $secret);
+        }
+        $token = hash_hmac('sha256', 'swift_search_async_bg', $secret);
 
         $args = array(
             'timeout' => 0.01,
             'blocking' => false, // FIRE AND FORGET
             'body' => array(
                 'action' => $this->action,
-                'nonce' => wp_create_nonce('swift_search_async_bg'),
+                'nonce' => $token,
                 'data' => $data,
             ),
             'sslverify' => apply_filters('swift_search_https_local_ssl_verify', false),
@@ -44,29 +52,31 @@ class BackgroundProcess
 
         wp_remote_post($url, $args);
 
-        // Run a test BLOCKING request to capture the exact server response/error
-        $test_args = $args;
-        $test_args['blocking'] = true;
-        $test_args['timeout'] = 10;
-        
-        $response = wp_remote_post($url, $test_args);
-        
-        if (is_wp_error($response)) {
-            $log = array(
-                'success' => false,
-                'error_message' => $response->get_error_message(),
-                'error_code' => $response->get_error_code(),
-                'time' => time(),
-            );
-        } else {
-            $log = array(
-                'success' => true,
-                'response_code' => wp_remote_retrieve_response_code($response),
-                'response_body' => wp_remote_retrieve_body($response),
-                'time' => time(),
-            );
+        if ($test_loopback) {
+            // Run a test BLOCKING request to capture the exact server response/error
+            $test_args = $args;
+            $test_args['blocking'] = true;
+            $test_args['timeout'] = 10;
+            
+            $response = wp_remote_post($url, $test_args);
+            
+            if (is_wp_error($response)) {
+                $log = array(
+                    'success' => false,
+                    'error_message' => $response->get_error_message(),
+                    'error_code' => $response->get_error_code(),
+                    'time' => time(),
+                );
+            } else {
+                $log = array(
+                    'success' => true,
+                    'response_code' => wp_remote_retrieve_response_code($response),
+                    'response_body' => wp_remote_retrieve_body($response),
+                    'time' => time(),
+                );
+            }
+            update_option('swift_search_debug_loopback', $log);
         }
-        update_option('swift_search_debug_loopback', $log);
     }
 
     /**
@@ -85,7 +95,10 @@ class BackgroundProcess
          */
         // Sanitize Nonce and Data
         $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (!wp_verify_nonce($nonce, 'swift_search_async_bg')) {
+        $secret = get_option('swift_search_bg_secret');
+        $expected = $secret ? hash_hmac('sha256', 'swift_search_async_bg', $secret) : '';
+
+        if (empty($expected) || !hash_equals($expected, $nonce)) {
             wp_die('Invalid Nonce');
         }
 

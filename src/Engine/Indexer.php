@@ -95,7 +95,7 @@ class Indexer
             'type' => 'batch_process',
             'offset' => 0,
             'limit' => 50
-        ));
+        ), true);
 
         return $total;
     }
