@@ -208,6 +208,32 @@ Run bulk indexing processes and monitor real-time sync status logs.
 
 ---
 
+## 💻 WP-CLI Commands
+
+SwiftSearch includes native command-line support via WP-CLI. This is highly recommended for larger catalogs (10,000+ items) to bypass PHP execution time limits and local server loopback blocks.
+
+### Run Indexing
+Runs a complete bulk synchronization of all selected post types in chunks:
+```bash
+wp swift-search index
+```
+*Options:*
+* `--batch-size=<size>`: Number of documents to index per batch (default: `250`).
+
+### Check Server Status
+Tests connectivity and displays index statistics for each collection:
+```bash
+wp swift-search status
+```
+
+### Reset Index
+Deletes and recreates the Typesense collections:
+```bash
+wp swift-search reset
+```
+
+---
+
 ## ⚠️ Known Limitations
 
 1. **Search-Only Keys:** For public-facing sites, you **must** use a "Search Only" API key from Typesense for frontend queries. Using your Admin key on the frontend is a severe security risk.

@@ -94,6 +94,11 @@ class Plugin
 
         // Scheduled Tasks
         (new Cron())->init();
+
+        // WP-CLI Registration
+        if (defined('WP_CLI') && WP_CLI) {
+            \WP_CLI::add_command('swift-search', '\SwiftSearch\CLI\IndexCommand');
+        }
     }
 
     /**

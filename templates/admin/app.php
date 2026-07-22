@@ -591,6 +591,33 @@ if (!defined('ABSPATH')) {
                     </div>
                 </div>
 
+                <!-- WP-CLI Commands Panel -->
+                <div class="ss-card" style="margin-top: 20px;">
+                    <div class="ss-card-header">
+                        <h2><?php esc_html_e('WP-CLI Terminal Commands', 'swiftsearch-for-typesense'); ?></h2>
+                        <p><?php esc_html_e('Highly recommended for large catalogs (10,000+ items) or servers with strict security blocks to bypass timeouts and loopback limitations.', 'swiftsearch-for-typesense'); ?></p>
+                    </div>
+                    <div class="ss-card-body">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div>
+                                <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #374151;"><?php esc_html_e('Run Bulk Indexing', 'swiftsearch-for-typesense'); ?></h4>
+                                <p style="margin: 0 0 10px 0; font-size: 12px; color: #6b7280; line-height: 1.4;"><?php esc_html_e('Perform a complete synchronization of all selected content types.', 'swiftsearch-for-typesense'); ?></p>
+                                <code style="display: block; padding: 8px 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; font-family: monospace; font-size: 12px; color: #111827;">wp swift-search index</code>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #374151;"><?php esc_html_e('Check Connection & Stats', 'swiftsearch-for-typesense'); ?></h4>
+                                <p style="margin: 0 0 10px 0; font-size: 12px; color: #6b7280; line-height: 1.4;"><?php esc_html_e('Verify connectivity to the Typesense cluster and view collection counts.', 'swiftsearch-for-typesense'); ?></p>
+                                <code style="display: block; padding: 8px 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; font-family: monospace; font-size: 12px; color: #111827;">wp swift-search status</code>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #374151;"><?php esc_html_e('Reset Search Index', 'swiftsearch-for-typesense'); ?></h4>
+                                <p style="margin: 0 0 10px 0; font-size: 12px; color: #6b7280; line-height: 1.4;"><?php esc_html_e('Recreate and clean the search collection schemas on the cluster.', 'swiftsearch-for-typesense'); ?></p>
+                                <code style="display: block; padding: 8px 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; font-family: monospace; font-size: 12px; color: #111827;">wp swift-search reset</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Sync Logs Panel -->
                 <div class="ss-card" style="margin-top: 20px;">
                     <div class="ss-card-header">

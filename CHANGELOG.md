@@ -2,6 +2,10 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.6.0] - 2026-07-22
+- **Feature**: Full WP-CLI terminal command integration (`wp swift-search index`, `wp swift-search reset`, `wp swift-search status`) to handle large catalog indexing without execution timeouts or local loopback HTTP failures.
+- **UI**: Added styled WP-CLI helper command notice on the Sync management dashboard tab.
+
 ## [1.5.0] - 2026-06-25
 - **Feature**: Dedicated Shop & Catalog Page Mode replacing WooCommerce default shop page with horizontal sorting, pagination, and flat card aesthetics.
 - **Developer**: Added custom JavaScript DOM events (`swift-search:hit-rendered` and `swift-search:results-rendered`) to support custom integrations (wishlists, ratings, ajax cart).

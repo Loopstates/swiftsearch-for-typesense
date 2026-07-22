@@ -2,8 +2,8 @@
 Contributors: loopstates
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
-Tested up to: 7.0
-Stable tag: 1.5.0
+Tested up to: 7.0.2
+Stable tag: 1.6.0
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -46,6 +46,9 @@ Give users the power to filter results instantly. Map any custom meta fields (su
 ### Background Sync and Real-Time Updates
 When you first connect, our background sync engine processes your content in self-scheduling batches to prevent script timeouts. Once indexed, any new, updated, or deleted posts/products are synchronized.
 
+### Native WP-CLI Command-Line Integration
+For stores with large catalogs (10,000+ items) or servers with strict security firewalls that block background HTTP requests (loopback blocks), SwiftSearch includes full WP-CLI terminal commands. Run bulk indexing (`wp swift-search index`), check connection status (`wp swift-search status`), and reset indexes (`wp swift-search reset`) directly via SSH.
+
 ### Dedicated Shop & Catalog Page Mode
 Easily replace your default WooCommerce Shop page with a high-performance, dedicated search and filter catalog page. Features horizontal sort filters, instant category sidebar counts, pagination, and a clean flat card layout.
 
@@ -62,6 +65,7 @@ Customize the search UI without writing code. Control colors, typography, card l
 *   **Search Analytics**: Dashboard for tracking popular searches and identifying "Zero Result" gaps.
 *   **Background Indexing**: Sync engine handles items in self-scheduling batches without timing out.
 *   **Automated Sync**: Real-time indexing when you Save, Update, or Delete content.
+*   **WP-CLI Support**: Bulk sync, reset, and check connection status from your terminal via SSH.
 *   **CPT Support**: Index Posts, Pages, Products, and Custom Post Types.
 *   **Easy Setup (No Coding Required)**: Configure search layouts, color schemes, and settings visually without writing code.
 *   **Global UI Toggles**: Show or hide Thumbnails, Prices, and Excerpts globally.
@@ -198,6 +202,9 @@ Track your **Most Searched Keywords**. Our dashboard provides an overview of use
 8. **Sync Management**: Run bulk indexing processes and monitor real-time sync status logs.
 
 == Upgrade Notice ==
+= 1.6.0 =
+Adds full WP-CLI terminal support for bulk indexing, search index resetting, and server status checks. Highly recommended for stores with large catalogs.
+
 = 1.5.0 =
 Features a dedicated Shop/Catalog layout mode replacing WooCommerce defaults, plus JS developer events for custom hit/result DOM rendering logic. Please update immediately.
 
@@ -217,6 +224,10 @@ Minor bug fixes to resolve the browser-driven sync infinite loop. Please update 
 Robust browser fallback for servers with loopback/cURL security restrictions. Please update immediately.
  
 == Changelog ==
+
+= 1.6.0 =
+* Feature: Native WP-CLI integration. Adds terminal commands (`wp swift-search index`, `wp swift-search reset`, `wp swift-search status`) to handle large catalog indexing without timeouts.
+* UI: Added WP-CLI helper command notice on the Sync management dashboard tab.
 
 = 1.5.0 =
 * Feature: Dedicated Shop & Catalog Page Mode replacing WooCommerce default shop page with horizontal sorting, sticky pagination, and flat card aesthetics.
