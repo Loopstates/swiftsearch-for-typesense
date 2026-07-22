@@ -3,7 +3,7 @@ Contributors: loopstates
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 7.0.2
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -202,6 +202,9 @@ Track your **Most Searched Keywords**. Our dashboard provides an overview of use
 8. **Sync Management**: Run bulk indexing processes and monitor real-time sync status logs.
 
 == Upgrade Notice ==
+= 1.6.1 =
+Fixes background sync failures ("Invalid Nonce" errors) on cached hosts like WP Engine by utilizing a secure stateless HMAC signature, and resolves a double-execution performance bug.
+
 = 1.6.0 =
 Adds full WP-CLI terminal support for bulk indexing, search index resetting, and server status checks. Highly recommended for stores with large catalogs.
 
@@ -224,6 +227,10 @@ Minor bug fixes to resolve the browser-driven sync infinite loop. Please update 
 Robust browser fallback for servers with loopback/cURL security restrictions. Please update immediately.
  
 == Changelog ==
+
+= 1.6.1 =
+* Fix: Implemented secure stateless HMAC signature validation for background processes to prevent cookie-less loopback authentication errors on cached hosts.
+* Fix: Resolved a performance bug causing double execution of async batch dispatches during indexing loop recursion.
 
 = 1.6.0 =
 * Feature: Native WP-CLI integration. Adds terminal commands (`wp swift-search index`, `wp swift-search reset`, `wp swift-search status`) to handle large catalog indexing without timeouts.

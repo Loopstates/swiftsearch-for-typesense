@@ -2,6 +2,10 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.6.1] - 2026-07-23
+- **Fix**: Implemented secure stateless HMAC signature validation for background processes to prevent cookie-less loopback authentication errors on cached hosts.
+- **Fix**: Resolved a performance bug causing double execution of async batch dispatches during indexing loop recursion.
+
 ## [1.6.0] - 2026-07-22
 - **Feature**: Full WP-CLI terminal command integration (`wp swift-search index`, `wp swift-search reset`, `wp swift-search status`) to handle large catalog indexing without execution timeouts or local loopback HTTP failures.
 - **UI**: Added styled WP-CLI helper command notice on the Sync management dashboard tab.
