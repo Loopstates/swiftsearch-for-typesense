@@ -49,7 +49,7 @@ class DocumentBuilder
             'post_id' => $post->ID,
             'post_title' => $post->post_title,
             'post_content' => wp_strip_all_tags(strip_shortcodes($post->post_content)),
-            'post_excerpt' => wp_strip_all_tags(get_the_excerpt($post)),
+            'post_excerpt' => wp_strip_all_tags($post->post_excerpt ? $post->post_excerpt : wp_html_excerpt(wp_strip_all_tags(strip_shortcodes($post->post_content)), 252)),
             'post_type' => $post->post_type,
             'permalink' => get_permalink($post),
             'published_at' => get_post_timestamp($post),

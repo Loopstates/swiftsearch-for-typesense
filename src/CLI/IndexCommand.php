@@ -23,9 +23,15 @@ class IndexCommand
      * [--batch-size=<size>]
      * : Number of items to index in each batch. Default is 250.
      *
+     * [--offset=<offset>]
+     * : Skip N items before starting. Default is 0.
+     *
+     * [--limit=<limit>]
+     * : Max number of items to index. Default is no limit.
+     *
      * ## EXAMPLES
      *
-     *     wp swift-search index --batch-size=500
+     *     wp swift-search index --batch-size=500 --offset=1000 --limit=5000
      *
      * @alias index
      */
@@ -35,6 +41,13 @@ class IndexCommand
         if ($batch_size <= 0) {
             $batch_size = 250;
         }
+
+        $offset_arg = isset($assoc_args['offset']) ? intval($assoc_args['offset']) : 0;
+        if ($offset_arg < 0) {
+            $offset_arg = 0;
+        }
+
+        $limit_arg = isset($assoc_args['limit']) ? intval($assoc_args['limit']) : -1;
 
         $config_loader = new ConfigLoader();
         $config = $config_loader->get_config();
@@ -58,6 +71,17 @@ class IndexCommand
         if ($total === 0) {
             WP_CLI::success('No posts found to index.');
             return;
+        }
+
+        // Apply Offset & Limit filters
+        if ($offset_arg > 0 || $limit_arg > 0) {
+            if ($limit_arg > 0) {
+                $post_ids = array_slice($post_ids, $offset_arg, $limit_arg);
+            } else {
+                $post_ids = array_slice($post_ids, $offset_arg);
+            }
+            $total = count($post_ids);
+            WP_CLI::line(sprintf('Applied filters: offset %d, limit %d. Remaining: %d posts', $offset_arg, $limit_arg, $total));
         }
 
         WP_CLI::line(sprintf('Found %d posts to index. Starting bulk sync in batches of %d...', $total, $batch_size));
@@ -105,6 +129,14 @@ class IndexCommand
             }
 
             $offset += count($batch_ids);
+
+            // Free PHP Memory by flushing local WordPress post/meta caches
+            global $wpdb;
+            $wpdb->queries = array();
+            foreach ($batch_ids as $id) {
+                clean_post_cache($id);
+                wp_cache_delete($id, 'post_meta');
+            }
             
             // Keep admin status option updated
             update_option('swift_search_index_status', array(

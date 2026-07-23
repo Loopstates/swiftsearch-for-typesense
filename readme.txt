@@ -3,7 +3,7 @@ Contributors: loopstates
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 7.0.2
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -202,6 +202,9 @@ Track your **Most Searched Keywords**. Our dashboard provides an overview of use
 8. **Sync Management**: Run bulk indexing processes and monitor real-time sync status logs.
 
 == Upgrade Notice ==
+= 1.6.2 =
+Fixes a WP-CLI progress bar hang on hosts with strict loop filters by fetching raw excerpts directly without applying layout and translation hooks.
+
 = 1.6.1 =
 Fixes background sync failures ("Invalid Nonce" errors) on cached hosts like WP Engine by utilizing a secure stateless HMAC signature, and resolves a double-execution performance bug.
 
@@ -227,6 +230,9 @@ Minor bug fixes to resolve the browser-driven sync infinite loop. Please update 
 Robust browser fallback for servers with loopback/cURL security restrictions. Please update immediately.
  
 == Changelog ==
+
+= 1.6.2 =
+* Fix: Prevented WP-CLI progress bar hangs by bypassing WordPress rendering layout/builder filters on post excerpts during CLI indexing.
 
 = 1.6.1 =
 * Fix: Implemented secure stateless HMAC signature validation for background processes to prevent cookie-less loopback authentication errors on cached hosts.

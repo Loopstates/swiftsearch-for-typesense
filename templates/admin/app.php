@@ -595,7 +595,7 @@ if (!defined('ABSPATH')) {
                 <div class="ss-card" style="margin-top: 20px;">
                     <div class="ss-card-header">
                         <h2><?php esc_html_e('WP-CLI Terminal Commands', 'swiftsearch-for-typesense'); ?></h2>
-                        <p><?php esc_html_e('Highly recommended for large catalogs (10,000+ items) or servers with strict security blocks to bypass timeouts and loopback limitations.', 'swiftsearch-for-typesense'); ?></p>
+                        <p><?php esc_html_e('Highly recommended for large catalogs (10,000+ items) or servers with strict security blocks to bypass timeouts and loopback limitations.', 'swiftsearch-for-typesense'); ?> <a href="https://docs.loopstates.com/swift-search-typesense/#cli" target="_blank" style="color: #2271b1; text-decoration: underline; font-weight: 500;"><?php esc_html_e('Learn more here.', 'swiftsearch-for-typesense'); ?></a></p>
                     </div>
                     <div class="ss-card-body">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">

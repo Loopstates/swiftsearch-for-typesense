@@ -2,6 +2,9 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.6.2] - 2026-07-23
+- **Fix**: Prevented WP-CLI progress bar hangs by bypassing WordPress rendering layout/builder filters on post excerpts during CLI indexing.
+
 ## [1.6.1] - 2026-07-23
 - **Fix**: Implemented secure stateless HMAC signature validation for background processes to prevent cookie-less loopback authentication errors on cached hosts.
 - **Fix**: Resolved a performance bug causing double execution of async batch dispatches during indexing loop recursion.
