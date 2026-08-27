@@ -3,7 +3,7 @@ Contributors: loopstates
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 1.6.6
+Stable tag: 1.6.7
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -249,6 +249,13 @@ Minor bug fixes to resolve the browser-driven sync infinite loop. Please update 
 Robust browser fallback for servers with loopback/cURL security restrictions. Please update immediately.
  
 == Changelog ==
+
+= 1.6.7 =
+* Fix: Resolved an issue where the "Disconnect" button failed to clear server settings or disconnect from the Typesense server.
+* Fix: Resolved price display defaulting to a dollar sign ($) by dynamically formatting card prices based on active WooCommerce currency symbol and position settings.
+* Fix: Resolved custom styling and layout options failing to save on the "Styling & UI" configuration tab.
+* Feature: Added a "Factory Reset" option in settings to easily clear all local configuration mappings and start fresh without uninstalling the plugin.
+* Improvement: Enhanced the uninstallation database cleanup sequence to ensure all settings and tables are completely removed upon deletion.
 
 = 1.6.6 =
 * Improvement: Automatically sanitize default proposed target names to match Typesense field naming standards.

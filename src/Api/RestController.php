@@ -88,6 +88,12 @@ class RestController extends WP_REST_Controller
             'permission_callback' => array($this, 'check_permission'),
         ));
 
+        register_rest_route($this->namespace, '/settings/reset', array(
+            'methods' => WP_REST_Server::CREATABLE,
+            'callback' => array($this, 'handle_factory_reset'),
+            'permission_callback' => array($this, 'check_permission'),
+        ));
+
         register_rest_route($this->namespace, '/log', array(
             'methods' => WP_REST_Server::CREATABLE,
             'callback' => array($this, 'handle_log'),
@@ -219,6 +225,62 @@ class RestController extends WP_REST_Controller
                 )
             ), 200);
         }
+    }
+
+    /**
+     * Handle disconnect request.
+     *
+     * @return \WP_REST_Response
+     */
+    public function handle_disconnect()
+    {
+        $settings = get_option('swift_search_settings', array());
+
+        // Only clear the connection credentials so that they don't lose their custom fields, facets, or styling
+        unset($settings['host']);
+        unset($settings['port']);
+        unset($settings['protocol']);
+        unset($settings['api_key']);
+        unset($settings['search_key']);
+
+        update_option('swift_search_settings', $settings);
+
+        // Reset loopback/index status options since the old sync is no longer valid
+        delete_option('swift_search_index_status');
+        delete_option('swift_search_debug_loopback');
+        delete_option('swift_search_schema_hash');
+        delete_option('swift_search_schema_mismatch');
+        delete_option('swift_search_sync_errors');
+
+        return new \WP_REST_Response(array('success' => true), 200);
+    }
+
+    /**
+     * Handle Factory Reset request.
+     *
+     * @return \WP_REST_Response
+     */
+    public function handle_factory_reset()
+    {
+        global $wpdb;
+        // Truncate tables to delete logs but keep the table structures intact
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}swift_search_logs");
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}swift_search_batch_logs");
+
+        // Delete all options
+        delete_option('swift_search_settings');
+        delete_option('swift_search_index_status');
+        delete_option('swift_search_debug_loopback');
+        delete_option('swift_search_schema_hash');
+        delete_option('swift_search_schema_mismatch');
+        delete_option('swift_search_sync_errors');
+        delete_option('swift_search_pinned_items');
+        delete_option('swift_search_override_default');
+        delete_option('swift_search_bg_secret');
+
+        return new \WP_REST_Response(array('success' => true), 200);
     }
 
     /**

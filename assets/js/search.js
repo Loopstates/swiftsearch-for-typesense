@@ -8,6 +8,21 @@
 
     const config = swiftSearchVars;
 
+    function formatPrice(price) {
+        const symbol = config.currencySymbol || '$';
+        const position = config.currencyPosition || 'left';
+        if (position === 'left') {
+            return `${symbol}${price}`;
+        } else if (position === 'left_space') {
+            return `${symbol} ${price}`;
+        } else if (position === 'right') {
+            return `${price}${symbol}`;
+        } else if (position === 'right_space') {
+            return `${price} ${symbol}`;
+        }
+        return `${symbol}${price}`;
+    }
+
     function initSearchInstance(wrapper) {
         const input = wrapper.querySelector('.ss-search-input') || wrapper.querySelector('input[type="text"]');
         const resultsContainer = wrapper.querySelector('.ss-results-container');
@@ -496,7 +511,7 @@
                                     </div>` : ''}
                                     <div class="ss-card-body">
                                         <h4 class="ss-card-title">${highlight(hit, 'post_title')}</h4>
-                                        ${(showPrice && isProduct && typeof doc.price !== 'undefined' && doc.price !== null) ? `<div class="ss-card-price">$${doc.price}</div>` : ''}
+                                        ${(showPrice && isProduct && typeof doc.price !== 'undefined' && doc.price !== null) ? `<div class="ss-card-price">${formatPrice(doc.price)}</div>` : ''}
                                         ${(showExcerpt && doc.post_excerpt) ? `<p class="ss-card-excerpt">${doc.post_excerpt}</p>` : ''}
                                     </div>
                                 </a>`;

@@ -632,6 +632,25 @@ if (!defined('ABSPATH')) {
                         </div>
                     </div>
                 </div>
+
+                <!-- Danger Zone Panel -->
+                <div class="ss-card" style="margin-top: 20px; border: 1px solid #fca5a5;">
+                    <div class="ss-card-header" style="border-bottom: 1px solid #fee2e2; background: #fff5f5; padding: 15px 20px;">
+                        <h2 style="color: #b91c1c; margin: 0; font-size: 16px; font-weight: 600;"><?php esc_html_e('Danger Zone', 'swiftsearch-for-typesense'); ?></h2>
+                        <p style="color: #7f1d1d; margin: 5px 0 0 0; font-size: 13px;"><?php esc_html_e('Destructive actions to reset the plugin configuration.', 'swiftsearch-for-typesense'); ?></p>
+                    </div>
+                    <div class="ss-card-body" style="background: #fffafa; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 250px;">
+                                <h4 style="margin: 0 0 5px 0; font-size: 14px; font-weight: 600; color: #991b1b;"><?php esc_html_e('Reset Plugin to Factory Defaults', 'swiftsearch-for-typesense'); ?></h4>
+                                <p style="margin: 0; font-size: 13px; color: #7f1d1d; line-height: 1.4;"><?php esc_html_e('This will permanently delete all local settings, custom fields mapping, synonyms, facets, design styling, and credentials. The plugin will be returned to a fresh unconfigured state.', 'swiftsearch-for-typesense'); ?></p>
+                            </div>
+                            <div>
+                                <button type="button" id="ss-factory-reset-btn" class="ss-btn ss-btn-danger" style="background: #dc2626; border-color: #dc2626; color: #fff; font-weight: 600; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><?php esc_html_e('Factory Reset', 'swiftsearch-for-typesense'); ?></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
         </main>

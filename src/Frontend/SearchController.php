@@ -82,6 +82,15 @@ class SearchController
             // Gating Pro features at the source (Frontend Configuration)
             $is_pro = Gatekeeper::can_use_features();
             
+            $currency_symbol = '$';
+            $currency_pos = 'left';
+            if (function_exists('get_woocommerce_currency_symbol')) {
+                $currency_symbol = get_woocommerce_currency_symbol();
+            }
+            if (function_exists('get_option')) {
+                $currency_pos = get_option('woocommerce_currency_pos', 'left');
+            }
+
             $vars = array(
                 'host' => $settings['host'],
                 'port' => $settings['port'],
@@ -98,6 +107,8 @@ class SearchController
                 'synonym_sets' => ($is_pro) ? $synonym_sets : array(),
                 'apiUrl' => rest_url('swift-search/v1'),
                 'nonce' => wp_create_nonce('swift_search_log_nonce'),
+                'currencySymbol' => $currency_symbol,
+                'currencyPosition' => $currency_pos,
             );
 
             $vars = apply_filters('swift_search_vars', $vars, $settings);

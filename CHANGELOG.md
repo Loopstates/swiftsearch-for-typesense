@@ -2,6 +2,13 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.6.7] - 2026-08-27
+- **Fix**: Resolved an issue where the "Disconnect" button failed to clear server settings or disconnect from the Typesense server.
+- **Fix**: Resolved price display defaulting to a dollar sign ($) by dynamically formatting card prices based on active WooCommerce currency symbol and position settings.
+- **Fix**: Resolved custom styling and layout options failing to save on the "Styling & UI" configuration tab.
+- **Feature**: Added a "Factory Reset" option in settings to easily clear all local configuration mappings and start fresh without uninstalling the plugin.
+- **Improvement**: Enhanced the uninstallation database cleanup sequence to ensure all settings and tables are completely removed upon deletion.
+
 ## [1.6.6] - 2026-08-20
 - **Improvement**: Automatically sanitize default proposed target names to match Typesense field naming standards.
 - **Compatibility**: Full support for WordPress 7.1.

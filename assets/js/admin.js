@@ -44,6 +44,7 @@
             // Sync
             this.$syncBtn = $('#ss-sync-btn');
             this.$resetBtn = $('#ss-reset-btn');
+            this.$factoryResetBtn = $('#ss-factory-reset-btn');
             this.$progressCircle = $('.progress-circle');
             this.$syncStatusText = $('#ss-sync-msg');
             this.$logContainer = $('#ss-sync-log-container');
@@ -118,6 +119,7 @@
             // Sync Actions
             this.$syncBtn.on('click', this.startSync.bind(this));
             this.$resetBtn.on('click', this.resetIndex.bind(this));
+            this.$factoryResetBtn.on('click', this.factoryReset.bind(this));
 
             // Override Toggle (Remove auto-save)
             // this.$overrideToggle.on('change', this.handleOverrideChange.bind(this));
@@ -540,6 +542,7 @@
             const originalText = $btn.text();
 
             const payload = {
+                section: 'styling',
                 primary_color: this.$ssPrimaryColor.val(),
                 text_color: this.$ssTextColor.val(),
                 card_bg: this.$ssCardBg.val(),
@@ -548,7 +551,7 @@
 
             $btn.prop('disabled', true).text('Saving...');
 
-            this.request('POST', '/settings/styling', payload).done((response) => {
+            this.request('POST', '/settings', payload).done((response) => {
                 if (response.success) {
                     alert('Styling Settings Saved!');
                     // Refresh custom CSS if we have a way, or just reload
@@ -1446,6 +1449,24 @@
             }).fail(function () {
                 self.$syncStatusText.text('Error resetting index.');
                 self.$resetBtn.prop('disabled', false);
+            });
+        },
+
+        factoryReset: function () {
+            if (!confirm('WARNING: Are you sure you want to restore factory default settings? This will delete all your local configuration settings, custom mappings, layout choices, search synonyms, styling designs, and server credentials. This action cannot be undone.')) return;
+
+            const self = this;
+            const $btn = this.$factoryResetBtn;
+            const originalText = $btn.text();
+
+            $btn.prop('disabled', true).text('Resetting...');
+
+            this.request('POST', '/settings/reset', {}).done(function (response) {
+                alert('Success: Plugin has been restored to factory defaults.');
+                location.reload();
+            }).fail(function () {
+                alert('Error: Failed to perform factory reset.');
+                $btn.prop('disabled', false).text(originalText);
             });
         },
 
