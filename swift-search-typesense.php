@@ -3,8 +3,9 @@
  * Plugin Name: SwiftSearch for Typesense
  * Plugin URI:  https://docs.loopstates.com/swift-search-typesense/
  * Description: Lightning-Fast, typo-tolerant instant search for WordPress, WooCommerce, Custom Post Types (CPTs), and custom taxonomies. Features zero-middleware direct-to-node queries, sidebar facets configurator, synonyms, result weighting, search analytics, and merchandising/result pinning.
- * Version:           1.6.7
- * Tested up to:      7.1
+ * Version:           1.6.8
+ * Tested up to:      7.1.1
+ * WC tested up to:   11.1.1
  * Requires PHP:      8.0.0
  * Author:      Loopstates
  * Author URI:  https://loopstates.com
@@ -18,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('SWIFT_SEARCH_VERSION', '1.6.7');
+define('SWIFT_SEARCH_VERSION', '1.6.8');
 define('SWIFT_SEARCH_DB_VERSION', '1.1.0');
 define('SWIFT_SEARCH_FILE', __FILE__);
 define('SWIFT_SEARCH_PATH', plugin_dir_path(__FILE__));

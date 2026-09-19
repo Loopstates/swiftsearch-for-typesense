@@ -2,8 +2,9 @@
 Contributors: loopstates
 Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
-Tested up to: 7.1
-Stable tag: 1.6.7
+Tested up to: 7.1.1
+WC tested up to: 11.1.1
+Stable tag: 1.6.8
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -249,6 +250,10 @@ Minor bug fixes to resolve the browser-driven sync infinite loop. Please update 
 Robust browser fallback for servers with loopback/cURL security restrictions. Please update immediately.
  
 == Changelog ==
+
+= 1.6.8 =
+* Compatibility: Confirmed compatibility with WordPress 7.1.1 and WooCommerce 11.1.1.
+* Improvement: Minor UI/UX improvements.
 
 = 1.6.7 =
 * Fix: Resolved an issue where the "Disconnect" button failed to clear server settings or disconnect from the Typesense server.

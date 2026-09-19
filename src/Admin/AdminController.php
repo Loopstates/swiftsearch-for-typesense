@@ -35,7 +35,7 @@ class AdminController
             'manage_options',
             'swift-search',
             array($this, 'render_app'),
-            'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xMyAyTDMgMTRoOWwtMSAxMiAxMC0xMmgtOWwxLTEyeiIvPjwvc3ZnPg==',
+            SWIFT_SEARCH_URL . 'assets/images/menu-icon.png',
             30
         );
     }
@@ -47,6 +47,14 @@ class AdminController
      */
     public function enqueue_assets($hook)
     {
+        // Strictly constrain sidebar menu icon to 20x20px globally across all admin screens
+        wp_register_style('swift-search-menu-icon', false, array(), defined('SWIFT_SEARCH_VERSION') ? SWIFT_SEARCH_VERSION : '1.0.0');
+        wp_enqueue_style('swift-search-menu-icon');
+        wp_add_inline_style(
+            'swift-search-menu-icon',
+            '#adminmenu .toplevel_page_swift-search .wp-menu-image img, #adminmenu a[href*="page=swift-search"] .wp-menu-image img { width: 20px !important; height: 20px !important; max-width: 20px !important; max-height: 20px !important; padding: 7px 0 0 0 !important; object-fit: contain !important; box-sizing: content-box !important; }'
+        );
+
         if ($hook !== 'toplevel_page_swift-search') {
             return;
         }

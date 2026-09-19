@@ -2,6 +2,10 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.6.8] - 2026-09-19
+- **Compatibility**: Confirmed compatibility with WordPress 7.1.1 and WooCommerce 11.1.1.
+- **Improvement**: Minor UI/UX improvements.
+
 ## [1.6.7] - 2026-08-27
 - **Fix**: Resolved an issue where the "Disconnect" button failed to clear server settings or disconnect from the Typesense server.
 - **Fix**: Resolved price display defaulting to a dollar sign ($) by dynamically formatting card prices based on active WooCommerce currency symbol and position settings.
