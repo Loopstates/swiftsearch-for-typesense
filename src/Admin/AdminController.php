@@ -2,6 +2,7 @@
 namespace SwiftSearch\Admin;
 
 use SwiftSearch\Core\Gatekeeper;
+use SwiftSearch\Engine\ConfigLoader;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -127,8 +128,8 @@ class AdminController
                 'api_key' => isset($settings['api_key']) ? $settings['api_key'] : '',
                 'search_key' => isset($settings['search_key']) ? $settings['search_key'] : '',
             ),
-            'indexed_post_types' => isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : array('post', 'page', 'product'),
-            'indexed_taxonomies' => isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array('category', 'post_tag', 'product_cat'),
+            'indexed_post_types' => isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : ConfigLoader::get_default_post_types(),
+            'indexed_taxonomies' => isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : ConfigLoader::get_default_taxonomies(),
             'indexed_users' => isset($settings['indexed_users']) ? (bool) $settings['indexed_users'] : false,
             'custom_fields' => isset($settings['custom_fields']) ? $settings['custom_fields'] : array(),
             'facets_config' => isset($settings['facets_config']) ? $settings['facets_config'] : array(),

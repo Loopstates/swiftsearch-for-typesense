@@ -4,7 +4,7 @@ Tags: typesense, woocommerce, instant search, auto complete, algolia
 Requires at least: 6.0
 Tested up to: 7.1.1
 WC tested up to: 11.1.1
-Stable tag: 1.6.8
+Stable tag: 1.6.9
 Requires PHP: 8.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -250,6 +250,13 @@ Minor bug fixes to resolve the browser-driven sync infinite loop. Please update 
 Robust browser fallback for servers with loopback/cURL security restrictions. Please update immediately.
  
 == Changelog ==
+
+= 1.6.9 =
+* Fix: Prevented connection saves from wiping out existing content, taxonomy, custom field, and styling configurations.
+* Fix: Centralized default post types and taxonomies so non-WooCommerce sites correctly index posts and pages instead of defaulting to product-only queries.
+* Compatibility: Declared official compatibility with WooCommerce High-Performance Order Storage (HPOS) and Cart/Checkout Blocks.
+* Architecture: Added administrative query filtering hygiene (`suppress_filters => true`) to ensure background indexing captures all published content reliably.
+* Extensibility: Added `swift_search_document` filter in DocumentBuilder for clean metadata and translation extension.
 
 = 1.6.8 =
 * Compatibility: Confirmed compatibility with WordPress 7.1.1 and WooCommerce 11.1.1.

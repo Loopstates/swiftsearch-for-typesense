@@ -66,13 +66,14 @@ class Indexer
         $config = $this->config_loader->get_config();
 
         // 1. Calculate Totals
-        $post_types = isset($config['indexed_post_types']) ? (array) $config['indexed_post_types'] : array('product');
+        $post_types = !empty($config['indexed_post_types']) ? (array) $config['indexed_post_types'] : ConfigLoader::get_default_post_types();
 
         $args = array(
             'post_type' => $post_types,
             'post_status' => 'publish',
             'fields' => 'ids',
             'posts_per_page' => -1,
+            'suppress_filters' => true,
         );
 
         $query = new \WP_Query($args);
@@ -106,7 +107,7 @@ class Indexer
     public function process_bulk_batch($offset, $limit = 50)
     {
         $config = $this->config_loader->get_config();
-        $post_types = isset($config['indexed_post_types']) ? (array) $config['indexed_post_types'] : array('product');
+        $post_types = !empty($config['indexed_post_types']) ? (array) $config['indexed_post_types'] : ConfigLoader::get_default_post_types();
 
         $args = array(
             'post_type' => $post_types,
@@ -116,6 +117,7 @@ class Indexer
             'offset' => $offset,
             'orderby' => 'ID',
             'order' => 'ASC',
+            'suppress_filters' => true,
         );
 
         $query = new \WP_Query($args);

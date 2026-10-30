@@ -39,8 +39,7 @@ class TermIndexer
             return false;
         }
 
-        // Strict Check: specific taxonomies only
-        $allowed_taxonomies = isset($this->config['indexed_taxonomies']) ? $this->config['indexed_taxonomies'] : array('category', 'post_tag', 'product_cat');
+        $allowed_taxonomies = !empty($this->config['indexed_taxonomies']) ? (array) $this->config['indexed_taxonomies'] : ConfigLoader::get_default_taxonomies();
 
         if (!in_array($term->taxonomy, $allowed_taxonomies)) {
             return false;

@@ -3,6 +3,7 @@
 namespace SwiftSearch\Frontend;
 
 use SwiftSearch\Core\Gatekeeper;
+use SwiftSearch\Engine\ConfigLoader;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -97,7 +98,8 @@ class SearchController
                 'protocol' => $settings['protocol'],
                 'apiKey' => $settings['search_key'],
                 'collection' => 'posts',
-                'indexed_taxonomies' => isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : array(),
+                'indexed_post_types' => isset($settings['indexed_post_types']) ? $settings['indexed_post_types'] : ConfigLoader::get_default_post_types(),
+                'indexed_taxonomies' => isset($settings['indexed_taxonomies']) ? $settings['indexed_taxonomies'] : ConfigLoader::get_default_taxonomies(),
                 'indexed_users' => isset($settings['indexed_users']) ? (bool) $settings['indexed_users'] : false,
                 'experience' => isset($settings['experience']) ? $settings['experience'] : array(),
                 'facets_config' => ($is_pro && isset($settings['facets_config'])) ? $settings['facets_config'] : array(),

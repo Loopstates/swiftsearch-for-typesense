@@ -2,6 +2,13 @@
 
 All notable changes to the SwiftSearch - Typesense Search for WordPress plugin will be documented in this file.
 
+## [1.6.9] - 2026-10-30
+- **Fix**: Prevented connection saves from wiping out existing content, taxonomy, custom field, and styling configurations.
+- **Fix**: Centralized default post types and taxonomies in `ConfigLoader` so non-WooCommerce sites correctly index posts and pages instead of defaulting to product-only queries.
+- **Compatibility**: Declared official compatibility with WooCommerce High-Performance Order Storage (HPOS) and Cart/Checkout Blocks (`before_woocommerce_init`).
+- **Architecture**: Added administrative query filtering hygiene (`suppress_filters => true`) across all bulk queries (`Indexer`, `IndexCommand`, `RestController`) to ensure background indexing captures all published content reliably.
+- **Extensibility**: Added `swift_search_document` filter in `DocumentBuilder` for clean metadata and translation extension.
+
 ## [1.6.8] - 2026-09-19
 - **Compatibility**: Confirmed compatibility with WordPress 7.1.1 and WooCommerce 11.1.1.
 - **Improvement**: Minor UI/UX improvements.

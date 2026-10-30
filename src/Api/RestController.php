@@ -4,6 +4,7 @@ namespace SwiftSearch\Api;
 
 use SwiftSearch\Client\Client;
 use SwiftSearch\Core\Gatekeeper;
+use SwiftSearch\Engine\ConfigLoader;
 use WP_REST_Controller;
 use WP_REST_Server;
 use WP_Error;
@@ -189,8 +190,13 @@ class RestController extends WP_REST_Controller
         $is_valid = $client->test_connection();
 
         if ($is_valid) {
-            // Save to Options
-            update_option('swift_search_settings', $config);
+            // Save to Options (merge with existing settings to prevent wiping content/facets/styling)
+            $current_settings = get_option('swift_search_settings', array());
+            if (!is_array($current_settings)) {
+                $current_settings = array();
+            }
+            $current_settings = array_merge($current_settings, $config);
+            update_option('swift_search_settings', $current_settings);
 
             // Init Collection if possible
             $indexer = new \SwiftSearch\Engine\Indexer();
@@ -333,7 +339,7 @@ class RestController extends WP_REST_Controller
 
         if ($type === 'terms') {
             // Sync Terms
-            $taxonomies = isset($config['indexed_taxonomies']) ? $config['indexed_taxonomies'] : array();
+            $taxonomies = !empty($config['indexed_taxonomies']) ? (array) $config['indexed_taxonomies'] : ConfigLoader::get_default_taxonomies();
 
             if (empty($taxonomies)) {
                 return new \WP_REST_Response(array('success' => true, 'data' => array('processed' => 0, 'page' => 1, 'total_pages' => 0, 'complete' => true)), 200);
@@ -435,7 +441,7 @@ class RestController extends WP_REST_Controller
 
         } else {
             // Sync Posts (Default)
-            $post_types = isset($config['indexed_post_types']) ? $config['indexed_post_types'] : array('post', 'page', 'product');
+            $post_types = !empty($config['indexed_post_types']) ? (array) $config['indexed_post_types'] : ConfigLoader::get_default_post_types();
 
             $args = array(
                 'post_type' => $post_types,
@@ -445,6 +451,7 @@ class RestController extends WP_REST_Controller
                 'fields' => 'ids',
                 'orderby' => 'ID',
                 'order' => 'ASC',
+                'suppress_filters' => true,
             );
 
             $query = new \WP_Query($args);

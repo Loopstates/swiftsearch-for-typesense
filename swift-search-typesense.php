@@ -3,7 +3,7 @@
  * Plugin Name: SwiftSearch for Typesense
  * Plugin URI:  https://docs.loopstates.com/swift-search-typesense/
  * Description: Lightning-Fast, typo-tolerant instant search for WordPress, WooCommerce, Custom Post Types (CPTs), and custom taxonomies. Features zero-middleware direct-to-node queries, sidebar facets configurator, synonyms, result weighting, search analytics, and merchandising/result pinning.
- * Version:           1.6.8
+ * Version:           1.6.9
  * Tested up to:      7.1.1
  * WC tested up to:   11.1.1
  * Requires PHP:      8.0.0
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('SWIFT_SEARCH_VERSION', '1.6.8');
+define('SWIFT_SEARCH_VERSION', '1.6.9');
 define('SWIFT_SEARCH_DB_VERSION', '1.1.0');
 define('SWIFT_SEARCH_FILE', __FILE__);
 define('SWIFT_SEARCH_PATH', plugin_dir_path(__FILE__));
@@ -38,6 +38,14 @@ if (file_exists(untrailingslashit(SWIFT_SEARCH_PATH) . '/vendor/autoload.php')) 
 
 // Activation Hook
 register_activation_hook(__FILE__, array(\SwiftSearch\Core\DB::class, 'install'));
+
+// Declare WooCommerce HPOS and Feature Compatibility
+add_action('before_woocommerce_init', function () {
+	if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
+	}
+});
 
 // Init Plugin
 function swift_search_init()

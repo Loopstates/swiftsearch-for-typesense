@@ -23,6 +23,34 @@ class ConfigLoader
 
 
     /**
+     * Get default post types to index.
+     *
+     * @return array
+     */
+    public static function get_default_post_types()
+    {
+        $types = array('post', 'page');
+        if (class_exists('WooCommerce')) {
+            $types[] = 'product';
+        }
+        return apply_filters('swift_search_default_post_types', $types);
+    }
+
+    /**
+     * Get default taxonomies to index.
+     *
+     * @return array
+     */
+    public static function get_default_taxonomies()
+    {
+        $taxonomies = array('category', 'post_tag');
+        if (class_exists('WooCommerce')) {
+            $taxonomies[] = 'product_cat';
+        }
+        return apply_filters('swift_search_default_taxonomies', $taxonomies);
+    }
+
+    /**
      * Pro Configuration (Smart Defaults).
      * Contains features only available to paid users.
      *
@@ -31,6 +59,9 @@ class ConfigLoader
     private function get_pro_config()
     {
         $saved = get_option('swift_search_settings', array());
+
+        $default_post_types = self::get_default_post_types();
+        $default_taxonomies = self::get_default_taxonomies();
 
         // Defaults
         $defaults = array(
@@ -46,7 +77,9 @@ class ConfigLoader
                 'tag' => 2
             ),
             'default_sorting_field' => 'published_at',
-            'enable_facets' => true
+            'enable_facets' => true,
+            'indexed_post_types' => $default_post_types,
+            'indexed_taxonomies' => $default_taxonomies,
         );
 
         // Merge User Settings
